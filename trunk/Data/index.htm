@@ -1,0 +1,25 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title>GHost One</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <link href="pack.css" rel="stylesheet" type="text/css">
+  <script language="JavaScript" type="text/JavaScript" src="ajaxcode.js"></script>
+</head>
+
+<body background="Texture0208.png" style="color:white; font-family:courier">
+  <div id=headerarea> <style="clear: both; border-color : White ; background-color : White; font-family:courier">
+  CMD&nbsp;&nbsp;<input type="text" id="command" size=100 value="version" onkeypress="loadcommand(event)" >
+	PASS&nbsp;<input type="text" id="pass1" size=10 value="">
+  <br>	
+  CHAT&nbsp;<input type="text" id="command2" size=100 value="hi" onkeypress="loadcommand2(event)" >	
+	<p align="center">
+  <input name="update1" type="button" class="button" id="update1" value="Tools" onclick="makeRequestID('/ajaxtest_update1.htm','')" >
+
+  <!-- when the second parameter is "" the default updateArea is Applied -->
+  <input name="update2" type="button" class="button" id="update2" value="Tools2" onclick="makeRequestID('/ajaxtest_update2.htm','')" >  	
+  	</div>
+	<div id=chat style="font-family:courier"></div>  	
+  <div id="updateArea"></div>
+  <div id="bodyarea" background="/Texture0208.png" style="clear: both; background-image: url("/Texture0208.png"); border-color : White ; background-color : White">
+</body>

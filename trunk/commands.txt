@@ -1,0 +1,341 @@
+
+In battle.net (via local chat or whisper at any time):
+
+!acc [name] [cmd] [acc] access commands available to admins, !acc lists available cmds, !acc name 1/0 - access all/none cmds
+!addadmin <name>        add a new admin to the database for this realm
+!addban <name> <reason> add a new ban to the database for this realm
+!addfriend <name>       add a friend
+!announce <sec> <msg>   set the announce message (the bot will print <msg> every <sec> seconds in the game lobby), leave blank or "off" to disable the announce message
+!ann <sec> <msg>        set the announce message (the bot will print <msg> every <sec> seconds in the game lobby), leave blank or "off" to disable the announce message
+!autohostxx <m> <p> <n> like autohost but only allow xxxx countries
+!autohost <m> <p> <n>   auto host up to <m> games, auto starting when <p> players have joined, with name <n>, leave blank or "off" to disable auto hosting
+!ah <m> <p> <n>         auto host up to <m> games, auto starting when <p> players have joined, with name <n>, leave blank or "off" to disable auto hosting
+!autohostg <m> <p> <n>  auto host allowing only garena + admins
+!autostart <players>    auto start the game when the specified number of players have joined, leave blank or "off" to disable auto start
+!as <players>           auto start the game when the specified number of players have joined, leave blank or "off" to disable auto start
+!ban                    alias to !addban
+!b                      alias to !addban
+!channel <name>         change channel
+!cc <name>              change channel
+!checkadmin <name>      check if a user is an admin on this realm
+!ca <name>              check if a user is an admin on this realm
+!checkban <name>        check if a user is banned on this realm
+!cb <name>              check if a user is banned on this realm
+!close <number> ...     close slot
+!c <number> ...         close slot
+!closeall               close all open slots
+!ca                     close all open slots
+!countadmins            display the total number of admins for this realm
+!cas                    display the total number of admins for this realm
+!countbans              display the total number of bans for this realm
+!cbs                    display the total number of bans for this realm
+!commands               toggle non admin commands
+!deladmin <name>        remove an admin from the database for this realm
+!da <name>              remove an admin from the database for this realm
+!delban <name>          remove a ban from the database for this realm
+!db <name>              remove a ban from the database for this realm
+!delfriend <name>       delete a friend
+!dlinfo [on/off]        show info on current downloads
+!dlinfotime <value>     interval in seconds between info messages
+!dlmax <value>          maximum players allowed to download at once, the rest will have almost KB/s until someone finishes downloading
+!dltspeed <value>       set total download speed (KB/s) available for all clients at once, if set to 1024, 4 people will get 256 each
+!dlspeed <value>        set max download speed (KB/s) available for one client
+!dl <url> <path>        will download a file (multithreaded) : ex: !dl http://host.com/language.cfg ./
+!dlmap <url>            will download a map and place it in map path
+!dlmapcfg <url>         will download a mapcfg and place it in mapcfg path
+!delmapcfg <name>       will delete a config (partial name match)
+!delmap <name>          will delete a map (partial name match)
+!downloads              enable/disable map downloads
+!disable                disable creation of new games
+!d                      disable creation of new games
+!enable                 enable creation of new games
+!e                      enable creation of new games
+!end <number>           end a game in progress (disconnect everyone)
+!endn                   end a game in progress, no countdown
+!ends                   stop end countdown
+!exit [force]           shutdown ghost++, optionally add [force] to skip checks
+!q [nice/force]         shutdown ghost++, optionally add [force] to skip checks
+!fadd <name>            add a friend
+!fa <name>              add a friend
+!fdel <name>            delete a friend
+!fd <name>              delete a friend
+!fw [msg]               will send a message to all the bot's friends, without parameter will send: Lobby: gamename (1/10) - ownername
+!getclan                refresh the internal copy of the clan members list
+!gc                     refresh the internal copy of the clan members list
+!getfriends             refresh the internal copy of the friends list
+!gfs                    refresh the internal copy of the friends list
+!getgame <number>       display information on a game in progress
+!gg <number>            display information on a game in progress
+!getgames               display information on all games
+!ggs                    display information on all games
+!get <varname>          ex: !get bot_log - will return value of variable bot_log from ghost.cfg
+!set <varname> <value>  ex: !set bot_log ghost.txt - will set bot_log=ghost.txt and reload config
+!setnew <varname> <value>  set var even if it doesn't exist, ex: !set bot_log ghost.txt - will set bot_log=ghost.txt and reload config
+!hold <name> ...        hold a slot for someone
+!h <name> ...           hold a slot for someone
+!hs <name> <nr> ...     hold a specific slot for someone
+!load <pattern>         load a map config file (".cfg" files), leave blank to see current map
+!language               reload language.cfg
+!mars [name]            will insult someone using mars.txt (random player if no parameter is given), partial name match
+!mute <name>            mutes a player (it tries to do a partial match)
+!note/!n <name> [note]  will show the note for player name (if no note given) or set a note
+!nr <name>              will remove a note
+!unmute <name>          unmutes a player (it tries to do a partial match)
+!open <number> ...      open slot
+!o <number> ...         open slot
+!openall                open all closed slots
+!pri <name>             host private inhouse game
+!priv <name>            host private game
+!pr <name>              host private game
+!privby <owner> <name>  host private game by another player (gives <owner> access to admin commands in the game lobby and in the game)
+!priby <owner> <name>   host private inhouse game by another player (gives <owner> access to admin commands in the game lobby and in the game)
+!pub [name]             host public game, !pub with no name will set lastname+1
+!p [name]               host public game, !pub with no name will set lastname+1
+!pubg [name]            host public game allowing only garena + admins
+!pubby <owner> <name>   host public game by another player (gives <owner> access to admin commands in the game lobby and in the game)
+!pubdl <name>           host public game download only, kicks people who do have the map, no lobby time limit.
+!query <query>          will perform an SQL query  - only available to rootadmins
+!quit [force]           alias to !exit
+!reloadcfg              reload ghost.cfg
+!rcfg                   reload ghost.cfg
+!rd <seconds>           auto rehost delay in seconds
+!rb                     refresh banlist (updates cached bans/admins by reading them again from the dbase)
+!rload [pattern]        load a real map file, leave blank to see current map
+!rmap [pattern]         load a real map file, leave blank to see current map
+!say <text>             send <text> to battle.net as a chat command
+!s <text>               send <text> to battle.net as a chat command
+!saygame <nr> <text>    send <text> to game nr
+!sg <nr> <text>         send <text> to game nr
+!saygames <text>        send <text> to all games
+!sgs <text>              send <text> to all games
+!sl <name>              check if player is safelisted
+!sladd <name>           add player to safelist
+!sla <name>             add player to safelist
+!sldel <name>           delete player from safelist
+!sld <name>             delete player from safelist
+!slr <name>             remove player from safelist
+!sp                     shuffle players
+!start [force]          start game, optionally add [force] to skip checks
+!startn                 start game now! (no countdown)
+!stats [name]           display basic player statistics, optionally add [name] to display statistics for another player (can be used by non admins)
+!sd [name]              display DotA player per game statistics, optionally add [name]
+!statsdota [name]       display DotA player statistics, optionally add [name] to display statistics for another player (can be used by non admins)
+!swap <n1> <n2>         swap slots
+!top                    top10, calculate in GHost One first
+!top10                  top10, calculate in GHost One first
+!tempban <name> <days> <reason>  ex: !tban kileratz 13 flamer -  will ban for 13 days
+!tban <name> <days> <reason>  ex: !tban kileratz 13 flamer -  will ban for 13 days
+!tb <name> <days> <reason>  ex: !tban kileratz 13 flamer -  will ban for 13 days
+!unban                  alias to !delban
+!unhost                 unhost game in lobby
+!version                display version information (can be used by non admins)
+!addwarn <victim> <reason>  ex: !w kileratz flamer
+!warn <victim> <reason>  ex: !w kileratz flamer
+!w <victim> <reason>  ex: !w kileratz flamer
+!checkwarns <user>      will show current warnings for player user
+!cw <user>              will show current warnings for player user
+!delwarns <user>        remove warnings for user
+!unwarn <user>          remove warnings for user
+!dw <user>              remove warnings for user
+!uw <user>              remove warnings for user
+!wardenstatus           show warden status information
+!pubnxxxx [gamename]    for ex: !pubnbrru dota - deny br ru countries
+!pubxxxxxx [gamename]   for ex: !pubroes dota - only allow ro es countries
+!verbose                toggle info showing on player trying to join and getting kicked
+!vb                     toggle info showing on player trying to join and getting kicked
+
+In game lobby:
+
+!a                      alias to !abort
+!abort                  abort countdown
+!acc [name] [cmd] [acc] access commands available to admins, !acc lists available cmds, !acc name 1/0 - access all/none cmds
+!announce <sec> <msg>   set the announce message (the bot will print <msg> every <sec> seconds), leave blank or "off" to disable the announce message, use | as newline
+!autostart <players>    auto start the game when the specified number of players have joined, leave blank or "off" to disable auto start
+!bans off|on            enables/disables auto kicking banned people from lobby
+!fw [msg]               will send a message to all the bot's friends, without parameter will send: Lobby: gamename (1/10) - ownername
+!check <name>           check a user's status (leave blank to check your own status)
+!checkban <name>        check if a user is banned on any realm
+!close <number> ...     close slot
+!closeall               close all open slots
+!commands               toggle non admin commands
+!comp <slot> <skill>    create a computer in slot <slot> of skill <skill> (skill is 0 for easy, 1 for normal, 2 for insane)
+!compcolour <s> <c>     change a computer's colour in slot <s> to <c> (c goes from 1 to 12)
+!comphandicap <s> <h>   change a computer's handicap in slot <s> to <h> (h is 50, 60, 70, 80, 90, or 100)
+!comprace <s> <r>       change a computer's race in slot <s> to <r> (r is "human", "orc", "night elf", "undead", or "random")
+!compteam <s> <t>       change a computer's team in slot <s> to <t> (t goes from 1 to # of teams)
+!dl <name>              alias to !download
+!dlinfo [on/off]        show info on current downloads
+!dli [on/off]           show info on current downloads
+!dlinfotime <value>     interval in seconds between info messages
+!dlit <value>           interval in seconds between info messages
+!dlmax <value>          maximum players allowed to download at once, the rest will have almost KB/s until someone finishes downloading
+!dlm <value>            maximum players allowed to download at once, the rest will have almost KB/s until someone finishes downloading
+!dltspeed <value>       set total download speed (KB/s) available for all clients at once, if set to 1024, 4 people will get 256 each
+!dlts <value>           set total download speed (KB/s) available for all clients at once, if set to 1024, 4 people will get 256 each
+!dlspeed <value>        set max download speed (KB/s) available for one client
+!dls <value>            set max download speed (KB/s) available for one client
+!download <name>        allow a user to start downloading the map (only used with conditional map downloads, it tries to do a partial match)
+!downloads              enable/disable map downloads
+!from <name>            display the country each player is from, or of a player (partial match)
+!f <name>               display the country each player is from, or of a player (partial match)
+!fromp <name>           display the country each player is from + providers, or of a player
+!fp <name>              display the country each player is from + providers, or of a player
+!garena                 toggle allowing garena only (and admins) or everyone
+!gn                     display current game name
+!hold <name> ...        hold a slot for someone
+!holds <name> <nr> ...  hold a specified slot for someone
+!ips                    show IPs of players
+!kick <name>            kick a player (it tries to do a partial match)
+!k <name>               kick a player (it tries to do a partial match)
+!only xx xx xx          define allowed countries, for ex: !only RO ES or !only to clear list
+!no xx xx xx            define denied countries, for ex: !no BR RU or !no to clear list
+!onlyp xx xx xx         allow only specified providers (partial match), ex: !onlyp RDS, !onlyp to clear
+!nop xx xx xx           deny specified providers (partial match), ex: !nop telecom, !nop to clear
+!l                      show ping and country of the last player who joined
+!latency <number>       set game latency (50-500), leave blank to see current latency
+!dr <number>            alias to latency 
+!lock                   lock the game so only the game owner can run commands
+!mars [name]            will insult someone using mars.txt (random player if no parameter is given), partial name match
+!mute <name>            mutes a player (it tries to do a partial match)
+!m <name>               mutes a player (it tries to do a partial match)
+!note/!n <name> [note]  will show the note for player name (if no note given) or set a note
+!nr <name>              will remove a note
+!unmute <name>          unmutes a player (it tries to do a partial match)
+!open <number> ...      open slot
+!open <number> ...      open slot
+!openall                open all closed slots
+!owner [name]           set game owner to yourself, optionally add [name] to set game owner to someone else
+!ping [number]          ping players, optionally add [number] to kick players with ping above [number]
+!p [number]             ping players, optionally add [number] to kick players with ping above [number]
+!priv <name>            rehost as private game
+!pri <name>             rehost as private inhouse game
+!pub [name]             rehost as public game, a simple !pub will auto set a new name!
+!rehost [name]          rehost with same parameters, a simple !rehost will auto set a new name!
+!refresh [on/off]       enable or disable refresh messages, by itself it close all slots and then opens them.
+!rd [value]             set rehostdelay
+!roll                   will pick a random number from 1-100
+!sendlan <ip> [port]    send a fake LAN message to IP address <ip> and port [port], default port is 6112 if not specified
+!sl <name>              check if player is safelisted
+!sladd <name>           add player to safelist
+!sla <name>             add player to safelist
+!sldel <name>           delete player from safelist
+!sld <name>             delete player from safelist
+!slr <name>             remove player from safelist
+!sp                     shuffle players
+!start [force]          start game, optionally add [force] to skip checks
+!stats [name]           display basic player statistics, optionally add [name] to display statistics for another player (can be used by non admins)
+!sd [name]              display DotA player per game statistics, optionally add [name]
+!sdi [name]             display DotA player per inhouse game statistics, optionally add [name]
+!sdpub [name]           display DotA player per public game statistics, optionally add [name]
+!sdpriv [name]          display inhouse DotA player per private game statistics, optionally add [name]
+!statsdota [name]       display DotA player statistics, optionally add [name] to display statistics for another player (can be used by non admins)
+!swap <n1> <n2>         swap slots
+!synclimit <number>     set sync limit for the lag screen (10-10000), leave blank to see current sync limit
+!top                    top10, calculate with !topc or in GHost One first
+!top10                  top10, calculate with !topc or in GHost One first
+!topc                   calculate scores, when used with sqlite will block bot while calculating
+!tempban <name> <days> <reason>  ex: !tban kileratz 13 flamer -  will ban for 13 days
+!tban <name> <days> <reason>  ex: !tban kileratz 13 flamer -  will ban for 13 days
+!tb <name> <days> <reason>  ex: !tban kileratz 13 flamer -  will ban for 13 days
+!unhost                 unhost game
+!uh                     unhost game
+!unlock                 unlock the game
+!version                display version information (can be used by non admins)
+!virtualhost <name>     change the virtual host name
+!votecancel             cancel a votekick
+!votekick <name>        start a votekick (it tries to do a partial match, can be used by non admins)
+!verbose                toggle info showing on player trying to join and getting kicked
+!vb                     toggle info showing on player trying to join and getting kicked
+!w <name> <message>     send a whisper on every connected battle.net realm from the bot's account to the player called <name> (this command is HIDDEN from other players)
+
+
+In game:
+
+!addban <name> <reason> add a new ban to the database (it tries to do a partial match)
+!ban                    alias to !addban
+!bl [reason]            alias to !banlast, reasons = l, i, r, mh, lag, n, f
+!banlast [reason]       ban the last leaver, reasons = l, i, r, mh, lag, n, f
+!check <name>           check a user's status (leave blank to check your own status)
+!checkban <name>        check if a user is banned on any realm
+!drop                   drop all lagging players
+!end                    end the game (disconnect everyone)
+!gn                     display current game name
+!kick <name>            kick a player (it tries to do a partial match)
+!latency <number>       set game latency (50-500), leave blank to see current latency
+!dr <number>            alias to latency 
+!lock                   lock the game so only the game owner can run commands
+!messages <on/off>      enable or disable local admin messages for this game (battle.net messages relayed to local admins in game)
+!muteall                mute global chat (allied and private chat still works)
+!note/!n <name> [note]  will show the note for player name (if no note given) or set a note
+!nr <name>              will remove a note
+!override               cancel game over timer
+!owner [name]           set game owner to yourself, optionally add [name] to set game owner to someone else
+!rd <seconds>           auto rehost delay in seconds
+!roll                   will pick a random number from 1-100
+!stats [name]           display basic player statistics, optionally add [name] to display statistics for another player (can be used by non admins)
+!statsdota [name]       display DotA player statistics, optionally add [name] to display statistics for another player (can be used by non admins)
+!synclimit <number>     set sync limit for the lag screen (10-10000), leave blank to see current sync limit
+!sl <name>              check if player is safelisted
+!sladd <name>           add player to safelist
+!sla <name>             add player to safelist
+!sldel <name>           delete player from safelist
+!sld <name>             delete player from safelist
+!slr <name>             remove player from safelist
+!slap <name>            slap message
+!top                    top10, calculate with !topc or in GHost One first
+!top10                  top10, calculate with !topc or in GHost One first
+!topc                   calculate scores, when used with sqlite will block bot while calculating
+!unlock                 unlock the game
+!unmuteall              unmute global chat
+!version                display version information (can be used by non admins)
+!votecancel             cancel a votekick
+!votekick <name>        start a votekick (it tries to do a partial match, can be used by non admins)
+!wtv                    weather wtv is on or off
+!wtv <on/off>           turn on/off
+!wtv <name> <x>         gives the observer which is needed for the streaming function the name x.
+!tbanlast               temp ban last
+!tblast                 temp ban last
+!tbl                    temp ban last
+!warnlast/wlast/wl      warn last
+!wlast                  warn last
+!wl                     warn last
+!yes                    register a vote in the votekick (can be used by non admins)
+!getnames               get names of current games
+!gns                    get names of current games
+!w <name> <message>     send a whisper on every connected battle.net realm from the bot's account to the player called <name> (this command is HIDDEN from other players)
+
+
+In admin game lobby:
+
+!addadmin <name> [realm]        add a new admin to the database for the specified realm (if only one realm is defined in ghost.cfg it uses that realm instead)
+!autohost <m> <p> <n>           auto host up to <m> games, auto starting when <p> players have joined, with name <n>, use "off" to disable auto hosting
+!autohostmm <m> <p> <a> <b> <n> auto host up to <m> games, auto starting when <p> players have joined, with name <n>, with matchmaking enabled and min score <a>, max score <b>
+!checkadmin <name> [realm]      check if a user is an admin for the specified realm (if only one realm is defined in ghost.cfg it uses that realm instead)
+!checkban <name> [realm]        check if a user is banned on the specified realm (if only one realm is defined in ghost.cfg it uses that realm instead)
+!countadmins [realm]            display the total number of admins for the specified realm (if only one realm is defined in ghost.cfg it uses that realm instead)
+!countbans [realm]              display the total number of bans on the specified realm (if only one realm is defined in ghost.cfg it uses that realm instead)
+!deladmin <name> [realm]        remove an admin from the database for the specified realm (if only one realm is defined in ghost.cfg it uses that realm instead)
+!delban <name>                  remove a ban from the database for all realms
+!disable                        disable creation of new games
+!downloads <0|1|2>              disable/enable/conditional map downloads
+!enable                         enable creation of new games
+!end <number>                   end a game in progress (disconnect everyone)
+!exit [force|nice]              shutdown ghost++, optionally add [force] to skip checks or [nice] to allow running games to finish first
+!getgame <number>               display information on a game in progress
+!getgames                       display information on all games
+!hostsg <name>                  host a saved game
+!load <pattern>                 load a map config file (".cfg" files), leave blank to see current map
+!loadsg <filename>              load a saved game
+!map <pattern>                  load a map file (".w3m" and ".w3x" files), leave blank to see current map
+!password <p>                   login (the password is set in ghost.cfg with admingame_password)
+!priv <name>                    host private game
+!privby <owner> <name>          host private game by another player (gives <owner> access to admin commands in the game lobby and in the game)
+!pub <name>                     host public game
+!pubby <owner> <name>           host public game by another player (gives <owner> access to admin commands in the game lobby and in the game)
+!quit [force|nice]              alias to !exit
+!say <text>                     send <text> to all connected battle.net realms as a chat command
+!saygame <number> <text>        send <text> to the specified game in progress
+!saygames <text>                send <text> to all games
+!unban <name>                   alias to !delban
+!unhost                         unhost game in lobby (not the admin game)
+!w <name> <message>             send a whisper on every connected battle.net realm from the bot's account to the player called <name>

@@ -1,0 +1,3 @@
+Game.exe
+D2Client.dll
+Bnclient.dll

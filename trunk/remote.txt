@@ -1,0 +1,23 @@
+Remote connection tutorial:
+
+Make sure you have port 5868 open on your friends.
+On your bot:
+ghost.cfg:
+bot_udppassword = somepass
+udp_cmdport = 6969
+On your friends:
+ghost.cfg:
+udp_cmdport = 6969 or the port you set the bot.
+in Ghost One:
+Enter UDP Password = somepass
+Enter your account name = account of your friend
+Choose local IP = external IP if your friend connects to the bot over the internet
+or = internal IP (some 192.168 or 10. or 5.) if your friend connects from the LAN.
+
+Enter remote IP: external IP of the bot, or internal if in LAN. or host name if you use a dynamic DNS such as no-ip.com..
+
+Press Remote Connect.
+
+Remember: 
+UDP port 5868 open on the client PC
+UDP port 6969 open on the server PC

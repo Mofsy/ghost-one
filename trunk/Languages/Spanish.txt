@@ -1,0 +1,221 @@
+
+En battle.net (via chat local o whisper):
+
+!acc [nombre] [cmd] [acc] Comandos disponibles para admins, !acc lista comandos disponibles, !acc nombre 1/0 - Acceso a todo/Ningun comando
+!addadmin <nombre>        Agrega un nuevo admin a la base de datos de este server
+!addban <nombre> <razon>  Agrega un nuevo ban a la base de datos de este server
+!addfriend <nombre>       Agrega un amigo
+!announce <seg> <msj>     Coloca un mensaje de anuncio (<msj> cada <seg>). !announce off lo deshabilita.
+!autohost <m> <p> <n>     Autohostea <m> partidas con nombre <n> que comienzan cuando <p> jugadores hayan entrado. !autohost off lo deshabilita.
+!autohostxx <m> <p> <n>   Igual que autohost pero solo permite el ingreo a la partida de jugadores de paises XX
+!autohostg <m> <p> <n>    Autohostea solo para garena y admins
+!autostart <numero>       Comienza el juego cuando "x" jugadores ingresen a la partida
+!ban                      Alias para !addban
+!channel <nombre>         Cambia de canal
+!checkadmin <nombre>      Chequea si un usuario es admin en este server
+!checkban <nombre>        Chequea si un usuario esta baneado en este server
+!close <numero>           Cierra un slot
+!closeall                 Cierra todos los slots abiertos
+!commands                 Activa/Desactiva comandos no-admin
+!countadmins              Muestra el numero de admins en este server
+!countbans                Muestra el numero total de bans en este server
+!deladmin <nombre>        Borra un admin de la base de datos de este server
+!delban <nombre>          Borra un ban de la base de datos de este server
+!delfriend <nombre>       Elimina a un amigo
+!downloads                Activa/Desactiva la descarga de mapas
+!dmaps                    Lista dinamica de los mapas
+!dlinfo [on/off]          Mostrar informacion de las descargas actuales
+!dlinfotime <valor>       Intervalo en segundos entre los mensajes de informacion de descarga
+!dload <nr>               Carga dinamica de un mapa
+!dlmax <valor>            El numero maximo de jugadores permitidos para descargar al mismo tiempo.
+!dltspeed <valor>         Equipa el total de la maxima velocidad de descarga (KB/s) para todos los usuarios juntos (Ejemplo: 1024, entonces 4 personas obtendran 256)
+!dlspeed <valor>          Equipa la maxima velocidad de descarga (KB/s) para cada usuario.
+!disable                  Deshabilita la creacion de nuevas partidas
+!enable                   Habilita la creacion de nuevas partidas
+!end <numero>             Finaliza una partida en progreso (desconecta a todos)
+!endn                     Finaliza una partida en progreso instantaneamente (sin conteo)
+!ends                     Detiene la finalizacion de una partida
+!exit [force]             Cierra GHost++. Opcional agregar [force] para saltear chequeos
+!fadd <nombre>            Agrega un amigo
+!fdel <nombre>            Borra a un amigo
+!getclan                  Refresca la lista de miembros del clan
+!getfriends               Refresca la lista de amigos
+!getgame <numero>         Muestra informacion de la partida <numero>
+!getgames                 Muestra informacion de todas las partidas creadas por el bot
+!hold <nombre>            Reserva un slot para alguien
+!holds <nombre> <nr>      Reserva un slot especifico para alguien
+!load <archivo>           Carga un archivo de configuracion de mapa. !load sin <archivo> mostrara el mapa cargado actualmente
+!map <pattern>            load a map file (".w3m" and ".w3x" files), leave blank to see current map
+!mute <nombre>            Deshabilita el chat a un jugador(Silenciar)
+!unmute <nombre>          Habilita el chat a un jugador
+!open <numero>            Abre el slot <numero>
+!openall                  Abre todos los slots cerrados.
+!priv <nombre>            Hostea una partida privada
+!privby <owner> <nombre>  Hostea una partida privada para otro usuario
+!pub <nombre>             Hostea una partida publica. !pub sin nombre recreara la ultima partida "+1"
+!pubg <nombre>            Hostea una partida publica solo para Garena y admins.
+!pubby <owner> <nombre>   Hostea una partida publica para otro usuario
+!pubdl <nombre>           Hostear partida publica solo para download, y bota a las personas que tienen el mapa. No hay limite de tiempo para el lobby.
+!quit [force]             Alias para !exit
+!reloadcfg                Recargar ghost.cfg
+!say <texto>              Envia <texto> a battle.net en el chat
+!saygames <texto>         Envia <texto> a todas las partidas hosteadas por el bot
+!sl <nombre>              Chequea si un jugador esta en el safelist
+!sladd <nombre>           Agrega un jugador al safelist
+!sla <nombre>             Agrega un jugador al safelist
+!sldel <nombre>           Borra un jugador del safelist
+!sld <nombre>             Borra un jugador del safelist
+!slr <nombre>             Elimina un jugador del safelist
+!sp                       Mezcla jugadores en la sala de espera de una partida
+!start [force]            Inicia el juego(Todos deben tener el ping chequeado). Opcional "force" para evitar chequear pings
+!startn                   Comienza el juego instantaneamente (sin conteo)
+!stats <nombre>           Muestra estadisticas basicas del usuario. Opcional agregar nombre de otro jugador
+!statsdota <nombre>       Muestra estadisticas del DotA. Opcional agregar nombre de otro jugador
+!swap <n1> <n2>           Intercambia posiciones de jugadores (slots)
+!top                      Top10, calcular primero en GHost One
+!top10                    Top10, calcular primero en GHost One
+!unban                    Alias para !delban
+!unhost                   Cancela la partida actual
+!version                  Muestra la version del bot
+!pubnxxxx <nombre>        Ejemplo: !pubnarco dota - No permitira el ingreso de jugadores de paises  AR y CO
+!pubxxxx <nombre>         Ejemplo: !pubpebr dota - Solo permitira el ingreso de jugadores de paises PE y BR
+!verbose                  Activa/Desactiva mostart la informacion  de un jugador que intenta entrar a la partida y es kickeado
+
+-----------------------------------------------------------------------------
+En la sala de espera(Lobby) de la partida:
+
+!a                        Alias para !abort
+!abort                    Abortar conteo para el comienzo de una partida o su finalizacion.
+!announce <seg> <msj>     Coloca un mensaje de anuncio (<msj> cada <seg>). !announce off lo deshabilita.
+!autostart <numero>       Comienza el juego cuando "x" jugadores ingresen a la partida
+!check <nombre>           Chequea el estado de un usuario 
+!checkban <nombre>        Chequea si un usuario esta baneado en este server
+!commands                 Activa/Desactiva comandos no-admin
+!close <numero>           Cierra un slot
+!closeall                 Cierra todos los slots abiertos
+!comp <slot> <hab>        Pone una computadora en <slot> y <hab> (0 Easy, 1 Normal, 2 Insane)
+!compcolour <s> <c>       Cambia el color de una computadora (s=slot c=color 1-12)
+!comphandicap <s> <h>     Cambia la ventaja de una computadora (s=slot h=50, 60, 70, 80, 90, 100)
+!comprace <s> <r>         Cambia la raza de una comp (s=slot r="human", "orc", "night elf", "undead", "random")
+!compteam <s> <t>         Cambia el equipo de una comp (s=slot t=1,2,3,4)
+!dl <nombre>              Alias para !download
+!dlinfo [on/off]          Mostrar informacion de las descargas actuales
+!dlinfotime <valor>       Intervalo en segundos entre los mensajes de informacion de descarga
+!dlmax <valor>            El numero maximo de jugadores permitidos para descargar al mismo tiempo.
+!dltspeed <valor>         Equipa el total de la maxima velocidad de descarga (KB/s) para todos los usuarios juntos (Ejemplo: 1024, entonces 4 personas obtendran 256)
+!dlspeed <valor>          Equipa la maxima velocidad de descarga (KB/s) para cada usuario.
+!download <nombre>        Permite que un jugador pueda descargar el mapa
+!downloads                Activa/Desactiva la descarga de mapas
+!from <nombre>            Muestra el pais de todos los jugadores o de solo uno en particular
+!fromp <nombre>           Muestra el pais y proveedor de todos los jugadores o de solo uno en particular
+!garena                   Activa/Desactiva permitir solo garena (Y admins) o todos
+!gn                       Muestra el nombre de la partida actual
+!hold <nombre>            Reserva un slot para alguien
+!holds <nombre> <nr>      Reserva un slot especifico para alguien
+!ips                      Muestra las IPs de los jugadores
+!kick <nombre>            Kickea un jugador
+!only xx xx xx            define solo los paises permitidos, por ejemplo: !only AR CO PE
+!no xx xx xx              Define paises denegados para ingresar, por ejemplo: !no US MX BR
+!onlyp xx xx xx           Permite solo proveedores especificos, ejemplo: !onlyp RDS
+!nop xx xx xx             Deniega acceso para ciertos proveedores, ejemplo: !nop ELE
+!latency <numero>         Equipa la latencia de la partida (50-500)
+!l                        Muestra el ping y pais del ultimo jugador que entro
+!dr <numero>              Alias para !latency
+!lock                     Bloquea la partida, solo el dueño podra usar comandos de admin
+!mute <nombre>            Deshabilita el chat a un jugador(Silenciar)
+!unmute <nombre>          Habilita el chat a un jugador
+!open <numero>            Abre el slot <numero>
+!openall                  Abre todos los slots cerrados.
+!owner <nombre>           Coloca al dueño del juego a ti mismo. Opcional agregar nombre de otro jugador
+!ping <numero>            Calcula el ping de los jugadores. Agregar un numero para ademas kickear a jugadores con un ping mayor al numero.
+!priv <nombre>            Hostea una partida privada
+!pub <nombre>             Hostea una partida publica. !pub sin nombre recreara la ultima partida "+1"
+!rehost <nombre>          Vuelve a hostear con los mismos parametros. Si no se agrega un nombre se equipara uno nuevo
+!refresh [on/off]         Activa/Desactiva mensajes de refresco, !refresh - Abrir/Cerrar slots
+!sendlan <ip> <port>      Envia un falso mensaje de red LAN a la direccion IP y Puerto
+!sl <nombre>              Chequea si un jugador esta en el safelist
+!sladd <nombre>           Agrega un jugador al safelist
+!sla <nombre>             Agrega un jugador al safelist
+!sldel <nombre>           Borra un jugador del safelist
+!sld <nombre>             Borra un jugador del safelist
+!slr <nombre>             Elimina un jugador del safelist
+!sp                       Mezcla jugadores en la sala de espera de una partida
+!start [force]            Inicia el juego(Todos deben tener el ping chequeado). Opcional "force" para evitar chequear pings
+!stats <nombre>           Muestra estadisticas basicas del usuario. Opcional agregar nombre de otro jugador
+!statsdota <nombre>       Muestra estadisticas del DotA. Opcional agregar nombre de otro jugador
+!swap <n1> <n2>           Intercambia posiciones de jugadores (slots)
+!synclimit <numero>       Coloca el limite de sync para configurar el lag (10-10000)
+!top                      Top10, calcular primero en GHost One
+!top10                    Top10, calcular primero en GHost One
+!unhost                   Cancela la partida actual
+!unlock                   Desbloquea la partida
+!version                  Muestra la version del bot
+!votecancel               Cancela una votacion para kickear un jugador
+!votekick <nombre>        Comienza una votacion para kickear un jugador (Puede ser usado por no-admins)
+!verbose                  Activa/Desactiva mostart la informacion  de un jugador que intenta entrar a la partida y es kickeado
+
+
+-----------------------------------------------------------------------------
+Dentro de la partida:
+
+!addban <nombre> <razon>  Agrega un nuevo ban a la base de datos del bot
+!ban                      Alias para !addban
+!bl <razon>               Alias para !banlast
+!banlast <razon>          Banea el ultimo kiter. Opcional razones = l, i, r, mh, lag, n, f
+!check <nombre>           Chequea el estado de un usuario 
+!checkban <nombre>        Chquea si un usuario fue baneado
+!drop                     Saca a todos los jugadores con lag
+!end                      Termina la partida (desconecta a todos)
+!gn                       Muestra el nombre de la partida actual
+!kick <nombre>            Kickea un jugador de la partida
+!latency <numero>         Equipa la latencia de la partida (50-500)
+!dr <numero>              Alias para !latency
+!lock                     Bloquea el juego
+!muteall                  Deshabilita el chat global(El Chat aliado y privado no es afectado)
+!override                 Cancela el tiempo para game over
+!owner <nombre>           Coloca al dueño del juego a ti mismo. Opcional agregar nombre de otro jugador
+!stats <nombre>           Muestra stats basicas del usuario. Opcional agregar nombre de otro jugador
+!statsdota <nombre>       Muestra stats del DotA. Opcional agregar nombre de otro jugador
+!synclimit <numero>       Coloca el limite de sync para configurar el lag (10-10000)
+!sl <nombre>              Chequea si un jugador esta en el safelist
+!sladd <nombre>           Agrega un jugador al safelist
+!sla <nombre>             Agrega un jugador al safelist
+!sldel <nombre>           Borra un jugador del safelist
+!sld <nombre>             Borra un jugador del safelist
+!slr <nombre>             Elimina un jugador del safelist
+!top                      Top10, calcular primero en GHost One
+!top10                    Top10, calcular primero en GHost One
+!unlock                   Desbloquea la partida
+!unmuteall                Activa el chat global para que se puede chatear en all
+!version                  Muestra la version del bot
+!votecancel               Cancela una votacion para kickear a un jugador
+!votekick <nombre>        Comienza una votacion para kickear a un jugador (Puede ser usado por no-Admins)
+!getnames                 Obtiene los nombres de los jugadores de la partida
+
+-----------------------------------------------------------------------------
+Solo Administradores en sala de espera(Lobby) de una partida:
+
+!addadmin <nombre> <server>    Agrega un admin a la base de datos del bot
+!checkadmin <nombre> <server>  Chequea si un usuario es admin de un server especifico
+!countadmins <server>          Muestra la cantidad de admins en un server especifico
+!deladmin <nombre> <server>    Elimina un admin de la base de datos del bot
+!disable                       Deshabilita la creacion de nuevas partidas
+!enable                        Habilita la creacion de nuevas partidas
+!end <numero>                  Finaliza una partida en progreso (desconecta a todos)
+!exit [force]                  Cierra GHost++. Opcional agregar [force] para saltear chequeos
+!getgame <numero>              Muestra informacion de la partida <numero>
+!getgames                      Muestra informacion de todas las partidas creadas por el bot
+!load <archivo>                Carga un archivo de configuracion
+!map <archivo>                 Alias para !load
+!password <c>                  Ingreso (la contraseña es colocada en ghost.cfg)
+!priv <nombre>                 Hostea una partida privada
+!privby <owner> <nombre>       Hostea una partida privada para otro usuario
+!pub <nombre>                  Hostea una partida publica. !pub sin nombre recreara la ultima partida "+1"
+!pubby <owner> <nombre>        Hostea una partida publica para otro usuario
+!quit [force]                  Alias para !exit
+!saygames <texto>              Envia <texto> a todas las partidas
+!getnames                      Muestra los nombres de los usuarios en una partida
+!unhost                        Abandona la partida
+
+// Nota: Las tildes han sido omitidas intencionalmente.
+// Creditos: Kodam
