@@ -1,0 +1,3 @@
+Diablo.exe
+Storm.dll
+Battle.snp

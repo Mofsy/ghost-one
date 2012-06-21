@@ -1,0 +1,685 @@
+[GHOST]
+###########################################################
+# PLEASE EDIT CONFIG IN GHOST ONE UNDER GHOST OPTIONS TAB #
+###########################################################
+# LIST OF SETTINGS NOT IN GHOST OPTIONS TAB
+#bot_language
+#bot_mapcfgpath
+#bot_savegamepath
+#bot_refreshmessages
+#bot_autolock
+#bot_autosave
+#bot_allowdownloads
+#bot_pingduringdownloads
+#bot_lcpings
+#bot_latency
+#bot_synclimit
+#bot_votekickallowed
+#bot_votekickpercentage
+#udp_cmdbindip
+#udp_cmdspooftarget
+#admingame_password
+#db_sqlite3_file
+#bnet_holdfriends
+#bnet_holdclan
+
+########################
+# Actual Config Below  #
+########################
+
+### if enabled, on GArena will hide the bot from normal users (admins will still see the commands/messages)
+bot_hidebotfromnormalusersingarena = 1
+
+### if = 0, will not broadcast the game in LAN (only bnet)
+bot_broadcastlan = 1
+
+### show .note of anyone who enters the lobby
+bot_shownotesonjoin = 0
+
+### only owners can swap other admins
+bot_onlyownerscanswapadmins = 1
+
+### !statsdota will be disabled if set to 1 (!sd will still work)
+bot_nostatsdota = 0
+
+### !top/!rank will be disabled if set to 1
+bot_norank = 0
+
+### add a list of ips you want the bot to send the game (to be seen in LAN) to, ex: 81.12.21.1 127.54.12.2
+bot_ipusers =
+
+### lan players will be rootadmins
+bot_lanrootadmins = 0
+
+### if set to 1, blue player is considered the owner
+bot_blueisowner = 0
+
+### if enabled, any user can !pub/!map/!unhost
+bot_userscanhost = 0
+
+### if enabled, any safelisted player can !pub/!map/!unhost
+bot_safecanhost = 0
+
+### if enabled, will greet every player who joins the channel with channelwelcome.txt
+bot_channeljoinmessage = 0
+
+### specify which players won't be greeted when joining the channel.
+bot_channeljoinexceptions = 
+
+### will allow admins and safelisted players to download even if downloads are disabled
+bot_adminsandsafecandownload = 1
+
+### will replace every !ban/!bl with !warn/!wl
+bot_replacebanwithwarn = 0
+
+# In LAN/GArena show the real number of current/total players in the game, when using !pubg it will be auto activated
+lan_showrealslotcount = 0
+
+### all the bots messages will only be seen by admins (bot will be practicly hidden)
+bot_detourallmessagestoadmins = 0
+
+### 0 - ghost countdown, 1 - warcraft countdown
+bot_normalcountdown = 0
+
+# when you !unban player, the bot also issues an /unban player
+bot_unbanremoveschannelban = 0
+
+# Time limit for hosting a game
+bot_lobbytimelimitmax = 15
+
+### enable dynamic latency, lowers or even increases latency as needed
+bot_usedynamiclatency = 1
+
+### how many milliseconds to add to the normal latency if the players lag
+bot_dynamiclatencymaxtoadd = 30
+
+### milliseconds to add to highest ping as base dynamic latency
+bot_dynamiclatencyaddedtoping = 25
+
+### dynamic latency will be increased when a lobby is active
+bot_dynamiclatencyincreasewhenlobby = 1
+
+### dynamic latency will try not to go over 2.2x highest ping, recommended
+bot_dynamiclatency2.2xhighestpingmax = 1
+
+### all messages will be answered with a whisper
+bot_whisperallmessages = 0
+
+### if 1 - no admin can start the game if the owner is in the lobby
+bot_onlyownerscanstart = 1
+
+### allow only players with score>=x to join the lobby
+bot_allowedscores = 0
+
+### in autohosted games, allow only players with score>=x to join the lobby
+bot_autohostallowedscores = 0
+
+### if set to 1, if using bot_allowedscores, players having an unknown score will be allowed
+bot_allownullscoredplayers = 1
+
+### 0 - auto timer resolution (as low as possible), 1-5 - if you want it to be less accurate
+bot_newTimerResolution = 0
+
+### 0 - old timer on windows (gettickcount), 1 - new timer
+bot_newTimer = 0
+
+### 0 - old latency system, 1 - as close to the set latency as possible
+bot_newLatency = 0
+
+### set to 1 if you want admins to be autoplaced higher only in dota games
+bot_placeadminshigheronlyindota = 0
+
+### force auto hcl from gamename in dota games (even when bot_defaulthcl is not set)
+bot_forceautohclindota = 1
+
+### set !autostart 10 automatically in dota games
+bot_autostartdotagames = 0
+
+### safelisted players are immune to ban/warn
+bot_safelistedbanimmunity = 1
+
+### send admin messages or not (if using the admin game)
+bot_adminmessages = 0
+
+### send local admin messages or not (if using the admin game)
+bot_localadminmessages = 0
+
+### fake pings for the following players, space separated: ex = nick1 nick2
+bot_fakepings = 
+
+### when !end is issued, a message is sent to the enemy team and the game ends only if someone accepts, replying with !end (only for 2 team maps)
+bot_endreq2ndteamaccept = 0
+
+### normal bans will expire in x days - set to 0 to be permanent
+bot_bantime = 180
+
+### normal banlast/bl will expire in x days - set to 0 to be permanent
+bot_banlasttime = 180
+
+### tbanlast/tbl will expire in x days - set to 0 to be permanent
+bot_tbanlasttime = 30
+
+### how many warns are needed to auto-ban the player. Default: 3.
+bot_banthewarnedplayerquota = 3
+
+### how many days will the auto-ban from warns last. 0 - permanent ban. Default: 14.
+bot_bantimeofwarnedplayer = 14
+
+### how many days will each warn last. 0 - permanent warn. Default: 14.
+bot_warntimeofwarnedplayer = 14
+
+### how many games should the player play (without taking another warn) to make one of his warns inactive. Default: 7
+bot_gamenumtoforgetawarn = 7
+
+### if 0, autowarning is off. Default: 0.
+bot_autowarnearlyleavers = 0
+
+### Prints the gameloaded.txt message after X seconds. Default: 10.
+bot_gameloadedprintout = 10
+
+### handle ip bans: 0 = do nothing, 1 = kick, 2 = announce only (no kick).
+bot_ipbanning = 2
+
+### handle name bans: 0 = do nothing, 1 = kick, 2 = announce only (no kick).
+bot_banning = 1
+
+# Drop the user if he/she desyncs or not?
+bot_dropifdesync = 1
+
+# the log file
+bot_log =
+
+# Show a message when a safe/admin/rootadmin/chieftain/shaman joins the channel
+bot_channeljoingreets = 1
+# Admins will be able to delete only bans they've made
+bot_adminslimitedunban = 0
+
+# Announce +1 and +2 (players left to join) in lobby (only if not autohosted)
+bot_lobbyannounceunoccupied = 1
+
+# Auto set HCL based on game name,ex: -arso EU pros will set HCL to arso (only if map_defaulthcl is defined, for ex: map_defaulthcl = ar), will set hcl to empty if no mode is detected in the gamename
+bot_autohclfromgamename = 1
+
+# whether players who use censored words are auto muted for x seconds
+bot_censormute = 0
+# also auto mute admins
+bot_censormuteadmins = 0
+# mute for x seconds, the first time a player curses
+bot_censormutefirstseconds = 60
+# mute for x seconds, the second time a player curses
+bot_censormutesecondseconds = 180
+# mute for x seconds, if a player has cursed for 3 or more times
+bot_censormuteexcessiveseconds = 360
+
+lan_war3version = 24
+
+# Disable nagle algorithm (TCPIP algorithm that can slow down the network) - may improve latency if you set to 1
+tcp_nodelay = 0
+
+# Path to your WC3TVRecorder ex: c:\Program Files\waaaghTV Recorder\
+wtv_path = C:\Program Files\WaaaghTV Recorder\
+# Use WC3TVRecorder, 1 to enable
+wtv_enabled = 0
+# WaaaghTV Observer Name
+wtv_playername = Waaagh!TV
+
+# for ex: RO, only these countries will be allowed to join a game
+bot_allowedcountries = 
+# for ex: BR, these countries will not be allowed to join a game
+bot_deniedcountries = 
+
+# milliseconds to wait before sending medium sized packets to bnet when using PVPGN
+bot_bnetpacketdelaymediumpvpgn = 2000
+# milliseconds to wait before sending big sized packets to bnet when using PVPGN
+bot_bnetpacketdelaybigpvpgn = 2500
+# milliseconds to wait before sending medium sized packets to bnet (official)
+bot_bnetpacketdelaymedium = 3200
+# milliseconds to wait before sending big sized packets to bnet (official)
+bot_bnetpacketdelaybig = 4000
+
+
+# Allowed variables: totgames, kills, deaths, assists, creepkills, creepdenies, neutralkills, 
+# towerkills, raxkills, courierkills, wins, losses, killstotal, deathstotal, creepkillstotal, 
+# creepdeniestotal,assiststotal, neutralkillstotal, towerkillstotal, raxkillstotal, courierkillstotal
+# default formula: 
+# (((wins-losses)/totgames)+(kills-deaths+assists/2)+(creepkills/100+creepdenies/10+neutralkills/50)+(raxkills/6)+(towerkills/11))
+# alternative formula:
+# (((kills-deaths+assists*0.7)*0.6+towerkills*0.8+raxkills+creepkills*0.02+creepdenies*0.08+neutralkills*0.03+courierkills*0.04)*0.5+(wins/totgames*2)+(totgames*0.002))
+
+bot_scoreformula = (((wins-losses)/totgames)+(kills-deaths+assists/2)+(creepkills/100+creepdenies/10+neutralkills/50)+(raxkills/6)+(towerkills/11))
+
+# Only players having played this many number of games will be ranked
+bot_scoremingames = 5
+
+# default access for owners (use admin access panel to change any admin's access to your liking and see the access code for those commands)
+bot_owneraccess = 3965
+
+# default access for admins
+bot_adminaccess = 1903
+
+# gamestate for inhouse games
+bot_gamestateinhouse = 999
+
+#  will only auto ban if team diff <= with the setting
+bot_autobanteamdiffmax = 0
+
+# Only ban players who leave prior to x minutes of game end time.
+bot_autobangameendmins = 3
+
+bot_autobantimer = 0
+bot_autobanall = 0
+bot_autobanfirstxleavers = 0
+
+# the bot will auto rehost the game as gamename + 1 if 60 seconds have passed since last player joined, 0 = disable
+bot_autorehostdelay = 60
+
+# the bot will auto rehost the game as gamename + 1 if game name is taken
+bot_rehostifnametaken = 1
+
+# if host counter goes over this number it will reset to 1, set to 0 to disable the feature
+bot_maxhostcounter = 30
+
+# these words will be edited/censored in game.
+bot_censorwords = fuck idiot retarded dick cunt pussy asshole suck shit penis vagina
+
+# load in game feature will be enabled for every map (if set to 1)
+bot_forceloadingame = 1
+
+# After a game has ended, if mysql is used, ghost will run update_dota_elo.exe (use either this or score not both!)
+bot_updatedotaeloaftergame = 0
+
+# After a game has ended, if mysql is used, ghost will recalculate scores (use either this or elo not both!)
+bot_updatedotascoreaftergame = 0
+
+# set to 1 if you are using warcraft 3 patch 1.23 or newer
+bot_patch23ornewer = 1
+
+# set to 1 if you are using warcraft 3 patch 1.21
+bot_patch21 = 0
+
+# show .sd of anyone who enters the lobby (and has played games with the bot before)
+bot_showscoresonjoin = 0
+
+# setting bot_autohostmaximumgames > 0 will make ghost begin autohosting on startup
+bot_autohostmaximumgames = 0
+bot_autohostautostartplayers = 10
+bot_autohostallowstart = 0
+bot_autohostlocal = 0
+bot_autohostowner = one
+bot_autohostmapcfg = map.cfg
+bot_autohostgamename = auto -sd EU pros
+
+# If you autohost a even playered two team map and want to auto ban leavers that make the game uneven turn this on. Will not ban admins or root admins. An example map would be DotA or Battleships.
+#     0 = off   1 = on
+bot_autoban = 0
+
+# set to 1 if you want LAN players to be considered admins
+bot_lanadmins = 0
+
+# set to 1 if you want local players (GArena) to be considered admins
+bot_localadmins = 0
+
+# the language file
+
+bot_language = language.cfg
+
+# the path to your local Warcraft III directory
+#  this path must contain war3.exe, storm.dll, and game.dll
+#  this path must end in your system's path seperator (i.e. "\" on Windows or "/" on Linux)
+#  if this path contains War3Patch.mpq the bot will attempt to extract "Scripts\common.j" and "Scripts\blizzard.j" on startup and write them to bot_mapcfgpath (which is defined later in this file)
+#  common.j and blizzard.j are only required for automatically calculating map_crc, you do not need them if your map config files already contain map_crc
+
+bot_war3path = C:\Program Files\Warcraft III\
+
+# the port GHost++ will host battle.net games on (this must be different from your admingame_port)
+
+bot_hostport = 6113
+
+# maximum number of games to host at once
+
+bot_maxgames = 5
+
+# command trigger for ingame only (battle.net command triggers are defined later)
+
+bot_commandtrigger = !
+
+# the path to the directory where you keep your map config files (must end in your system's path seperator)
+#  this directory can also contain common.j and blizzard.j (extracted from War3Patch.mpq)
+#  common.j and blizzard.j are only required for automatically calculating map_crc, you do not need them if your map config files already contain map_crc
+
+bot_mapcfgpath = mapcfgs\
+
+# the path to the directory where you keep your savegame files (must end in your system's path seperator)
+
+bot_savegamepath = savegames\
+
+# the path to the directory where you keep your map files (must end in your system's path seperator)
+#  GHost++ doesn't require map files but if it has access to them it can send them to players and automatically calculate most map config values
+#  GHost++ will search [bot_mappath + map_localpath] for the map file (map_localpath is set in each map's config file)
+
+bot_mappath = c:\program files\Warcraft III\Maps\Download\
+
+# whether to save replays or not
+
+bot_savereplays = 0
+
+# the path to the directory where you want GHost++ to save replays (must end in your system's path seperator)
+
+bot_replaypath = replays\
+
+### the Warcraft 3 version to save replays as
+
+replay_war3version = 24
+
+### the Warcraft 3 build number to save replays as (this is specific to each Warcraft 3 version)
+###  patch 1.23:  war3version 23, buildnumber 6058
+###  patch 1.24:  war3version 24, buildnumber 6059
+###  patch 1.24b: war3version 24, buildnumber 6059
+
+replay_buildnumber = 6059
+
+### whether to do automatic spoof checks or not
+###  you can always manually spoof check by whispering the bot (and in fact this is required before running admin commands)
+###  set to 0 to disable automatic spoof checks
+###  set to 1 to enable automatic spoof checks on all players
+###  set to 2 to enable automatic spoof checks on potential admins only
+
+bot_spoofchecks = 2
+
+### whether to require spoof checks or not
+###  this controls whether the bot will require players to spoof check before starting the game
+###  it does NOT control whether the bot will require players to spoof check before running admin commands - spoof checks are ALWAYS required for admin status
+###  if you require spoof checks, players will be kicked from the lobby if they haven't spoof checked within 20 seconds of joining (autohosted games only)
+
+bot_requirespoofchecks = 0
+
+# whether to display game refresh messages by default
+#  this can always be changed for a particular game with the !refresh command
+
+bot_refreshmessages = 0
+
+# whether to automatically lock games when the owner joins
+
+bot_autolock = 0
+
+# whether to automatically save games when a player disconnects
+#  this can always be changed for a particular game with the !autosave command
+
+bot_autosave = 0
+
+# whether to allow map downloads or not
+#  set to 0 to disable map downloads
+#  set to 1 to enable map downloads
+#  set to 2 to enable conditional map downloads (an admin must start each map download with the !download or !dl command)
+
+bot_allowdownloads = 1
+
+# whether to ping players during map downloads or not
+#  GHost++ will always stop pinging any players who are downloading the map
+#  this config value determines whether GHost++ should stop pinging *all* players when at least one player is downloading the map
+
+bot_pingduringdownloads = 0
+
+# kicked banned people when they enter the channel
+bot_kickbannedfromchannel = 0
+
+# Ban banned people when they enter the channel
+bot_banbannedfromchannel = 0
+
+# use LC style pings (divide actual pings by two)
+
+bot_lcpings = 1
+
+# auto kick players with ping higher than this
+
+bot_autokickping = 200
+
+# the game latency
+#  this can always be changed for a particular game with the !latency command (which enforces a minimum of 50 and a maximum of 500)
+
+bot_latency = 110
+
+# the maximum number of packets a player is allowed to get out of sync by before starting the lag screen
+#  before version 8.0 GHost++ did not have a lag screen which is the same as setting this to a very high number
+#  this can always be changed for a particular game with the !synclimit command (which enforces a minimum of 10 and a maximum of 10000)
+
+bot_synclimit = 90
+
+# whether votekicks are allowed or not
+
+bot_votekickallowed = 1
+
+# the percentage of players required to vote yes for a votekick to pass
+#  the player starting the votekick is assumed to have voted yes and the player the votekick is started against is assumed to have voted no
+#  the formula for calculating the number of votes needed is votes_needed = ceil( ( num_players - 1 ) * bot_votekickpercentage / 100 )
+#  this means it will round UP the number of votes required
+#  if you set it to 100 it will require 2/3, 3/4, 4/5, 5/6, 6/7, 7/8, 8/9, 9/10, 10/11, and 11/12 votes to pass
+#  if you set it to 90 it will require 2/3, 3/4, 4/5, 5/6, 6/7, 7/8, 8/9, 9/10, 9/11, and 10/12 votes to pass
+#  if you set it to 80 it will require 2/3, 3/4, 4/5, 4/6, 5/7, 6/8, 7/9, 8/10, 8/11, and 9/12 votes to pass
+#  if you set it to 70 it will require 2/3, 3/4, 3/5, 4/6, 5/7, 5/8, 6/9, 7/10, 7/11, and 8/12 votes to pass
+#  if you set it to 60 it will require 2/3, 2/4, 3/5, 3/6, 4/7, 5/8, 5/9, 6/10, 6/11, and 7/12 votes to pass
+
+bot_votekickpercentage = 100
+
+# Just before a game is hosted the creator is added to the bots friends list and removed soon after 
+bot_addcreatorasfriendonhost = 0
+
+# lobby/game commands are displayed as chat (or hidden)
+bot_relaychatcommands = 1
+
+# display information on current downloads (speed, ETA)
+bot_showdownloadsinfo = 1
+
+# interval in seconds between download info message
+bot_showdownloadsinfotime = 5
+
+# maximum players allowed to download at once, the rest will have almost KB/s until someone finishes downloading
+bot_maxdownloaders = 3
+
+# set total download speed (KB/s) available for all clients at once, if set to 1024, 4 people will get 256 each
+bot_totaldownloadspeed = 1024
+
+# set max download speed (KB/s) available for one client
+bot_clientdownloadspeed = 512
+
+# initiate game over timer when x seconds have passed since world tree/frozen throne has fallen - 0 to disable
+bot_gameoverbasefallen = 20
+
+# initiate game over timer if remaining players are less than this number (and at least a player left) - 0 to disable
+bot_gameoverminplayers = 0
+
+# initiate game over timer if remaining player percentage is less than this number (and at least a player left) - 0 to disable
+bot_gameoverminpercent = 0
+
+# initiate game over timer if team difference is bigger than this number, 0 - to disable
+bot_gameovermaxteamdifference = 0
+
+# redirect console output to udp
+bot_udpconsole = 1
+
+# whether to automatically add the players from last game to the next game's reserved list
+bot_holdplayersforrmk = 1
+
+# non admin commands, 1 enable, 0 disable
+bot_nonadmincommands = 1
+
+# root admins are required to spoof check if 1, or not if 0
+bot_rootadminsspoofcheck = 0
+
+# admins are required to spoof check if 1, or not if 0
+bot_adminsspoofcheck = 0
+
+# banned players will be notified with a whisper.
+bot_notifybannedplayers = 1
+
+# ghost will find its external ip on startup, disable if you want to play on LAN only
+bot_findexternalip = 1
+
+# specify your external ip here if you don't want ghost to auto find it.
+bot_externalip = 
+
+# use alternative site for external ip finding (if you experience lag (30s) on ghost startup)
+bot_altfindip = 0
+
+# bot's additional rootadmins separated by space ex: userone usertwo userthree
+bot_rootadmins = 
+
+# bot's UDP password
+bot_udppassword = 
+
+# show autokick denied country or banned player messages
+bot_verbose = 0
+
+# bot's virtual host name
+bot_virtualhostname = |cFF483D8BOne
+
+# ignore drop request for the first x seconds of lagging.
+bot_dropvotetime = 30
+
+# Time limit for hosting a game where no admins enter it
+bot_lobbytimelimit = 10
+
+# udp ip
+udp_cmdbindip = 0.0.0.0
+
+# udp port
+udp_cmdport = 6969
+
+# udp spoof target
+udp_cmdspooftarget =
+
+############################
+# ADMIN GAME CONFIGURATION #
+############################
+
+# whether to create the admin game or not (see readme.txt for more information)
+
+admingame_create = 0
+
+# the port GHost++ will host the admin game on (this must be different from your bot_hostport)
+
+admingame_port = 6114
+
+# the admin game password
+
+admingame_password = 
+
+##########################
+# DATABASE CONFIGURATION #
+##########################
+
+# database type
+#  use "sqlite3" for a local SQLite database
+#  use "mysql" for any MySQL database
+
+db_type = sqlite3
+
+# sqlite3 database file
+
+db_sqlite3_file = ghost.dbs
+
+# this is only used if your database type is MySQL
+
+db_mysql_server = localhost
+db_mysql_database = ghost
+db_mysql_user = YOUR_USERNAME
+db_mysql_password = YOUR_PASSWORD
+db_mysql_port = 0
+
+############################
+# BATTLE.NET CONFIGURATION #
+############################
+
+# which battle.net server to connect to
+#  1.) useast.battle.net
+#  2.) uswest.battle.net
+#  3.) asia.battle.net
+#  4.) europe.battle.net
+# note that each banned player is tied to the realm it was created on and the realm is case sensitive
+# so if you change your realm from useast.battle.net to USEAST.BATTLE.NET it'll still connect but anyone previously banned will not be counted as banned until you change it back
+
+bnet_server = europe.battle.net
+
+# your Warcraft III: Reign of Chaos CD key
+
+bnet_cdkeyroc = FFFFFFFFFFFFFFFFFFFFFFFFFF
+
+# your Warcraft III: The Frozen Throne CD key
+
+bnet_cdkeytft = FFFFFFFFFFFFFFFFFFFFFFFFFF
+
+# your battle.net username
+
+bnet_username = 
+
+# your battle.net password
+
+bnet_password = 
+
+# the first channel to join upon entering battle.net
+
+bnet_firstchannel = W3-bots
+
+# the root admin on this battle.net server only
+
+bnet_rootadmin = 
+
+# command trigger for this battle.net server only
+
+bnet_commandtrigger = !
+
+# whether to automatically add your friends list to each game's reserved list
+
+bnet_holdfriends = 1
+
+# whether to automatically add your clan members list to each game's reserved list
+
+bnet_holdclan = 1
+
+# you will need to edit this section of the config file if you're connecting to a PVPGN server
+#  your PVPGN server operator will tell you what to put here
+
+bnet_custom_war3version = 24
+bnet_custom_exeversion = 
+bnet_custom_exeversionhash = 
+bnet_custom_passwordhashtype = 
+
+###
+# BNLS Settings
+###
+bnet_bnlsserver = 80.86.83.93
+bnet_bnlsport = 9367
+
+###
+# example configuration for connecting to a official battle.net server (second server)
+###
+
+# bnet2_server = uswest.battle.net
+# bnet2_cdkeyroc = FFFFFFFFFFFFFFFFFFFFFFFFFF
+# bnet2_cdkeytft = FFFFFFFFFFFFFFFFFFFFFFFFFF
+# bnet2_username =
+# bnet2_password =
+# bnet2_firstchannel = The Void
+# bnet2_rootadmin =
+# bnet2_commandtrigger = !
+# bnet2_holdfriends = 1
+# bnet2_holdclan = 1
+
+###
+# example configuration for connecting to a PVPGN battle.net (third server)
+###
+
+# bnet3_server = pvpgn.boredaussie.com
+# bnet3_cdkeyroc = FFFFFFFFFFFFFFFFFFFFFFFFFF
+# bnet3_cdkeytft = FFFFFFFFFFFFFFFFFFFFFFFFFF
+# bnet3_username =
+# bnet3_password =
+# bnet3_firstchannel = The Void
+# bnet3_rootadmin =
+# bnet3_commandtrigger = !
+# bnet3_holdfriends = 1
+# bnet3_holdclan = 1
+# bnet3_custom_war3version = 22
+# bnet3_custom_exeversion = 184 0 22 1
+# bnet3_custom_exeversionhash = 219 152 153 144
+# bnet3_custom_passwordhashtype = pvpgn

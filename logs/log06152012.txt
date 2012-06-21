@@ -1,0 +1,80 @@
+------ Build started: Project: update_dota_elo, Configuration: Release Win32 ------
+Compiling...
+update_dota_elo.cpp
+elo.cpp
+.\elo.cpp(404) : warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+.\elo.cpp(410) : warning C4244: '/=' : conversion from 'double' to 'float', possible loss of data
+.\elo.cpp(445) : warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+config.cpp
+Linking...
+Generating code
+Finished generating code
+Embedding manifest...
+Build log was saved at "file://c:\Users\Phuc Tran\Desktop\GhostOne\update_dota_elo\Release\BuildLog.htm"
+update_dota_elo - 0 error(s), 3 warning(s)
+------ Build started: Project: BNCSutil, Configuration: Release MySQL Win32 ------
+Compiling...
+stack.c
+Generating Code...
+Compiling...
+oldauth.cpp
+libinfo.cpp
+file.cpp
+decodekey.cpp
+cdkeydecoder.cpp
+bsha1.cpp
+Generating Code...
+Compiling...
+sha1.c
+Compiling...
+nls.c
+Compiling...
+checkrevision.cpp
+Linking...
+   Creating library C:\Users\Phuc Tran\Desktop\GhostOne\Release MySQL/BNCSutil.lib and object C:\Users\Phuc Tran\Desktop\GhostOne\Release MySQL/BNCSutil.exp
+Embedding manifest...
+Build log was saved at "file://c:\Users\Phuc Tran\Desktop\GhostOne\bncsutil\vc8_build\Release MySQL\BuildLog.htm"
+BNCSutil - 0 error(s), 0 warning(s)
+------ Build started: Project: ghost, Configuration: Release MySQL Win32 ------
+Compiling...
+bncsutilinterface.cpp
+bnet.cpp
+bnetprotocol.cpp
+bnlsclient.cpp
+bnlsprotocol.cpp
+commandpacket.cpp
+config.cpp
+crc32.cpp
+csvparser.cpp
+game.cpp
+game_admin.cpp
+game_base.cpp
+gameplayer.cpp
+gameprotocol.cpp
+gameslot.cpp
+ghost.cpp
+ghostdb.cpp
+ghostdbmysql.cpp
+ghostdbsqlite.cpp
+gpsprotocol.cpp
+Compiling...
+language.cpp
+map.cpp
+packed.cpp
+replay.cpp
+savegame.cpp
+sha1.cpp
+socket.cpp
+stats.cpp
+statsdota.cpp
+statsw3mmd.cpp
+util.cpp
+Compiling...
+sqlite3.c
+Linking...
+Generating code
+Finished generating code
+Embedding manifest...
+Build log was saved at "file://c:\Users\Phuc Tran\Desktop\GhostOne\Obj\BuildLog.htm"
+ghost - 0 error(s), 0 warning(s)
+========== Build: 3 succeeded, 0 failed, 0 up-to-date, 0 skipped ==========

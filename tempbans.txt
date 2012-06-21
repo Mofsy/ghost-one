@@ -1,0 +1,74 @@
+Temporary bans and warns explained by their creator KileRatZ:
+
+This modification was done due to the observed fact that with the ordinary banning system, the bot admins (with a consistent ban policy) could even at their best not evade conflicts and be questioned by the "victims", creating somewhat unnecessary tensions. Discontinuing the ban policy seemed like a more reasonable choice every time such a conflict would happen.
+
+With the Temporary Bans, this has a chance to be the thing of the past. The admins are able to ban the victims for a given number of days, and after this "cool-off" period they will be allowed to play once more.
+The added command is !tempban (aliases !tban, !tb), and works as follows:
+!tban <name> <bantime in days> <reason>
+For example, "!tban kileratz 13 flamer" would ban me from the bot games until 13 days from now. If today's date is 10/06/2009, I'll be able to join the games again at 23/06/2009, from midnight onward. Notice that the tempbans will not hold the ban for exactly 13 days; If you tempban someone at 23:59:0 for 1 day, it'd only be effective for a minute.
+
+Some remarks:
+
+    * "!tban kileratz 0 flamer" will have the same effect as "!ban kileratz flamer".
+    * The !checkban and !delban commands work for temporary bans, as well.
+    * The !tban/tb command in the game will work for partial strings in the same way !ban does.
+
+Though the temporary bans have the potential to work better than ordinary bans for communities, they still have their limitations. There are some occasions where a gameplayer would do something that irks the admin, but is not a reason enough to ban him even for a day - for example, voluntarily leaving in mid-game (since in some mods, like HoSK, this can happen well after 30 minutes, you cannot really ban the guy for it). This is where the warn system comes in.
+
+Admins are now able to warn players for those minor offences. Now bear with me, a lot of the "variables" mentioned in this next section will be fully customizable through the cfg file. When the player manages to reach a certain number of warns (say, three), he gets automatically banned (or tempbanned) by the bot.
+
+The added command for this is !warn <victim> <reason> (aliases !addwarn, !w), its syntax working in much the same way as the ordinary bans.
+
+The warns themselves do actually act as some sort of "hidden" bans or tempbans. The daytime they last is customizable through the cfg (but not through the command !warn itself).
+You might have noticed that this system would not be in favor for people who play a lot of games per day (as they have a higher chance to get 3 warns before the first one expires). That's why there's also an option to let the bot "forget" one's warns after a certain number of games. i.e. if this number is 7, the chronologically first of the player's warns will be disabled after he has played seven games without being warned in the meantime (and another after 14 games, etc). A tiny remark: if you set this number to 1 in the cfg, one of the player's warns will be forgiven each game (no matter if you have warned him in that game or not).
+
+There are two more commands regarding warns.
+!checkwarns/cw <user> will return a compilation of reasons for the current active warns of the player. If the player has no active warns but has been auto-banned because he'd reached the warn quota, the bot will return the warn reasons that led him to be banned instead.
+!delwarns/dw <user> will delete all the active warns from this player.
+
+Additional remarks:
+
+    * The !warn/w command in the game will work for partial strings in the same way !ban and !tban do.
+
+All of these commands are accessible to the admins who have the banning rights.
+
+But wait, there's more! An "auto-warning" functionality is added here, as well. With it on, the bot will be able to auto-warn early leavers.
+How it works is simple. If the player leaves before the X minute, he will be "remembered" as an offender by the bot. At the end of the game, the bot checks the actual game time, and if it's over Y minutes, all the early leavers will be warned for it.
+For example, if we set the X value to 2 and Y to 5, everyone who left in the very first two minutes of the game will be automaticaly warned for it - but only if the game has lasted for at least 5 minutes. Without the Y variable, everyone would get warned even if they all left early because of a failgame (if blue failed to insert the correct game modes, for example). The bot admins are not vulnerable to this feature.
+Since "early leaving" can be defined differently for each map, the X and Y variables cannot determined in the ghost.cfg, but only in each of the map cfg files. The bot owner is therefore forced to think how to set these variables for each of the maps, and if he doesn't set them, the autowarning will be off for that map.
+
+Note: Automated warns are by default only enabled on autohosted games. If a game admin wants this feature on a game that wasn't autohosted, he must use the "!autowarn" command before the game begins.
+
+Here's a list of all the configuration lines that can be changed (but don't need to be):
+
+    * Ghost.cfg
+
+Code:
+
+ - bot_banthewarnedplayerquota = X // how many warns are needed to auto-ban the player. Default: 3.
+ - bot_bantimeofwarnedplayer = X // how many days will the auto-ban from warns last. Setting to 0 makes the ban permanent. Default: 14.
+ - bot_warntimeofwarnedplayer = X // how many days will each warn last. Setting to 0 makes warns permanent. Default: 14.
+ - bot_gamenumtoforgetawarn = X // how many games should the player play (without taking another warn) to make one of his warns inactive. Default: 7
+ - bot_autowarnearlyleavers = X // if 0, autowarning is off. Default: 0.
+
+    * Each of the mapcfgs
+
+Code:
+
+ - map_marks = A B C D E F .... X Y Z // Can be any amount of numbers. If a player leaves before "A" minutes, he'll be auto-warned if game lasted at least "C" minutes. If he leaves before "B" minutes (but after "A" minutes), he'll be auto-warned if game lasted at least "D" minutes. A good example is: map_marks = 5 10 15 20 28 35
+ - map_onlyautowarnifmorethanxplayers = X // When the game only has X players left, no-one remaining in the game will get autowarned anymore. Defaults to 0.
+ 
+ Further updates by psionic:
+ 
+!tbanlast/tblast/tbl - temp ban last
+!warnlast/wlast/wl - warn last
+
+- new config variables:
+### normal bans will expire in x days - set to 0 to be permanent
+bot_bantime = 180
+
+### normal banlast/bl will expire in x days - set to 0 to be permanent
+bot_banlasttime = 180
+
+### tbanlast/tbl will expire in x days - set to 0 to be permanent
+bot_tbanlasttime = 30

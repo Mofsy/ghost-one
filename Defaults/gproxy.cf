@@ -1,0 +1,28 @@
+### required config values
+
+war3path = c:\program files\Warcraft III\
+cdkeyroc = FFFFFFFFFFFFFFFFFFFFFFFFFF
+cdkeytft = FFFFFFFFFFFFFFFFFFFFFFFFFF
+server = server.eurobattle.net
+username = 
+password = 
+channel = w3
+
+### optional config values
+
+war3version = 24
+port = 6125
+exeversion =
+exeversionhash =
+passwordhashtype = pvpgn
+filterhosts = 
+filtergproxy = 0
+### whispers coming from these will not be shown, ex: pvpgn|realm bot1 , note: use | instead of SPACE
+hidewhispersfrom = 
+### if 1, will list public games
+publicgames = 1
+udp_cmdport = 6959
+udp_guiport = 5858
+udp_console = 1
+udp_password = 
+udp_commandtrigger = !

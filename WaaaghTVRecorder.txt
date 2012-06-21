@@ -1,0 +1,29 @@
+##############################################
+##########Download/Install/Configure Waaagh!TV##########
+##############################################
+
+1.)To let Ghost++ stream your files, you need the WaaaghTV-Recorder: http://www.waaaghtv.com/files/downloads/wtvRecorder0.53.00.zip
+
+2.) You need WinpCap to let the waaaghtv recorder work:
+*stable: http://www.winpcap.org/install/bin/WinPcap_4_0_2.exe
+*newest beta: http://www.winpcap.org/install/bin/WinPcap_4_1_beta5.exe
+
+3.) Create a WaaaghTV-Account: http://www.waaaghtv.com/en/user/signup/
+
+4.) Restart your computer and start the wtvRecorder.exe located in your WaaahTV Installdirectory.
+
+5.) Select the Networkadapter, on which GHost++ is sending its data to.
+
+6.) Servers->IP-Adresse: games.waaaghtv.com; Port: 10384; Username/Password: the one form the signup.
+Activate "Connect to server at startup" and "Remember password".
+
+7.)Close the Waaagh!TV-Recorder.
+
+ghost.cfg:
+
+# Path to your WC3TVRecorder ex: c:\Program Files\waaaghTV Recorder\
+wtv_path = C:\Program Files\WaaaghTV Recorder\
+# Use WC3TVRecorder, 1 to enable
+wtv_enabled = 0
+# WaaaghTV Observer Name
+wtv_playername = Waaagh!TV
