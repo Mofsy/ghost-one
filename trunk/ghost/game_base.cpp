@@ -4415,6 +4415,16 @@ void CBaseGame :: EventPlayerLeft( CGamePlayer *player, uint32_t reason )
 
 	if( !m_GameLoading && !m_GameLoaded )
 		OpenSlot( GetSIDFromPID( player->GetPID( ) ), false );
+		
+	//ban leaver who left the game in 30 secs after finishing map downloading.
+	if( player->GetDownloadFinished( ) && GetTime( ) - player->GetFinishedDownloadingTime( ) < 30 )
+	{
+		SendAllChat( "Leaver in 30 secs after downloaded gets banned for 2 days" );
+		string Reason = "Leaver in 30 secs after downloaded gets banned for 2 days";
+		Reason = "Autobanned"+Reason;
+		CONSOLE_Print( "[AUTOBAN2days: " + m_GameName + "] Autobanning " + player->GetName( ) + " (" + Reason +")" );
+		m_GHost->m_Callables.push_back( m_GHost->m_DB->ThreadedBanAdd( player->GetSpoofedRealm(), player->GetName( ), player->GetExternalIPString( ), m_GameName, "AUTOBAN2days", Reason, 2, 0 ));
+	}
 }
 
 void CBaseGame :: EventPlayerLoaded( CGamePlayer *player )
@@ -4955,8 +4965,8 @@ void CBaseGame :: EventPlayerChatToHost( CGamePlayer *player, CIncomingChatPlaye
 								(*i)->QueueChatCommand( player->GetName()+": " + chatPlayer->GetMessage( ) );
 							}
 					}
-
-					CONSOLE_Print( "[GAME: %s] [%s]: %s" + m_GameName + "[Lobby] [" + player->GetName( ) + "]: " + chatPlayer->GetMessage( ) );
+					
+					CONSOLE_Print( "[GAME: "+ m_GameName + "] [Lobby] [" + player->GetName( ) + "]: "+ chatPlayer->GetMessage( ) );					
 					m_GHost->UDPChatSend("|lobby "+player->GetName()+" "+chatPlayer->GetMessage());
 					if( m_MuteLobby )
 						Relay = false;
