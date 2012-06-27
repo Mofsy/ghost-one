@@ -5427,7 +5427,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 					m_StartedRmkVoteTime = GetTime();
 				}
 				player->SetRmkVote( true );
-				uint32_t VotesNeeded = (uint32_t)ceil( ( GetNumHumanPlayers( ) - 1 ) * (float)80 );
+				uint32_t VotesNeeded = (uint32_t)ceil( ( GetNumHumanPlayers( ) - 1 ) * (float)90 );
 				if (VotesNeeded>GetNumHumanPlayers()-1)
 					VotesNeeded = GetNumHumanPlayers()-1;
 				uint32_t Votes = 0;
@@ -5760,14 +5760,14 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 		if(!wiim.empty())
 			SendAllChat( "Players that need to ready: "+ wiim );
 		else 
-			SendAllChat( "Everybody is !ready. Waiting for 10 player." );
+			SendAllChat( "Everybody is !ready. Waiting for" + UTIL_ToString( GetNumHumanPlayers( ) ) + " player(s)." );
 	}
 
 	//
 	// !READY
 	//
 
-	if( ( Command == "ready" || Command == "rdy" ) && !m_CountDownStarted && !m_GameLoaded && !m_GameLoading && !m_StartVoteStarted && !player->GetStartVote( ) )
+	if( ( Command == "ready" || Command == "rdy" || Command == "go" ) && !m_CountDownStarted && !m_GameLoaded && !m_GameLoading && !m_StartVoteStarted && !player->GetStartVote( ) )
 	{
 
 		m_StartVoteStarted = true;
@@ -5776,17 +5776,17 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 			(*i)->SetStartVote( false );
 		}
 		player->SetStartVote( true );
-		SendAllChat( User + " is !ready to start the game." );
-		SendAllChat( "1/10 player is ready to start the game." );
+		SendAllChat( User + " is !ready to start the game." );		
 	}
 
-	else if( ( Command == "ready" || Command == "go" ) && !m_CountDownStarted && !m_GameLoaded && !m_GameLoading && m_StartVoteStarted && !player->GetStartVote( ) )
+	else if( ( Command == "ready" || Command == "rdy" || Command == "go" ) && !m_CountDownStarted && !m_GameLoaded && !m_GameLoading && m_StartVoteStarted && !player->GetStartVote( ) )
 	{
 
 		uint32_t sVotesNeeded = 6;
 		uint32_t sVotes = 0;
 		player->SetStartVote( true );
 		SendAllChat( User + " is !ready to start the game." );
+		SendAllChat( UTIL_ToString( sVotes ) + "/" + UTIL_ToString( GetNumHumanPlayers( ) ) + " is !ready to start the game." );
 
 		for( vector<CGamePlayer *> :: iterator i = m_Players.begin( ); i != m_Players.end( ); i++ )
 		{
@@ -5801,7 +5801,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 			StartCountDown( true );
 		}
 	}
-	else if( ( Command == "ready" || Command == "go" ) && !m_CountDownStarted && !m_GameLoaded && !m_GameLoading && m_StartVoteStarted && player->GetStartVote( ) )
+	else if( ( Command == "ready" || Command == "rdy" || Command == "go" ) && !m_CountDownStarted && !m_GameLoaded && !m_GameLoading && m_StartVoteStarted && player->GetStartVote( ) )
 		SendChat( player, "You are already !ready. Type !wim to see who needs to !ready yet.");
 	//
 	// !RMK
