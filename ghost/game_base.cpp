@@ -685,7 +685,7 @@ bool CBaseGame :: Update( void *fd, void *send_fd )
 
 			if (!m_ShowRealSlotCount)
 			{
-				slotsopen = 2;
+				slotsopen = 3;
 				slotstotal = 12;
 			}
 
@@ -4419,9 +4419,10 @@ void CBaseGame :: EventPlayerLeft( CGamePlayer *player, uint32_t reason )
 	//ban leaver who left the game in 30 secs after finishing map downloading.
 	if( !m_DownloadOnlyMode && player->GetDownloadFinished( ) && GetTime( ) - player->GetFinishedDownloadingTime( ) < 30 )
 	{
-		SendAllChat( "Leaver in 30 secs after downloaded gets banned for 2 days. DL xong, trong 30s ma out la bi ban nick 2 ngay" );
+		SendAllChat(player->GetName() + " left the lobby, Leaver in 30 secs after downloaded gets banned for 2 days. DL xong, trong 30s ma out la bi ban nick 2 ngay" );
+		SendChat(player->GetPID(), " left the lobby in 30 secs after downloaded gets banned for 2 days. DL xong, trong 30s ma out la bi ban nick 2 ngay" );
 		string Reason = "Leaver in 30 secs after downloaded gets banned for 2 days";
-		Reason = "Autobanned"+Reason;
+		Reason = "Autobanned "+Reason;
 		CONSOLE_Print( "[AUTOBAN2days: " + m_GameName + "] Autobanning " + player->GetName( ) + " (" + Reason +")" );
 		m_GHost->m_Callables.push_back( m_GHost->m_DB->ThreadedBanAdd( player->GetSpoofedRealm(), player->GetName( ), player->GetExternalIPString( ), m_GameName, "AUTOBAN2days", Reason, 2, 0 ));
 	}
