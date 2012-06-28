@@ -42,7 +42,6 @@ Deleting intermediate and output files for project 'ghost', configuration 'Relea
 Compiling...
 bncsutilinterface.cpp
 bnet.cpp
-.\bnet.cpp(6106) : warning C4293: '<<' : shift count negative or too big, undefined behavior
 bnetprotocol.cpp
 bnlsclient.cpp
 bnlsprotocol.cpp
@@ -51,19 +50,18 @@ config.cpp
 crc32.cpp
 csvparser.cpp
 game.cpp
-.\game.cpp(4917) : warning C4293: '<<' : shift count negative or too big, undefined behavior
 game_admin.cpp
 game_base.cpp
-.\game_base.cpp(713) : warning C4293: '<<' : shift count negative or too big, undefined behavior
 gameplayer.cpp
 gameprotocol.cpp
 gameslot.cpp
+gcbiprotocol.cpp
 ghost.cpp
 ghostdb.cpp
 ghostdbmysql.cpp
 ghostdbsqlite.cpp
-gpsprotocol.cpp
 Compiling...
+gpsprotocol.cpp
 language.cpp
 map.cpp
 packed.cpp
@@ -75,7 +73,6 @@ stats.cpp
 statsdota.cpp
 statsw3mmd.cpp
 util.cpp
-gcbiprotocol.cpp
 Compiling...
 sqlite3.c
 Linking...
@@ -83,5 +80,5 @@ Generating code
 Finished generating code
 Embedding manifest...
 Build log was saved at "file://c:\Users\Phuc Tran\Desktop\GhostOne\Obj\BuildLog.htm"
-ghost - 0 error(s), 3 warning(s)
+ghost - 0 error(s), 0 warning(s)
 ========== Rebuild All: 3 succeeded, 0 failed, 0 skipped ==========
