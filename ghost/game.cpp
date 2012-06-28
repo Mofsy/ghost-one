@@ -5430,7 +5430,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 				uint32_t VotesNeeded = (uint32_t)ceil( ( GetNumHumanPlayers( ) - 1 ) * (float)90 );
 				if (VotesNeeded>GetNumHumanPlayers()-1)
 					VotesNeeded = GetNumHumanPlayers()-1;
-				uint32_t Votes = 0;
+					uint32_t Votes = 0;
 
 				for( vector<CGamePlayer *> :: iterator i = m_Players.begin( ); i != m_Players.end( ); i++ )
 				{
@@ -5634,7 +5634,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 		
 		player->SetStartVote(true);
                 
-		uint32_t VotesNeeded = GetNumHumanPlayers( ) - 1;
+		uint32_t VotesNeeded = GetNumHumanPlayers( ) - 2;
 		uint32_t Votes = 0;
 		
 		for( vector<CGamePlayer *> :: iterator i = m_Players.begin( ); i != m_Players.end( ); ++i )
@@ -5760,7 +5760,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 		if(!wiim.empty())
 			SendAllChat( "Players that need to ready: "+ wiim );
 		else 
-			SendAllChat( "Everybody is !ready. Waiting for" + UTIL_ToString( GetNumHumanPlayers( ) ) + " player(s)." );
+			SendAllChat( "Everybody is !ready. Waiting to PING " + UTIL_ToString( GetNumHumanPlayers( ) ) + " player(s)." );
 	}
 
 	//
@@ -5785,15 +5785,15 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 		uint32_t sVotesNeeded = 6;
 		uint32_t sVotes = 0;
 		player->SetStartVote( true );
-		SendAllChat( User + " is !ready to start the game." );
-		SendAllChat( UTIL_ToString( sVotes ) + "/" + UTIL_ToString( GetNumHumanPlayers( ) ) + " is !ready to start the game." );
+		SendAllChat( User + " is !ready to start the game." );		
 
 		for( vector<CGamePlayer *> :: iterator i = m_Players.begin( ); i != m_Players.end( ); i++ )
 		{
 			if( (*i)->GetStartVote( ) )
 				sVotes++;
 		}
-		SendAllChat( UTIL_ToString(sVotes) + "/"+ UTIL_ToString(sVotesNeeded)+ " players are ready to start the game." );
+		SendAllChat( UTIL_ToString(sVotes) + "/" + UTIL_ToString( GetNumHumanPlayers( ) ) + "ppls are ready. " + UTIL_ToString(sVotesNeeded) + " votes needed to start game." );
+		
 		if( sVotes >= sVotesNeeded )
 		{
 			CONSOLE_Print ( "[GAME: " + m_GameName + "] Everybody is ready to start the game!" );
