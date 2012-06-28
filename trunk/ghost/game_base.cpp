@@ -901,9 +901,9 @@ bool CBaseGame :: Update( void *fd, void *send_fd )
 		StartCountDownAuto( m_GHost->m_RequireSpoofChecks );
 		m_LastAutoStartTime = GetTime( );
 	}
-	// display player count info every 180 seconds
+	// display player count info every 220 seconds
 
-	if ( !m_CountDownStarted && GetTime( ) - m_LastInfoShow >= 180 )
+	if ( !m_CountDownStarted && GetTime( ) - m_LastInfoShow >= 220 )
 	{
 		SendAllChat("Join our Garena Group 56934 for numerous games. TheGenMaps forum.");
 		SendAllChat("If no admin in lobby, to start the game all should type !ready , !votestart ");
@@ -4417,9 +4417,9 @@ void CBaseGame :: EventPlayerLeft( CGamePlayer *player, uint32_t reason )
 		OpenSlot( GetSIDFromPID( player->GetPID( ) ), false );
 		
 	//ban leaver who left the game in 30 secs after finishing map downloading.
-	if( player->GetDownloadFinished( ) && GetTime( ) - player->GetFinishedDownloadingTime( ) < 30 )
+	if( !m_DownloadOnlyMode && player->GetDownloadFinished( ) && GetTime( ) - player->GetFinishedDownloadingTime( ) < 30 )
 	{
-		SendAllChat( "Leaver in 30 secs after downloaded gets banned for 2 days" );
+		SendAllChat( "Leaver in 30 secs after downloaded gets banned for 2 days. DL xong, trong 30s ma out la bi ban nick 2 ngay" );
 		string Reason = "Leaver in 30 secs after downloaded gets banned for 2 days";
 		Reason = "Autobanned"+Reason;
 		CONSOLE_Print( "[AUTOBAN2days: " + m_GameName + "] Autobanning " + player->GetName( ) + " (" + Reason +")" );
@@ -5398,10 +5398,11 @@ void CBaseGame :: EventPlayerMapSize( CGamePlayer *player, CIncomingMapSize *map
 			SendAllChat( m_GHost->m_Language->PlayerDownloadedTheMap( player->GetName( ), UTIL_ToString( Seconds, 1 ), UTIL_ToString( Rate, 1 ) ) );
 			player->SetDownloadFinished( true );
 			player->SetFinishedDownloadingTime( GetTime( ) );
-
+			
 			if (m_DownloadOnlyMode)
 			SendChat (player->GetPID(),"This is a download only game, you should leave now");
-
+			else
+			SendChat (player->GetPID()," will get banned for 2 days IF you leave in 30s. dl xong, trong 30s ma out la bi ban nick 2 ngay" );
 			// add to database
 
 			m_GHost->m_Callables.push_back( m_GHost->m_DB->ThreadedDownloadAdd( m_Map->GetMapPath( ), MapSize, player->GetName( ), player->GetExternalIPString( ), player->GetSpoofed( ) ? 1 : 0, player->GetSpoofedRealm( ), GetTicks( ) - player->GetStartedDownloadingTicks( ) ) );
