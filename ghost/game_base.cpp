@@ -4419,8 +4419,8 @@ void CBaseGame :: EventPlayerLeft( CGamePlayer *player, uint32_t reason )
 	//ban leaver who left the game in 30 secs after finishing map downloading.
 	if( !m_DownloadOnlyMode && player->GetDownloadFinished( ) && GetTime( ) - player->GetFinishedDownloadingTime( ) < 30 )
 	{
-		SendAllChat(player->GetName() + " banned for dl & early leaving in lobby" );
-		SendChat(player->GetPID(), " left the lobby in 30 secs after downloaded gets banned for 2 days. DL xong, trong 30s ma out la bi ban nick 2 ngay" );
+		SendAllChat(player->GetName() + " BANNED for dl & early leaving in lobby" );
+		SendChat(player->GetPID(), ", left the lobby in 30 secs after downloaded gets banned for 2 days. DL xong, trong 30s ma out la bi ban nick 2 ngay" );
 		string Reason = "Leaver in 30 secs after downloaded gets banned for 2 days";
 		Reason = "Autobanned "+Reason;
 		CONSOLE_Print( "[AUTOBAN2days: " + m_GameName + "] Autobanning " + player->GetName( ) + " (" + Reason +")" );
@@ -5404,7 +5404,7 @@ void CBaseGame :: EventPlayerMapSize( CGamePlayer *player, CIncomingMapSize *map
 			SendChat (player->GetPID(),"This is a download only game, you should leave now");
 			} else {
 			SendChat (player->GetPID()," will get banned for 2 days IF you leave in 30s. dl xong, trong 30s ma out la bi ban nick 2 ngay" );
-			SendAllChat (player->GetName() + " Leaver in 30s after downloaded gets banned for 2 days. DL xong, trong 30s ma out la bi ban nick 2 ngay" );
+			SendAllChat ("@" + player->GetName() + ": WARNING, leaver in 30s after downloaded gets banned for 2 days.  DL xong, trong 30s ma out la bi ban nick 2 ngay" );
 			}
 			// add to database
 
