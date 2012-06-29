@@ -5634,7 +5634,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 		
 		player->SetStartVote(true);
                 
-		uint32_t VotesNeeded = GetNumHumanPlayers( ) - 2;
+		uint32_t VotesNeeded = GetNumHumanPlayers( ) - 1;
 		uint32_t Votes = 0;
 		
 		for( vector<CGamePlayer *> :: iterator i = m_Players.begin( ); i != m_Players.end( ); ++i )
@@ -5792,7 +5792,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 			if( (*i)->GetStartVote( ) )
 				sVotes++;
 		}
-		SendAllChat( UTIL_ToString(sVotes) + "/" + UTIL_ToString( GetNumHumanPlayers( ) ) + "ppls are ready. " + UTIL_ToString(sVotesNeeded) + " votes needed to start game." );
+		SendAllChat( UTIL_ToString(sVotes) + "/" + UTIL_ToString( GetNumHumanPlayers( ) ) + " ppls are ready. " + UTIL_ToString(sVotesNeeded) + " votes needed to start game." );
 		
 		if( sVotes >= sVotesNeeded )
 		{
