@@ -5427,9 +5427,9 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 					m_StartedRmkVoteTime = GetTime();
 				}
 				player->SetRmkVote( true );
-				uint32_t VotesNeeded = (uint32_t)ceil( ( GetNumHumanPlayers( ) - 1 ) * (float)90 );
-				if (VotesNeeded>GetNumHumanPlayers()-1)
-					VotesNeeded = GetNumHumanPlayers()-1;
+				uint32_t VotesNeeded = (uint32_t)ceil( ( GetNumHumanPlayers( ) - 1 ) * (float)100 );
+				if ( VotesNeeded > GetNumHumanPlayers( )-1 )
+					VotesNeeded = GetNumHumanPlayers( )-1;
 					uint32_t Votes = 0;
 
 				for( vector<CGamePlayer *> :: iterator i = m_Players.begin( ); i != m_Players.end( ); i++ )
@@ -5443,12 +5443,12 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 					SendAllChat("Game will end in 5 seconds");
 					m_GameEndCountDownStarted = true;
 					m_GameEndCountDownCounter = 5;
-					m_GameEndLastCountDownTicks = GetTicks();
+					m_GameEndLastCountDownTicks = GetTicks( );
 					m_RmkVotePlayer.clear( );
 					m_StartedRmkVoteTime = 0;
 				}
 				else
-					SendAllChat( User+" voted for rmk [" + UTIL_ToString( Votes )+"/"+ UTIL_ToString(VotesNeeded)+"] "+string( 1, m_GHost->m_CommandTrigger )+"rmk to accept");
+					SendAllChat( User +" voted for rmk [" + UTIL_ToString( Votes )+"/"+ UTIL_ToString(VotesNeeded)+"] "+string( 1, m_GHost->m_CommandTrigger )+"rmk to accept");
 			}
 
 			//
