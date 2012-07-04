@@ -54,7 +54,9 @@ protected:
 	string m_ErrorString;
 	CIncomingJoinPlayer *m_IncomingJoinPlayer;
 	CIncomingGarenaUser *m_IncomingGarenaUser;
-
+	
+	uint32_t m_ConnectionState;	// zero if no packets received (wait REQJOIN), one if only REQJOIN received (wait MAPSIZE), two otherwise
+	uint32_t m_ConnectionTime;	// last time the player did something relating to connection state
 
 public:
 	CPotentialPlayer( CGameProtocol *nProtocol, CBaseGame *nGame, CTCPSocket *nSocket );
@@ -117,6 +119,7 @@ private:
 	uint32_t m_FinishedDownloadingTime;			// GetTime when the player finished downloading the map
 	uint32_t m_FinishedLoadingTicks;			// GetTicks when the player finished loading the game
 	uint32_t m_StartedLaggingTicks;				// GetTicks when the player started lagging
+	uint32_t m_TotalLaggingTicks;				// total ticks that the player has been lagging in the game
 	uint32_t m_StatsSentTime;					// GetTime when we sent this player's stats to the chat (to prevent players from spamming !stats)
 	uint32_t m_StatsDotASentTime;				// GetTime when we sent this player's dota stats to the chat (to prevent players from spamming !statsdota)
 	uint32_t m_LastGProxyWaitNoticeSentTime;
@@ -190,6 +193,7 @@ public:
 	uint32_t GetFinishedDownloadingTime( )		{ return m_FinishedDownloadingTime; }
 	uint32_t GetFinishedLoadingTicks( )			{ return m_FinishedLoadingTicks; }
 	uint32_t GetStartedLaggingTicks( )			{ return m_StartedLaggingTicks; }
+	uint32_t GetTotalLaggingTicks( )			{ return m_TotalLaggingTicks; }
 	uint32_t GetStatsSentTime( )				{ return m_StatsSentTime; }
 	uint32_t GetStatsDotASentTime( )			{ return m_StatsDotASentTime; }
 	uint32_t GetLastGProxyWaitNoticeSentTime( )	{ return m_LastGProxyWaitNoticeSentTime; }
@@ -248,6 +252,7 @@ public:
 	void SetStartedDownloadingTicks( uint32_t nStartedDownloadingTicks )			{ m_StartedDownloadingTicks = nStartedDownloadingTicks; }
 	void SetFinishedDownloadingTime( uint32_t nFinishedDownloadingTime )			{ m_FinishedDownloadingTime = nFinishedDownloadingTime; }
 	void SetStartedLaggingTicks( uint32_t nStartedLaggingTicks )					{ m_StartedLaggingTicks = nStartedLaggingTicks; }
+	void SetTotalLaggingTicks( uint32_t nTotalLaggingTicks )						{ m_TotalLaggingTicks = nTotalLaggingTicks; }
 	void SetStatsSentTime( uint32_t nStatsSentTime )								{ m_StatsSentTime = nStatsSentTime; }
 	void SetStatsDotASentTime( uint32_t nStatsDotASentTime )						{ m_StatsDotASentTime = nStatsDotASentTime; }
 	void SetLastGProxyWaitNoticeSentTime( uint32_t nLastGProxyWaitNoticeSentTime )	{ m_LastGProxyWaitNoticeSentTime = nLastGProxyWaitNoticeSentTime; }

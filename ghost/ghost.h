@@ -47,6 +47,7 @@ class CSaveGame;
 //UDPCommandSocket patch
 class CUDPServer;
 class CConfig;
+struct DenyInfo;
 
 class CMyCallableDownloadFile : public CBaseCallable
 {
@@ -81,6 +82,7 @@ public:
 	CGHostDB *m_DBLocal;					// local database (for temporary data)
 	vector<CBaseCallable *> m_Callables;	// vector of orphaned callables waiting to die
 	vector<BYTEARRAY> m_LocalAddresses;		// vector of local IP addresses
+	map<string, DenyInfo> m_DenyIP;			// map (IP -> DenyInfo) of denied IP addresses
 	CLanguage *m_Language;					// language
 	CMap *m_Map;							// the currently loaded map
 	CMap *m_AdminMap;						// the map to use in the admin game
@@ -213,6 +215,18 @@ public:
 	uint32_t m_ReplayBuildNumber;			// config value: replay build number (for saving replays)
 	bool m_TCPNoDelay;						// config value: use Nagle's algorithm or not
 	uint32_t m_MatchMakingMethod;			// config value: the matchmaking method
+	
+	uint32_t m_DenyMaxDownloadTime;			// config value: the maximum download time in milliseconds
+	uint32_t m_DenyMaxMapsizeTime;			// config value: the maximum time in milliseconds to wait for a MAPSIZE packet
+	uint32_t m_DenyMaxReqjoinTime;			// config value: the maximum time in milliseconds to wait for a REQJOIN packet
+	uint32_t m_DenyMaxIPUsage;				// config value: the maximum number of users from the same IP address to accept
+	uint32_t m_DenyMaxLoadTime;				// config value: the maximum time in milliseconds to wait for players to load
+	
+	uint32_t m_DenyMapsizeDuration;			// config value: time to deny due to no mapsize received
+	uint32_t m_DenyDownloadDuration;		// config value: time to deny due to low download speed
+	uint32_t m_DenyReqjoinDuration;			// config value: time to deny due to no reqjoin received
+	uint32_t m_DenyIPUsageDuration;			// config value: time to deny due to high multiple IP usage
+	uint32_t m_DenyLoadDuration;			// config value: time to deny due to no load received
 	uint32_t m_PlayerBeforeStartPrintDelay; // config value: delay * 10s is the time between two WaitingForPlayersBeforeStart prints
 
 	bool m_UDPConsole;						// config value: console output redirected to UDP
@@ -432,6 +446,8 @@ public:
 	void LoadIPToCountryData( );
 	void LoadIPToCountryDataOpt( );
 	void CreateGame( CMap *map, unsigned char gameState, bool saveGame, string gameName, string ownerName, string creatorName, string creatorServer, bool whisper );
+	void DenyIP( string ip, uint32_t duration, string reason );
+	bool CheckDeny( string ip );
 	// UDPCommandSocket patch
 	CUDPServer *m_UDPCommandSocket;		// a UDP socket for receiving commands
 	string m_UDPCommandSpoofTarget;     // the realm to send udp received commands to
@@ -439,6 +455,12 @@ public:
 	// Metal_Koola's attempts
 	bool m_dropifdesync;				// config value: Drop desynced players
 	int m_CookieOffset;					// System used to remove need for bnet_bnlswardencookie. May need further optimization.
+};
+
+struct DenyInfo {
+	uint32_t Time;
+	uint32_t Duration;
+	uint32_t Count;
 };
 
 #endif

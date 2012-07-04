@@ -36,7 +36,7 @@
 // CPotentialPlayer
 //
 
-CPotentialPlayer :: CPotentialPlayer( CGameProtocol *nProtocol, CBaseGame *nGame, CTCPSocket *nSocket ) : m_Protocol( nProtocol ), m_Game( nGame ), m_Socket( nSocket ), m_DeleteMe( false ), m_Error( false ), m_IncomingJoinPlayer( NULL ), m_IncomingGarenaUser( NULL )
+CPotentialPlayer :: CPotentialPlayer( CGameProtocol *nProtocol, CBaseGame *nGame, CTCPSocket *nSocket ) : m_Protocol( nProtocol ), m_Game( nGame ), m_Socket( nSocket ), m_DeleteMe( false ), m_Error( false ), m_IncomingJoinPlayer( NULL ), m_IncomingGarenaUser( NULL ), m_ConnectionState( 0 ), m_ConnectionTime( GetTicks( ) )
 {
 	m_Protocol = nProtocol;
 	m_Game = nGame;
@@ -169,6 +169,15 @@ bool CPotentialPlayer :: Update( void *fd )
 	m_Socket->DoRecv( (fd_set *)fd );
 	ExtractPackets( );
 	ProcessPackets( );
+	
+	// make sure we don't keep this socket open forever (disconnect after five seconds)
+	if( m_ConnectionState == 0 && GetTicks( ) - m_ConnectionTime > m_Game->m_GHost->m_DenyMaxReqjoinTime )
+	{
+		CONSOLE_Print( "[DENY] Kicking player: REQJOIN not received within a few seconds" );
+		m_DeleteMe = true;
+		m_Game->m_GHost->DenyIP( GetExternalIPString( ), m_Game->m_GHost->m_DenyReqjoinDuration, "REQJOIN not received within a few seconds" );
+		
+	}
 
 	// don't call DoSend here because some other players may not have updated yet and may generate a packet for this player
 	// also m_Socket may have been set to NULL during ProcessPackets but we're banking on the fact that m_DeleteMe has been set to true as well so it'll short circuit before dereferencing
@@ -321,13 +330,14 @@ CGamePlayer :: CGamePlayer( CGameProtocol *nProtocol, CBaseGame *nGame, CTCPSock
 	m_LeftCode = PLAYERLEAVE_LOBBY;
 	m_LoginAttempts = 0;
 	m_SyncCounter = 0;
-	m_JoinTime = GetTime( );
+	m_JoinTime = GetTime( );	
 	m_LastMapPartSent = 0;
 	m_LastMapPartAcked = 0;
 	m_StartedDownloadingTicks = 0;
 	m_FinishedDownloadingTime = 0;
 	m_FinishedLoadingTicks = 0;
 	m_StartedLaggingTicks = 0;
+	m_TotalLaggingTicks = 0;
 	m_StatsSentTime = 0;
 	m_StatsDotASentTime = 0;
 	m_LastGProxyWaitNoticeSentTime = 0;
@@ -368,6 +378,7 @@ CGamePlayer :: CGamePlayer( CGameProtocol *nProtocol, CBaseGame *nGame, CTCPSock
 	m_Switching = false;
 	m_Switchok = false;
 	m_WarnChecked = false;
+	m_ConnectionState = 1;
 }
 
 CGamePlayer :: CGamePlayer( CPotentialPlayer *potential, unsigned char nPID, string nJoinedRealm, string nName, BYTEARRAY nInternalIP, bool nReserved ) : CPotentialPlayer( potential->m_Protocol, potential->m_Game, potential->GetSocket( ) )
@@ -386,7 +397,7 @@ CGamePlayer :: CGamePlayer( CPotentialPlayer *potential, unsigned char nPID, str
 	// to fix this we could move the packet counters to CPotentialPlayer and copy them here
 	// note: we must make sure we never send a packet to a CPotentialPlayer otherwise the send counter will be incorrect too! what a mess this is...
 	// that said, the packet counters are only used for managing GProxy++ reconnections
-
+	m_ConnectionState = 1;
 	m_TotalPacketsReceived = 1;
 	m_LeftCode = PLAYERLEAVE_LOBBY;
 	m_LoginAttempts = 0;
@@ -398,6 +409,7 @@ CGamePlayer :: CGamePlayer( CPotentialPlayer *potential, unsigned char nPID, str
 	m_FinishedDownloadingTime = 0;
 	m_FinishedLoadingTicks = 0;
 	m_StartedLaggingTicks = 0;
+	m_TotalLaggingTicks = 0;
 	m_StatsSentTime = 0;
 	m_StatsDotASentTime = 0;
 	m_LastGProxyWaitNoticeSentTime = 0;
@@ -550,7 +562,34 @@ bool CGamePlayer :: Update( void *fd )
 
 	if( m_Socket && GetTime( ) - m_Socket->GetLastRecv( ) >= 30 )
 		m_Game->EventPlayerDisconnectTimedOut( this );
-
+	// make sure we're not waiting too long for the first MAPSIZE packet
+	
+	if( m_ConnectionState == 1 && GetTicks( ) - m_ConnectionTime > m_Game->m_GHost->m_DenyMaxMapsizeTime && !m_Game->GetGameLoaded() && !m_Game->GetGameLoading() )
+	{
+		CONSOLE_Print( "[DENY] Kicking player: MAPSIZE not received within a few seconds" );
+		m_DeleteMe = true;
+		SetLeftReason( "MAPSIZE not received within a few seconds" );
+		SetLeftCode( PLAYERLEAVE_LOBBY );
+		m_Game->OpenSlot( m_Game->GetSIDFromPID( GetPID( ) ), false );
+		m_Game->m_GHost->DenyIP( GetExternalIPString( ), m_Game->m_GHost->m_DenyMapsizeDuration, "MAPSIZE not received within a few seconds" );
+	}
+	
+	// disconnect if the player is downloading too slowly
+	
+	if( m_DownloadStarted && !m_DownloadFinished && !m_Game->GetGameLoaded() && !m_Game->GetGameLoading() )
+	{
+		uint32_t downloadingTime = GetTicks( ) - m_StartedDownloadingTicks;
+		
+		if( downloadingTime > m_Game->m_GHost->m_DenyMaxDownloadTime )
+		{
+			CONSOLE_Print( "[DENY] Kicking player: download time too long" );
+			m_DeleteMe = true;
+			SetLeftReason( "download time too long" );
+			SetLeftCode( PLAYERLEAVE_LOBBY );
+			m_Game->OpenSlot( m_Game->GetSIDFromPID( GetPID( ) ), false );
+			m_Game->m_GHost->DenyIP( GetExternalIPString( ), m_Game->m_GHost->m_DenyDownloadDuration, "download time too long" );
+		}
+	}
 	// GProxy++ acks
 
 	if( m_GProxy && GetTime( ) - m_LastGProxyAckTime >= 10 )
@@ -575,15 +614,18 @@ bool CGamePlayer :: Update( void *fd )
 	// in cases other than the ones covered here m_LeftReason should have been set when m_DeleteMe was set
 
 	if( m_Error )
+		m_Game->m_GHost->DenyIP( GetExternalIPString( ), 180000, "player error" );
 		m_Game->EventPlayerDisconnectPlayerError( this );
 
 	if( m_Socket )
 	{
 		if( m_Socket->HasError( ) )
 			m_Game->EventPlayerDisconnectSocketError( this );
+			m_Game->m_GHost->DenyIP( GetExternalIPString( ), 20000, "socket error" );
 
 		if( !m_Socket->GetConnected( ) )
 			m_Game->EventPlayerDisconnectConnectionClosed( this );
+			m_Game->m_GHost->DenyIP( GetExternalIPString( ), 60000, "connection closed" );
 	}
 
 	return Deleting;
@@ -723,6 +765,8 @@ void CGamePlayer :: ProcessPackets( )
 				break;
 
 			case CGameProtocol :: W3GS_MAPSIZE:
+				m_ConnectionState = 2;
+				m_ConnectionTime = GetTicks( );
 				MapSize = m_Protocol->RECEIVE_W3GS_MAPSIZE( Packet->GetData( ), m_Game->m_GHost->m_Map->GetMapSize( ) );
 
 				if( MapSize )

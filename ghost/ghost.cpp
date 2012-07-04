@@ -2696,6 +2696,68 @@ void CGHost :: CreateGame( CMap *map, unsigned char gameState, bool saveGame, st
 	}
 #endif
 }
+//denyPatch Void CGhost
+void CGHost :: DenyIP( string ip, uint32_t duration, string reason )
+{
+	CONSOLE_Print( "[DENY] Denying connections from " + ip + " for " + UTIL_ToString( duration ) + " milliseconds: " + reason );
+	
+	// check to see if already in table
+	
+	if( m_DenyIP.count( ip ) == 0 )
+	{
+		DenyInfo Info;
+		Info.Time = GetTicks( );
+		Info.Duration = duration;
+		Info.Count = 0;
+		
+		m_DenyIP[ip] = Info;
+	}
+	
+	else
+	{
+		// only add if new ending time is greater than last ending time
+		if( duration >= m_DenyIP[ip].Duration || GetTicks( ) - m_DenyIP[ip].Time > m_DenyIP[ip].Duration - duration ) {
+			// increment deny count if necessary
+			if( GetTicks( ) - m_DenyIP[ip].Time < 60000 )
+			{
+				m_DenyIP[ip].Count++;
+				
+				if( m_DenyIP[ip].Count > 20 )
+				{
+					duration = 1200000;
+					CONSOLE_Print( "[DENY] Extending deny due to high deny count " );
+					m_DenyIP[ip].Count = 0;
+				}
+			}
+			
+			else
+				m_DenyIP[ip].Count = 0;
+			
+			m_DenyIP[ip].Time = GetTicks( );
+			m_DenyIP[ip].Duration = duration;
+		}
+	}
+}
+
+bool CGHost :: CheckDeny( string ip ) {
+	if( m_DenyIP.count( ip ) == 0 )
+		return false;
+	else
+	{
+		if( GetTicks( ) - m_DenyIP[ip].Time < m_DenyIP[ip].Duration )
+			return true;
+		else
+		{
+			// delete stale entries only, so that we can use DenyCount properly
+			if( GetTicks( ) - m_DenyIP[ip].Time > 60000 + m_DenyIP[ip].Duration )
+			{
+				m_DenyIP.erase( ip );
+			}
+			
+			return false;
+		}
+	}
+}
 
 void CGHost :: AdminGameMessage(string name, string message)
 {
@@ -3808,6 +3870,25 @@ void CGHost :: ReloadConfig ()
 		m_ReplayWar3Version = 24;
 		m_ReplayBuildNumber = 6059;
 	}
+	if (m_LANWar3Version == 26)
+	{
+		m_ReplayWar3Version = 26;
+		m_ReplayBuildNumber = 6060;
+	}
+	
+	// deny patch variables
+	m_DenyMaxDownloadTime = CFG->GetInt( "deny_maxdownloadtime", 90000 );
+	m_DenyMaxMapsizeTime = CFG->GetInt( "deny_maxmapsizetime", 5000 );
+	m_DenyMaxReqjoinTime = CFG->GetInt( "deny_maxreqjointime", 5000 );
+	m_DenyMaxIPUsage = CFG->GetInt( "deny_maxipusage", 8 );
+	m_DenyMaxLoadTime = CFG->GetInt( "deny_maxloadtime", 240000 );
+	
+	m_DenyDownloadDuration = CFG->GetInt( "deny_downloadtimeduration", 20000 );
+	m_DenyMapsizeDuration = CFG->GetInt( "deny_mapsizeduration", 60000 );
+	m_DenyReqjoinDuration = CFG->GetInt( "deny_reqjoinduration", 60000 );
+	m_DenyIPUsageDuration = CFG->GetInt( "deny_ipusageduration", 10000 );
+	m_DenyLoadDuration = CFG->GetInt( "deny_loadduration", 180000 );
+
 	m_AutoStartDotaGames = CFG->GetInt( "bot_autostartdotagames", 0 ) == 0 ? false : true;
 	m_AllowedScores = CFG->GetInt( "bot_allowedscores", 0 );
 	m_AutoHostAllowedScores = CFG->GetInt( "bot_autohostallowedscores", 0 );
