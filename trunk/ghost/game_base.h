@@ -296,7 +296,6 @@ public:
 	virtual bool GetGameLoading( )					{ return m_GameLoading; }
 	virtual bool GetGameLoaded( )					{ return m_GameLoaded; }
 	virtual bool GetLagging( )						{ return m_Lagging; }
-	virtual uint32_t GetSyncCounter( )					{ return m_SyncCounter; }
 	virtual vector<CGamePlayer*> GetPlayers ( ) 	{ return m_Players; }
 
 	virtual void SetEnforceSlots( vector<CGameSlot> nEnforceSlots )		{ m_EnforceSlots = nEnforceSlots; }
