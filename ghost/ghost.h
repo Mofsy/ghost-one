@@ -228,6 +228,8 @@ public:
 	uint32_t m_DenyIPUsageDuration;			// config value: time to deny due to high multiple IP usage
 	uint32_t m_DenyLoadDuration;			// config value: time to deny due to no load received
 	uint32_t m_PlayerBeforeStartPrintDelay; // config value: delay * 10s is the time between two WaitingForPlayersBeforeStart prints
+	uint32_t m_RehostPrintingDelay;			// config value: delay X times of rehost print should be not sent to prevent spamming in lobby
+	uint32_t m_ActualRehostPrintingDelay;  // Counts the number of checks before printing again
 
 	bool m_UDPConsole;						// config value: console output redirected to UDP
 	bool m_Verbose;							// config value: show all info or just some

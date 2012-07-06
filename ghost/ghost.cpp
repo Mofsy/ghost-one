@@ -1161,6 +1161,7 @@ CGHost :: CGHost( CConfig *CFG )
 		{
 			AutoHostMapCFGString += ".cfg";
 			CONSOLE_Print( "[GHOST] adding \".cfg\" to autohost game map -> new name is [" + AutoHostMapCFGString + "]" );
+			CONSOLE_Print( "[GHOST] hosting [" + AutoHostMapCFGString + "]" );
 		}
 		
 		CConfig AutoHostMapCFG;
@@ -1989,7 +1990,22 @@ void CGHost :: EventBNETGameRefreshed( CBNET *bnet )
 			m_CurrentGame->m_Rehost = false;
 			CONSOLE_Print( "[GAME: " + m_CurrentGame->GetGameName() + "] rehost worked");
 			m_CurrentGame->m_LastPlayerJoinedTime = GetTime( );
-			m_CurrentGame->SendAllChat("Rehosted as \""+m_CurrentGame->GetGameName()+"\"");
+			string s = string();
+			string st = string ();
+			
+			if(m_RehostPrintingDelay + 3 > m_ActualRehostPrintingDelay)
+			{			
+				s = m_CurrentGame->GetGameName();
+				s = s.substr(s.size() - 2, 2 );
+				st = st + " " + s ;
+				m_ActualRehostPrintingDelay++;
+			}
+			else
+			{
+				m_ActualRehostPrintingDelay = 0;
+				st = "Rehosted as \""+ st +"\"";
+				m_CurrentGame->SendAllChat(st);			
+			}			
 			UDPChatSend("|rehostw "+m_CurrentGame->GetGameName());
 		} else
 		{
@@ -2205,6 +2221,7 @@ void CGHost :: SetConfigs( CConfig *CFG )
 	m_dropifdesync = CFG->GetInt( "bot_dropifdesync", 1 ) == 0 ? false : true; //Metal_Koola
 	m_MatchMakingMethod = CFG->GetInt( "bot_matchmakingmethod", 1 );
 	m_PlayerBeforeStartPrintDelay = CFG->GetInt( "bot_playerbeforestartprintdelay", 4 );
+	m_RehostPrintingDelay = CFG->GetInt( "bot_rehostprintingdelay", 4 );
 }
 
 void CGHost :: ExtractScripts( )
@@ -2695,68 +2712,6 @@ void CGHost :: CreateGame( CMap *map, unsigned char gameState, bool saveGame, st
 		}
 	}
 #endif
-}
-//denyPatch Void CGhost
-void CGHost :: DenyIP( string ip, uint32_t duration, string reason )
-{
-	CONSOLE_Print( "[DENY] Denying connections from " + ip + " for " + UTIL_ToString( duration ) + " milliseconds: " + reason );
-	
-	// check to see if already in table
-	
-	if( m_DenyIP.count( ip ) == 0 )
-	{
-		DenyInfo Info;
-		Info.Time = GetTicks( );
-		Info.Duration = duration;
-		Info.Count = 0;
-		
-		m_DenyIP[ip] = Info;
-	}
-	
-	else
-	{
-		// only add if new ending time is greater than last ending time
-		if( duration >= m_DenyIP[ip].Duration || GetTicks( ) - m_DenyIP[ip].Time > m_DenyIP[ip].Duration - duration ) {
-			// increment deny count if necessary
-			if( GetTicks( ) - m_DenyIP[ip].Time < 60000 )
-			{
-				m_DenyIP[ip].Count++;
-				
-				if( m_DenyIP[ip].Count > 20 )
-				{
-					duration = 1200000;
-					CONSOLE_Print( "[DENY] Extending deny due to high deny count " );
-					m_DenyIP[ip].Count = 0;
-				}
-			}
-			
-			else
-				m_DenyIP[ip].Count = 0;
-			
-			m_DenyIP[ip].Time = GetTicks( );
-			m_DenyIP[ip].Duration = duration;
-		}
-	}
-}
-
-bool CGHost :: CheckDeny( string ip ) {
-	if( m_DenyIP.count( ip ) == 0 )
-		return false;
-	else
-	{
-		if( GetTicks( ) - m_DenyIP[ip].Time < m_DenyIP[ip].Duration )
-			return true;
-		else
-		{
-			// delete stale entries only, so that we can use DenyCount properly
-			if( GetTicks( ) - m_DenyIP[ip].Time > 60000 + m_DenyIP[ip].Duration )
-			{
-				m_DenyIP.erase( ip );
-			}
-			
-			return false;
-		}
-	}
 }
 
 void CGHost :: AdminGameMessage(string name, string message)
@@ -3875,20 +3830,6 @@ void CGHost :: ReloadConfig ()
 		m_ReplayWar3Version = 26;
 		m_ReplayBuildNumber = 6060;
 	}
-	
-	// deny patch variables
-	m_DenyMaxDownloadTime = CFG->GetInt( "deny_maxdownloadtime", 90000 );
-	m_DenyMaxMapsizeTime = CFG->GetInt( "deny_maxmapsizetime", 5000 );
-	m_DenyMaxReqjoinTime = CFG->GetInt( "deny_maxreqjointime", 5000 );
-	m_DenyMaxIPUsage = CFG->GetInt( "deny_maxipusage", 8 );
-	m_DenyMaxLoadTime = CFG->GetInt( "deny_maxloadtime", 240000 );
-	
-	m_DenyDownloadDuration = CFG->GetInt( "deny_downloadtimeduration", 20000 );
-	m_DenyMapsizeDuration = CFG->GetInt( "deny_mapsizeduration", 60000 );
-	m_DenyReqjoinDuration = CFG->GetInt( "deny_reqjoinduration", 60000 );
-	m_DenyIPUsageDuration = CFG->GetInt( "deny_ipusageduration", 10000 );
-	m_DenyLoadDuration = CFG->GetInt( "deny_loadduration", 180000 );
-
 	m_AutoStartDotaGames = CFG->GetInt( "bot_autostartdotagames", 0 ) == 0 ? false : true;
 	m_AllowedScores = CFG->GetInt( "bot_allowedscores", 0 );
 	m_AutoHostAllowedScores = CFG->GetInt( "bot_autohostallowedscores", 0 );
