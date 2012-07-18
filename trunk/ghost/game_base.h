@@ -77,7 +77,7 @@ protected:
 	uint16_t m_HostPort;							// the port to host games on
 	unsigned char m_GameState;						// game state, public or private
 	unsigned char m_VirtualHostPID;					// virtual host's PID
-	unsigned char m_FakePlayerPID;					// the fake player's PID (if present)
+	vector<unsigned char> m_FakePlayers;			// the fake player's PIDs (if present)	
 	unsigned char m_WTVPlayerPID;					// the WaaaghTV player's PID (if present)
 	unsigned char m_GProxyEmptyActions;
 	string m_GameName;								// game name
@@ -85,6 +85,7 @@ protected:
 	string m_OriginalGameName;						// game name
 	string m_VirtualHostName;						// virtual host's name
 	string m_OwnerName;								// name of the player who owns this game (should be considered an admin)
+	string m_DefaultOwner;								// name of the player who owns this game (should be considered an admin)
 	string m_CreatorName;							// name of the player who created this game
 	string m_CreatorServer;							// battle.net server the player who created this game was on
 	string m_AnnounceMessage;						// a message to be sent every m_AnnounceInterval seconds
@@ -131,7 +132,7 @@ protected:
 	uint32_t m_StartedVoteStartTime;// GetTime when the votestart was started
 	uint32_t m_GameOverTime;						// GetTime when the game was over
 	uint32_t m_LastPlayerLeaveTicks;				// GetTicks when the most recent player left the game
-	uint32_t m_ActualyPrintPlayerWaitingStartDelay; // Counts the number of checks before the waiting for x players before start get printed again
+	uint32_t m_ActualyPrintPlayerWaitingStartDelay; // Counts the number of checks before the waiting for x players before start get printed again	
 	double m_MinimumScore;							// the minimum allowed score for matchmaking mode
 	double m_MaximumScore;							// the maximum allowed score for matchmaking mode
 	bool m_SlotInfoChanged;							// if the slot info has changed and hasn't been sent to the players yet (optimization)
@@ -172,6 +173,8 @@ protected:
 	bool m_MatchMaking;								// if matchmaking mode is enabled
 	bool m_LocalAdminMessages;						// if local admin messages should be relayed or not
 	uint32_t m_LastInfoShow;
+	uint32_t m_LastGenInfoShow;
+	uint32_t m_LastOwnerInfoShow;
 	bool m_DoAutoWarns;								// enable automated warns for early leavers
 
 public:
@@ -209,7 +212,7 @@ public:
 	bool m_CountryCheck;						// if we allow only some countries
 	bool m_CountryCheck2;						// if we deny some countries
 	bool m_ScoreCheck;							// if we allow some scores only
-	bool m_ScoreCheckChecked;	
+	bool m_ScoreCheckChecked;
 	double m_ScoreCheckScore;
 	uint32_t m_ScoreCheckRank;
 	bool m_GarenaOnly;							// only allow GArena

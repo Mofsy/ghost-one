@@ -106,11 +106,11 @@ CGame :: ~CGame( )
 	if (endtime == 0)
 		endtime = GetTime();
 	for( vector<CDBGamePlayer *> :: iterator i = m_DBGamePlayers.begin( ); i != m_DBGamePlayers.end( ); i++ ) {
-		if (IsAutoBanned((*i)->GetName())) 
-		{ 
+		if (IsAutoBanned((*i)->GetName()))
+		{
 			timehasleft = (*i)->GetLeavingTime();
-			if (endtime>timehasleft+m_GHost->m_AutoBanGameEndMins*60) 
-			{ 
+			if (endtime>timehasleft+m_GHost->m_AutoBanGameEndMins*60)
+			{
 				string Reason = CustomReason( timehasleft, string(), (*i)->GetName() );
 				Reason = "Autobanned"+Reason;
 				CONSOLE_Print( "[AUTOBAN: " + m_GameName + "] Autobanning " + (*i)->GetName( ) + " (" + Reason +")" );
@@ -220,7 +220,7 @@ CGame :: ~CGame( )
 				{
 #ifdef WIN32
 					if (m_GHost->m_UpdateDotaEloAfterGame)
-						if (m_GHost->DBType == "mysql") 
+						if (m_GHost->DBType == "mysql")
 						{
 							CONSOLE_Print( "[GAME: " + m_GameName + "] running update_dota_elo.exe" );
 							system("update_dota_elo.exe");
@@ -288,8 +288,8 @@ CGame :: ~CGame( )
 
 bool CGame :: Update( void *fd, void *send_fd )
 {
-	// show score of 
-	if (m_ShowScoreOf!="")
+	// show score of
+	if (!m_ShowScoreOf.empty())
 	{
 //		CONSOLE_Print( "[GAME: " + m_GameName + "] checking score for "+ m_ShowScoreOf );		
 		if (!m_GHost->m_CalculatingScores)
@@ -318,7 +318,7 @@ bool CGame :: Update( void *fd, void *send_fd )
 
 		m_DisableStats = false;
 	}
-	
+
 	// update callables
 
 	for( vector<PairedBanCheck> :: iterator i = m_PairedBanChecks.begin( ); i != m_PairedBanChecks.end( ); )
@@ -356,7 +356,7 @@ bool CGame :: Update( void *fd, void *send_fd )
 						time_t Now = time( NULL );
 						Now += 3600*24*i->second->GetExpireDayTime();
 						timeinfo = localtime( &Now );
-						strftime (buffer,80,"%d-%m-%Y",timeinfo);  
+						strftime (buffer,80,"%d-%m-%Y",timeinfo);
 						sDate = buffer;
 					}
 
@@ -695,10 +695,10 @@ void CGame :: EventPlayerLeft( CGamePlayer *player, uint32_t reason  )
 				// If team is even then turn on auto ban
 				if(m_TeamDiff == 0) { m_BanOn = true; }
 				// Else if teams are uneven check which one it is. Then depending on the team that is uneven, check to see if we should ban the leaver for making it uneven or more uneven.
-				else if(m_TeamDiff > 0) 
+				else if(m_TeamDiff > 0)
 				{
 					// If leaver is on team one then check if it is the team with less players.
-					if (fteam == 0) { 
+					if (fteam == 0) {
 						// If it is then turn on Auto Ban.
 						if (m_Team1<m_Team2) { m_BanOn = true; }
 					}
@@ -722,10 +722,10 @@ void CGame :: EventPlayerLeft( CGamePlayer *player, uint32_t reason  )
 			}
 		} else if (m_GameLoading && m_GHost->m_AutoBanGameLoading) { 
 			// If game is loading and player is not a admin ban.
-			m_BanOn = true; 
+			m_BanOn = true;
 		} else if ( m_CountDownStarted && !m_GameLoading && !m_GameLoaded && m_GHost->m_AutoBanCountDown ) {
 			// If game is loading and player is not a admin ban
-			m_BanOn = true; 
+			m_BanOn = true;
 		}
 		// If m_BanOn got turned on for some reason ban.
 		if (m_BanOn) {
@@ -916,13 +916,13 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 	if( AdminCheck || RootAdminCheck )
 	{
 		CONSOLE_Print( "[GAME: " + m_GameName + "] admin [" + User + "] sent command [" + Command + "] with payload [" + Payload + "]" );
-
-		if( !m_Locked || RootAdminCheck || IsOwner( User ) )
-		{
-			/*****************
-			* ADMIN COMMANDS *
-			******************/
-			
+		
+		/*****************
+		* ADMIN COMMANDS *
+		******************/
+		
+		if( !m_Locked || RootAdminCheck || (IsOwner(User) && User == m_DefaultOwner) )
+		{						
 			//
 			// !AUTOBAN
 			// !AB
@@ -1527,7 +1527,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 				}
 
 				// extract the victim and the reason
-				// e.g. "Varlock leaver after dying" -> victim: "Gen", reason: "leaver after dying"
+				// e.g. "Varlock leaver after dying" -> victim: "Varlock", reason: "leaver after dying"
 
 				string Victim;
 				string Reason;
@@ -1573,7 +1573,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 						bool isAdmin = IsOwner(LastMatch->GetName());
 						for( vector<CBNET *> :: iterator j = m_GHost->m_BNETs.begin( ); j != m_GHost->m_BNETs.end( ); j++ )
 						{
-							if( (*j)->IsAdmin(LastMatch->GetName() ) || (*j)->IsRootAdmin( LastMatch->GetName() ) )
+							if( (*j)->IsAdmin(LastMatch->GetName() ) || (*j)->IsRootAdmin( LastMatch->GetName() ) || LastMatch->GetName() ==m_DefaultOwner )
 							{
 								isAdmin = true;
 								break;
@@ -1752,7 +1752,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 				}
 
 				// extract the victim and the reason
-				// e.g. "Varlock leaver after dying" -> victim: "Gen", reason: "leaver after dying"
+				// e.g. "Varlock leaver after dying" -> victim: "Varlock", reason: "leaver after dying"
 
 				string Victim;
 				string Reason;
@@ -1825,7 +1825,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 						bool isAdmin = IsOwner(LastMatch->GetName());
 						for( vector<CBNET *> :: iterator j = m_GHost->m_BNETs.begin( ); j != m_GHost->m_BNETs.end( ); j++ )
 						{
-							if( (*j)->IsAdmin(LastMatch->GetName() ) || (*j)->IsRootAdmin( LastMatch->GetName() ) )
+							if( (*j)->IsAdmin(LastMatch->GetName() ) || (*j)->IsRootAdmin( LastMatch->GetName() ) || LastMatch->GetName()==m_DefaultOwner )
 							{
 								isAdmin = true;
 								break;
@@ -2045,7 +2045,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 				}
 
 				// extract the victim and the reason
-				// e.g. "Varlock leaver after dying" -> victim: "Gen", reason: "leaver after dying"
+				// e.g. "Varlock leaver after dying" -> victim: "Varlock", reason: "leaver after dying"
 
 				string Victim;
 				string Reason;
@@ -2219,7 +2219,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 			// !AUTOSTART
 			//
 
-			if( Command == "autostart" && !m_CountDownStarted )
+			if( ( Command == "autostart" || Command == "as" ) && !m_CountDownStarted )
 			{
 				if (m_GHost->m_onlyownerscanstart)
 					if ((!IsOwner( User) && GetPlayerFromName(m_OwnerName, false)) && !RootAdminCheck )
@@ -2652,12 +2652,15 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 							if (IsAdmin(Player->GetName()) || IsRootAdmin(Player->GetName()))
 								isAdmin = true;
 						}
-						if (isAdmin && !(IsOwner(User) || RootAdminCheck))
+						if (isAdmin && !((IsOwner(User) && User == m_DefaultOwner) || RootAdminCheck))
 						{
 							SendChat( player->GetPID(), "You can't kick an admin!");
 							return HideCommand;
-						} else
+						} else {
 							CloseSlot( (unsigned char)( SID - 1 ), true );
+							if( m_Slots[SID-1].GetSlotStatus( ) == SLOTSTATUS_OCCUPIED && m_Slots[SID-1].GetComputer( ) == 1 )
+							SendAllChat("You have closed computer slot, type !comp "+ Payload +" to make it a comp again");
+							}
 					}
 				}
 			}
@@ -3185,36 +3188,36 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 			// !FAKEPLAYER
 			//
 
-			if( Command == "fakeplayer" && !m_CountDownStarted )
-			{
-				if( m_FakePlayerPID == 255 )
-					CreateFakePlayer( );
-				else
-					DeleteFakePlayer( );
-			}
+			if( ( Command == "fakeplayer" || Command == "fp" ) && !m_CountDownStarted )
+				CreateFakePlayer( );
+				
+			//
+			// !DELFAKE
+			//
+				
+			if( ( Command == "deletefake" || Command == "deletefakes" || Command == "df" || Command == "delfakes" || Command == "delfake" ) && m_FakePlayers.size( ) && !m_CountDownStarted )
+				DeleteFakePlayer( );
 
 			//
 			// !FPPAUSE
 			//
 
-			if( Command == "fppause" && m_FakePlayerPID != 255 && m_GameLoaded )
+			if( ( Command == "fppause" || Command == "fpp" ) && m_FakePlayers.size( ) && m_GameLoaded )
 			{
-				BYTEARRAY CRC;
-				BYTEARRAY Action;
+				BYTEARRAY CRC, Action;
 				Action.push_back( 1 );
-				m_Actions.push( new CIncomingAction( m_FakePlayerPID, CRC, Action ) );
+				m_Actions.push( new CIncomingAction( m_FakePlayers[ rand( ) % m_FakePlayers.size( ) ], CRC, Action ) );
 			}
 
 			//
 			// !FPRESUME
 			//
 
-			if( Command == "fpresume" && m_FakePlayerPID != 255 && m_GameLoaded )
+			if( ( Command == "fpresume" || Command == "fpr" ) && m_FakePlayers.size( ) && m_GameLoaded )
 			{
-				BYTEARRAY CRC;
-				BYTEARRAY Action;
+				BYTEARRAY CRC, Action;
 				Action.push_back( 2 );
-				m_Actions.push( new CIncomingAction( m_FakePlayerPID, CRC, Action ) );
+				m_Actions.push( new CIncomingAction( m_FakePlayers[0], CRC, Action ) );
 			}
 
 			//
@@ -3706,10 +3709,9 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 
 			//
 			// !FROMP
-			// !FP
 			//
 
-			if( Command == "fromp" || Command == "fp" )
+			if( Command == "fromp" )
 			{
 				string Froms;
 				string Froms2;
@@ -3869,74 +3871,6 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 				}
 			}
 
-
-			//
-			// !FROM
-			// !F
-			//
-
-			if( Command == "from" || Command == "f" )
-			{
-				string Froms;
-				string Froms2;
-				string CNL;
-				string CN;
-				bool samecountry=true;
-
-				if (!Payload.empty())
-				{
-					CGamePlayer *LastMatch = NULL;
-					uint32_t Matches = GetPlayerFromNamePartial( Payload , &LastMatch );
-
-					if( Matches == 0 )
-						CONSOLE_Print("No matches");
-
-					else if( Matches == 1 )
-					{
-						Froms = LastMatch->GetName( );
-						Froms += ": (";
-						CN = LastMatch->GetCountry();
-						Froms += CN;
-						Froms += ")";
-						SendAllChat(Froms);
-					}
-					else
-						CONSOLE_Print("Found more than one match");
-					return HideCommand;
-				}
-
-				for( vector<CGamePlayer *> :: iterator i = m_Players.begin( ); i != m_Players.end( ); i++ )
-				{
-					// we reverse the byte order on the IP because it's stored in network byte order
-					
-					Froms2 += (*i)->GetName( );
-					Froms += (*i)->GetName( );
-					Froms += ": (";
-					CN = (*i)->GetCountry();
-//					CN = m_GHost->m_DB->FromCheck( UTIL_ByteArrayToUInt32( (*i)->GetExternalIP( ), true ) );
-					Froms += CN;
-					Froms += ")";
-
-					if (CNL=="")
-						CNL=CN;
-					else 
-					if (CN!=CNL)
-						samecountry=false;
-
-					if( i != m_Players.end( ) - 1 )
-					{
-						Froms += ", ";
-						Froms2 += ", ";
-					}
-				}
-				Froms2 += " are all from ("+CNL+")";
-
-				if (samecountry)
-					SendAllChat( Froms2 );
-				else
-					SendAllChat( Froms );
-			}
-
 			//
 			// !SILENCE
 			//
@@ -4079,7 +4013,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 
 			if( Command == "holds" && !Payload.empty( ) && !m_GameLoading && !m_GameLoaded )
 			{
-				// hold as many players as specified, e.g. "Varlock 2 Kilranin 4" holds players "Gen" and "Kilranin"
+				// hold as many players as specified, e.g. "Gen 2 Kilranin 4" holds players "Gen" and "Kilranin"
 
 				stringstream SS;
 				SS << Payload;
@@ -4151,7 +4085,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 
 			if( Command == "unhold" && !Payload.empty( ) && !m_GameLoading && !m_GameLoaded )
 			{
-				// unhold as many players as specified, e.g. "Varlock Kilranin" unholds players "Gen" and "Kilranin"
+				// unhold as many players as specified, e.g. "Gen Kilranin" unholds players "Gen" and "Kilranin"
 
 				stringstream SS;
 				SS << Payload;
@@ -4216,7 +4150,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 
 
 	// nobody can kick a rootadmin
-					if (isRootAdmin)
+					if (isRootAdmin || LastMatch->GetName()==m_DefaultOwner)
 					{
 						SendChat( player->GetPID(), "You can't kick an owner or rootadmin!");
 						return HideCommand;
@@ -4383,12 +4317,15 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 							SendChat( player->GetPID(), "You can't kick a rootadmin!");
 							return HideCommand;
 						}
-						if (isAdmin && !(IsOwner(User) || RootAdminCheck))
+						if (isAdmin && !((IsOwner(User) && User == m_DefaultOwner) || RootAdminCheck))
 						{
 							SendChat( player->GetPID(), "You can't kick an admin!");
 							return HideCommand;
-						} else
-						OpenSlot( (unsigned char)( SID - 1 ), true );
+						} else {
+							OpenSlot( (unsigned char)( SID - 1 ), true );
+							if( m_Slots[SID-1].GetSlotStatus( ) == SLOTSTATUS_OCCUPIED && m_Slots[SID-1].GetComputer( ) == 1 )
+							SendAllChat("You have closed computer slot, type !comp "+ Payload +" to make it a comp again");
+							}
 					}
 				}
 			}
@@ -4406,34 +4343,6 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 				}
 
 				OpenAllSlots( );
-			}
-
-			//
-			// !OWNER (set game owner)
-			//
-
-			if( Command == "owner" )
-			{
-				if( RootAdminCheck || IsOwner( User ) || (!GetPlayerFromName( m_OwnerName, false ) && m_OwnerJoined))
-				{
-					if( !Payload.empty( ) )
-					{
-						string sUser = Payload;
-						CGamePlayer *LastMatch = NULL;
-						uint32_t Matches = GetPlayerFromNamePartial( Payload , &LastMatch );
-						if (Matches == 1)
-							sUser = LastMatch->GetName();
-						SendAllChat( m_GHost->m_Language->SettingGameOwnerTo( sUser ) );
-						m_OwnerName = sUser;
-					}
-					else
-					{
-						SendAllChat( m_GHost->m_Language->SettingGameOwnerTo( User ) );
-						m_OwnerName = User;
-					}
-				}
-				else
-					SendAllChat( m_GHost->m_Language->UnableToSetGameOwner( m_OwnerName ) );
 			}
 
 			//
@@ -4727,7 +4636,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 			//
 			// !PUB (rehost as public game)
 			//
-
+			if(User==m_DefaultOwner || (User!=m_DefaultOwner && !IsOwner(User)))
 			if( Command == "pub" && !m_CountDownStarted && !m_SaveGame )
 			{
 				if (!CMDCheck(CMD_host, AdminAccess))
@@ -4896,7 +4805,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 					// we also send 12 for SlotsOpen because Warcraft 3 assumes there's always at least one player in the game (the host)
 					// so if we try to send accurate numbers it'll always be off by one and results in Warcraft 3 assuming the game is full when it still needs one more player
 					// the easiest solution is to simply send 12 for both so the game will always show up as (1/12) players
-	
+
 
 					// construct the correct W3GS_GAMEINFO packet
 
@@ -5240,7 +5149,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 								return HideCommand;
 							}
 
-							if (isAdmin && !(IsOwner(User) || RootAdminCheck))
+							if (isAdmin && !((IsOwner(User) && User == m_DefaultOwner) || RootAdminCheck))
 							{
 								SendChat( player->GetPID(), "You can't swap an admin!");
 								return HideCommand;
@@ -5487,13 +5396,524 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 				HideCommand = true;
 			}
 		}
-		else
-		{
+		else{
 			CONSOLE_Print( "[GAME: " + m_GameName + "] admin command ignored, the game is locked" );
 			SendChat( player, m_GHost->m_Language->TheGameIsLocked( ) );
 		}
+		/*********************
+		* OWNER COMMANDS     *
+		*********************/
+		// !a, !as, !close, !closeall, !open, !openall, !comp, !holds, !hold, !unhold, !start, !startn. It's helpful for lobby control, we don't allow a sudden ending of the game by !end, no such command and no ingame command in here.
+		if( !RootAdminCheck && User != m_DefaultOwner )
+		if( !m_Locked || IsOwner( User ) )
+		{
+			//
+			// !ABORT (abort countdown)
+			// !A
+			//
+
+			// we use "!a" as an alias for abort because you don't have much time to abort the countdown so it's useful for the abort command to be easy to type
+
+			if( ( Command == "abort" || Command == "a" ) && m_CountDownStarted && !m_GameLoading && !m_GameLoaded && !m_NormalCountdown )
+			{
+				SendAllChat( m_GHost->m_Language->CountDownAborted( ) );
+				m_CountDownStarted = false;
+			}
+			//
+			// !AUTOSTART
+			//
+
+			if( ( Command == "autostart" || Command == "as" ) && !m_CountDownStarted )
+			{
+				if (m_GHost->m_onlyownerscanstart)
+					if ((!IsOwner( User) && GetPlayerFromName(m_OwnerName, false)) && !RootAdminCheck )
+					{
+						SendChat( player->GetPID(), "Only the owner can start the game.");
+						return HideCommand;
+					}
+
+				if( Payload.empty( ) || Payload == "off" )
+				{
+					SendAllChat( m_GHost->m_Language->AutoStartDisabled( ) );
+					m_AutoStartPlayers = 0;
+				}
+				else
+				{
+					uint32_t AutoStartPlayers = UTIL_ToUInt32( Payload );
+
+					if( AutoStartPlayers != 0 )
+					{
+						SendAllChat( m_GHost->m_Language->AutoStartEnabled( UTIL_ToString( AutoStartPlayers ) ) );
+						m_AutoStartPlayers = AutoStartPlayers;
+					}
+				}
+			}
+			//
+			// !CLOSE (close slot)
+			//
+
+			if( Command == "close" && !Payload.empty( ) && !m_GameLoading && !m_GameLoaded )
+			{
+				if (!CMDCheck(CMD_close, AdminAccess))
+				{
+					SendChat(player->GetPID(), m_GHost->m_Language->YouDontHaveAccessToThatCommand( ));
+					return HideCommand;
+				}
+				// close as many slots as specified, e.g. "5 10" closes slots 5 and 10
+
+				stringstream SS;
+				SS << Payload;
+
+				while( !SS.eof( ) )
+				{
+					uint32_t SID;
+					SS >> SID;
+
+					if( SS.fail( ) )
+					{
+						CONSOLE_Print( "[GAME: " + m_GameName + "] bad input to close command" );
+						break;
+					}
+					else
+					{
+						bool isAdmin = false;
+						CGamePlayer *Player = GetPlayerFromSID( SID - 1 );
+						if (Player)
+						{
+							if (IsAdmin(Player->GetName()) || IsRootAdmin(Player->GetName()))
+								isAdmin = true;
+						}
+						if (isAdmin && !(Player->GetName()==m_DefaultOwner || RootAdminCheck))
+						{
+							SendChat( player->GetPID(), "You can't kick an admin!");
+							return HideCommand;
+						} else {							
+							CloseSlot( (unsigned char)( SID - 1 ), true );
+							if( m_Slots[SID-1].GetSlotStatus( ) == SLOTSTATUS_OCCUPIED && m_Slots[SID-1].GetComputer( ) == 1 )
+							SendAllChat("You have closed computer slot, type !comp "+ Payload +" to make it a comp again");
+							}
+					}
+				}
+			}
+
+			//
+			// !CLOSEALL
+			//
+
+			if( Command == "closeall" && !m_GameLoading && !m_GameLoaded )
+			{
+				if (!CMDCheck(CMD_close, AdminAccess))
+				{
+					SendChat(player->GetPID(), m_GHost->m_Language->YouDontHaveAccessToThatCommand( ));
+					return HideCommand;
+				}
+				CloseAllSlots( );
+			}
+
+			//
+			// !COMP (computer slot)
+			//
+
+			if( Command == "comp" && !Payload.empty( ) && !m_GameLoading && !m_GameLoaded && !m_SaveGame )
+			{
+				// extract the slot and the skill
+				// e.g. "1 2" -> slot: "1", skill: "2"
+
+				uint32_t Slot;
+				uint32_t Skill = 1;
+				stringstream SS;
+				SS << Payload;
+				SS >> Slot;
+
+				if( SS.fail( ) )
+					CONSOLE_Print( "[GAME: " + m_GameName + "] bad input #1 to comp command" );
+				else
+				{
+					if( !SS.eof( ) )
+						SS >> Skill;
+
+					if( SS.fail( ) )
+						CONSOLE_Print( "[GAME: " + m_GameName + "] bad input #2 to comp command" );
+					else
+						ComputerSlot( (unsigned char)( Slot - 1 ), (unsigned char)Skill, true );
+				}
+			}
+			//
+			// !FAKEPLAYER
+			//
+
+			if( ( Command == "fakeplayer" || Command == "fp" ) && !m_CountDownStarted )
+				CreateFakePlayer( );
+				
+			//
+			// !DELFAKE
+			//
+				
+			if( ( Command == "deletefake" || Command == "deletefakes" || Command == "df" || Command == "delfakes" || Command == "delfake" ) && m_FakePlayers.size( ) && !m_CountDownStarted )
+				DeleteFakePlayer( );
+				
+			//
+			// !HCL
+			//
+
+			if( Command == "hcl" && !m_CountDownStarted )
+			{
+
+				if (m_GHost->m_onlyownerscanstart && !Payload.empty( ))
+					if ((!IsOwner( User) && GetPlayerFromName(m_OwnerName, false)) && !RootAdminCheck )
+					{
+						SendChat( player->GetPID(), "Only the owner can change HCL.");
+						return HideCommand;
+					}
+
+				if (BluePlayer && AdminAccess==m_GHost->m_OwnerAccess)
+					if (!m_GHost->m_BlueCanHCL)
+						return HideCommand;
+				if( !Payload.empty( ) )
+				{
+					if( Payload.size( ) <= m_Slots.size( ) )
+					{
+						string HCLChars = "abcdefghijklmnopqrstuvwxyz0123456789 -=,.";
+
+						if( Payload.find_first_not_of( HCLChars ) == string :: npos )
+						{
+							m_HCLCommandString = Payload;
+							SendAllChat( m_GHost->m_Language->SettingHCL( m_HCLCommandString ) );
+						}
+						else
+							SendAllChat( m_GHost->m_Language->UnableToSetHCLInvalid( ) );
+					}
+					else
+						SendAllChat( m_GHost->m_Language->UnableToSetHCLTooLong( ) );
+				}
+				else
+					SendAllChat( m_GHost->m_Language->TheHCLIs( m_HCLCommandString ) );
+			}
+			//
+			// !HOLDS (hold a specified slot for someone)
+			//
+
+			if( Command == "holds" && !Payload.empty( ) && !m_GameLoading && !m_GameLoaded )
+			{
+				// hold as many players as specified, e.g. "Varlock 2 Kilranin 4" holds players "Gen" and "Kilranin"
+
+				stringstream SS;
+				SS << Payload;
+
+				while( !SS.eof( ) )
+				{
+					string HoldName;
+					SS >> HoldName;
+
+					if( SS.fail( ) )
+					{
+						CONSOLE_Print( "[GAME: " + m_GameName + "] bad input to holds command" );
+						break;
+					}
+					else
+					{
+						uint32_t HoldNumber;
+						unsigned char HoldNr;
+						SS >> HoldNumber;
+						if ( SS.fail ( ) )
+						{
+							CONSOLE_Print( "[GAME: " + m_GameName + "] bad input to holds command" );
+							break;
+						}
+						else
+						{
+							if (HoldNumber>m_Slots.size())
+								HoldNumber = m_Slots.size();
+							HoldNr=(unsigned char)( HoldNumber - 1 );
+							SendAllChat( m_GHost->m_Language->AddedPlayerToTheHoldList( HoldName ) );
+							AddToReserved( HoldName, HoldNr );
+						}
+					}
+				}
+			}
+
+			//
+			// !HOLD (hold a slot for someone)
+			//
+
+			if( Command == "hold" && !Payload.empty( ) && !m_GameLoading && !m_GameLoaded )
+			{
+				// hold as many players as specified, e.g. "Gen Kilranin" holds players "Gen" and "Kilranin"
+
+				stringstream SS;
+				SS << Payload;
+
+				while( !SS.eof( ) )
+				{
+					string HoldName;
+					SS >> HoldName;
+
+					if( SS.fail( ) )
+					{
+						CONSOLE_Print( "[GAME: " + m_GameName + "] bad input to hold command" );
+						break;
+					}
+					else
+					{
+						SendAllChat( m_GHost->m_Language->AddedPlayerToTheHoldList( HoldName ) );
+						AddToReserved( HoldName, 255 );
+					}
+				}
+			}
+
+			//
+			// !UNHOLD (unhold a slot for someone)
+			//
+
+			if( Command == "unhold" && !Payload.empty( ) && !m_GameLoading && !m_GameLoaded )
+			{
+				// unhold as many players as specified, e.g. "Varlock Kilranin" unholds players "Gen" and "Kilranin"
+
+				stringstream SS;
+				SS << Payload;
+
+				while( !SS.eof( ) )
+				{
+					string HoldName;
+					SS >> HoldName;
+
+					if( SS.fail( ) )
+					{
+						CONSOLE_Print( "[GAME: " + m_GameName + "] bad input to hold command" );
+						break;
+					}
+					else
+					{
+						SendAllChat( "Removed " + HoldName + " from hold list" );
+						DelFromReserved( HoldName);
+					}
+				}
+			}
+			//
+			// !OPEN (open slot)
+			//
+
+			if( Command == "open" && !Payload.empty( ) && !m_GameLoading && !m_GameLoaded )
+			{
+				if (!CMDCheck(CMD_open, AdminAccess))
+				{
+					SendChat(player->GetPID(), m_GHost->m_Language->YouDontHaveAccessToThatCommand( ));
+					return HideCommand;
+				}
+
+				// open as many slots as specified, e.g. "5 10" opens slots 5 and 10
+
+				stringstream SS;
+				SS << Payload;
+
+				while( !SS.eof( ) )
+				{
+					uint32_t SID;
+					SS >> SID;
+
+					if( SS.fail( ) )
+					{
+						CONSOLE_Print( "[GAME: " + m_GameName + "] bad input to open command" );
+						break;
+					}
+					else
+					{
+						bool isAdmin = false;
+						bool isRootAdmin = false;
+						CGamePlayer *Player = GetPlayerFromSID( SID - 1 );
+						if (Player)
+						{
+							if (IsAdmin(Player->GetName()) || IsRootAdmin(Player->GetName()))
+								isAdmin = true;
+							if (IsRootAdmin(Player->GetName()))
+								isRootAdmin = true;
+						}
+						if (isRootAdmin)
+						{
+							SendChat( player->GetPID(), "You can't kick a rootadmin!");
+							return HideCommand;
+						}
+						if (isAdmin && !(Player->GetName()==m_DefaultOwner || RootAdminCheck))
+						{
+							SendChat( player->GetPID(), "You can't kick an admin!");
+							return HideCommand;
+						} else {
+							OpenSlot( (unsigned char)( SID - 1 ), true );
+							if( m_Slots[SID-1].GetSlotStatus( ) == SLOTSTATUS_OCCUPIED && m_Slots[SID-1].GetComputer( ) == 1 )
+							SendAllChat("You have closed computer slot, type !comp "+ Payload +" to make it a comp again");
+							}
+					}
+				}
+			}
+
+			//
+			// !OPENALL
+			//
+
+			if( Command == "openall" && !m_GameLoading && !m_GameLoaded )
+			{
+				if (!CMDCheck(CMD_open, AdminAccess))
+				{
+					SendChat(player->GetPID(), m_GHost->m_Language->YouDontHaveAccessToThatCommand( ));
+					return HideCommand;
+				}
+				OpenAllSlots( );
+			}
+			
+			//
+			// !STARTN
+			//
+
+			if( Command == "startn" && !m_CountDownStarted )
+			{		
+				if (m_GHost->m_onlyownerscanstart)
+				if ((!IsOwner( User) && GetPlayerFromName(m_OwnerName, false)) && !RootAdminCheck )
+				{
+					SendChat( player->GetPID(), "Only the owner can start the game.");
+					return HideCommand;
+				}
+				
+				// skip checks and start the game right now
+
+				if (GetTicks()-m_LastLeaverTicks<1000)
+				{
+					SendAllChat( "Sure you want to start right now? Someone just left");
+					return HideCommand;
+				}
+
+				m_CountDownStarted = true;
+				m_CountDownCounter = 0;
+				if (m_NormalCountdown)
+				{
+					m_CountDownCounter = 5;
+					SendAll( m_Protocol->SEND_W3GS_COUNTDOWN_START( ));
+				}
+			}
+
+			//
+			// !START
+			//
+
+			if( Command == "start" && !m_CountDownStarted )
+			{
+				if (m_GHost->m_onlyownerscanstart)
+				if ((!IsOwner( User) && GetPlayerFromName(m_OwnerName, false)) && !RootAdminCheck )
+				{
+					SendChat( player->GetPID(), "Only the owner can start the game.");
+					return HideCommand;
+				}
+
+				// if the player sent "!start force" skip the checks and start the countdown
+				// otherwise check that the game is ready to start
+
+				if( Payload == "force" )
+					StartCountDown( true );
+				else
+				{
+					if( GetTicks( ) - m_LastPlayerLeaveTicks >= 2000 )
+						StartCountDown( false );
+					else
+						SendAllChat( m_GHost->m_Language->CountDownAbortedSomeoneLeftRecently( ) );
+				}
+			}
+			//
+			// !PUB (rehost as public game)
+			//
+			if(User!=m_DefaultOwner && IsOwner(User))
+			if( Command == "pub" && !m_CountDownStarted && !m_SaveGame )
+			{
+				SendChat(player->GetPID(), m_GHost->m_Language->YouDontHaveAccessToThatCommand( ));
+				SendAllChat("You must become an admin to unlock this feature. Request at http://thegenmaps.tk");
+				return HideCommand;		
+			}
+			//
+			// !SWAP (swap slots)
+			//
+
+			if( Command == "swap" && !Payload.empty( ) && !m_GameLoading && !m_GameLoaded )
+			{
+				if (!CMDCheck(CMD_swap, AdminAccess))
+				{
+					SendChat(player->GetPID(), m_GHost->m_Language->YouDontHaveAccessToThatCommand( ));
+					return HideCommand;
+				}
+				uint32_t SID1;
+				uint32_t SID2;
+				stringstream SS;
+				SS << Payload;
+				SS >> SID1;
+
+				if( SS.fail( ) )
+					CONSOLE_Print( "[GAME: " + m_GameName + "] bad input #1 to swap command" );
+				else
+				{
+					if( SS.eof( ) )
+						CONSOLE_Print( "[GAME: " + m_GameName + "] missing input #2 to swap command" );
+					else
+					{
+						SS >> SID2;
+
+						if( SS.fail( ) )
+							CONSOLE_Print( "[GAME: " + m_GameName + "] bad input #2 to swap command" );
+						else
+						{
+							bool isAdmin = false;
+							bool isRootAdmin = false;
+							bool sameteam = false;
+							if (SID1-1<m_Slots.size() && SID2-1<m_Slots.size())
+								sameteam = m_Slots[SID1-1].GetTeam() == m_Slots[SID2-1].GetTeam();
+							CGamePlayer *Player = GetPlayerFromSID( SID1 - 1 );
+							CGamePlayer *Player2 = GetPlayerFromSID( SID2 - 1 );
+							if (Player)
+								if (Player->GetName()!=User)
+									if (IsRootAdmin(Player->GetName()))
+										isRootAdmin = true;
+							if (Player2)
+								if (Player2->GetName()!=User)
+									if (IsRootAdmin(Player2->GetName()))
+										isRootAdmin = true;
+							if (m_GHost->m_onlyownerscanswapadmins && !sameteam)
+							{
+								CGamePlayer *Player = GetPlayerFromSID( SID1 - 1 );
+								CGamePlayer *Player2 = GetPlayerFromSID( SID2 - 1 );
+								if (Player)
+								{
+									if (IsAdmin(Player->GetName()) || IsRootAdmin(Player->GetName()))
+									if (Player->GetName()!=User)
+										isAdmin = true;
+								}
+								if (Player2)
+								{
+									if (IsAdmin(Player2->GetName()) || IsRootAdmin(Player2->GetName()))
+									if (Player2->GetName()!=User)
+										isAdmin = true;
+								}
+							}
+
+							if (isRootAdmin)
+							{
+								SendChat( player->GetPID(), "You can't swap a rootadmin!");
+								return HideCommand;
+							}
+
+							if (isAdmin && !(IsOwner(User) || RootAdminCheck))
+							{
+								SendChat( player->GetPID(), "You can't swap an admin!");
+								return HideCommand;
+							} else
+							SwapSlots( (unsigned char)( SID1 - 1 ), (unsigned char)( SID2 - 1 ) );
+						}
+					}
+				}
+			}
+		}
+		else		
+		{
+			CONSOLE_Print( "[GAME: " + m_GameName + "] " + User + "'s owner command [" + Command + "] with payload [" + Payload + "] ignored, the game is locked" );			
+			SendChat( player, m_GHost->m_Language->TheGameIsLocked( ) );
+		}
 	}
-	else
+	else 
 	{
 		if( !player->GetSpoofed( ) )
 			CONSOLE_Print( "[GAME: " + m_GameName + "] non-spoofchecked user [" + User + "] sent command [" + Command + "] with payload [" + Payload + "]" );
@@ -5504,23 +5924,127 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 		if (!m_GHost->m_NonAdminCommands)
 			return HideCommand;
 	}
-
+	
 	/*********************
 	* NON ADMIN COMMANDS *
 	*********************/
+	
+	//
+	// !OWNER (set game owner)
+	//
+		if( Command == "owner" || Command =="admin" )
+		{				
+			if( RootAdminCheck || IsOwner( User ) || (!GetPlayerFromName( m_OwnerName, false ) && m_OwnerJoined))
+			{					
+				if( !Payload.empty( ) )
+				{
+					string sUser = Payload;
+					CGamePlayer *LastMatch = NULL;
+					uint32_t Matches = GetPlayerFromNamePartial( Payload , &LastMatch );
+					if (Matches == 1)
+						sUser = LastMatch->GetName();
+					SendAllChat( m_GHost->m_Language->SettingGameOwnerTo( sUser ) );
+					CONSOLE_Print( "[GAME: " + m_GameName + "] Default Owner[" + m_DefaultOwner + "] set GameOwner to A Friend named [" + sUser + "]" );
+					m_OwnerName = sUser;
+				}
+				else if ( !AdminCheck && !RootAdminCheck && User != m_DefaultOwner )
+				{
+					SendAllChat( m_GHost->m_Language->SettingGameOwnerTo( User ) );
+					CONSOLE_Print( "[GAME: " + m_GameName + "] Default Owner[" + m_DefaultOwner + "] set GameOwner to player [" + User + "]" );
+					m_OwnerName = User;
+				}
+			}
+			else{
+				if ( m_GHost->m_NewOwner < 1 && !AdminCheck && !RootAdminCheck && User != m_DefaultOwner ){
+					m_GHost->m_NewOwner = 1;				
+					SendAllChat( m_GHost->m_Language->SettingGameOwnerTo( User ) );
+					CONSOLE_Print( "[GAME: " + m_GameName + "] Default Owner[" + m_DefaultOwner + "] set GameOwner to the Player [" + User + "]" );
+					m_OwnerName = User;
+				}
+				else{
+					SendAllChat( m_GHost->m_Language->UnableToSetGameOwner( m_OwnerName ) );
+					CONSOLE_Print( "[GAME: " + m_GameName + "] Default Owner[" + m_DefaultOwner + "] Setting GameOwner to [" + User + "] Failed!" );
+				}
+			}
+		}
+	//
+	// !FROM
+	// !F
+	//
 
+		if( Command == "from" || Command == "f" )
+		{
+			string Froms;
+			string Froms2;
+			string CNL;
+			string CN;
+			bool samecountry=true;
+
+			if (!Payload.empty())
+			{
+				CGamePlayer *LastMatch = NULL;
+				uint32_t Matches = GetPlayerFromNamePartial( Payload , &LastMatch );
+
+				if( Matches == 0 )
+					CONSOLE_Print("No matches");
+
+				else if( Matches == 1 )
+				{
+					Froms = LastMatch->GetName( );
+					Froms += ": (";
+					CN = LastMatch->GetCountry();
+					Froms += CN;
+					Froms += ")";
+					SendAllChat(Froms);
+				}
+				else
+					CONSOLE_Print("Found more than one match");
+				return HideCommand;
+			}
+
+			for( vector<CGamePlayer *> :: iterator i = m_Players.begin( ); i != m_Players.end( ); i++ )
+			{
+				// we reverse the byte order on the IP because it's stored in network byte order
+					
+				Froms2 += (*i)->GetName( );
+				Froms += (*i)->GetName( );
+				Froms += ": (";
+				CN = (*i)->GetCountry();
+//				CN = m_GHost->m_DB->FromCheck( UTIL_ByteArrayToUInt32( (*i)->GetExternalIP( ), true ) );
+				Froms += CN;
+				Froms += ")";
+
+				if (CNL=="")
+					CNL=CN;
+				else 
+				if (CN!=CNL)
+					samecountry=false;
+
+				if( i != m_Players.end( ) - 1 )
+				{
+					Froms += ", ";
+					Froms2 += ", ";
+				}
+			}
+			Froms2 += " are all from ("+CNL+")";
+			
+			if (samecountry)
+				SendAllChat( Froms2 );
+			else
+				SendAllChat( Froms );
+		}
 	//
 	// !PING
 	//
 
-	if( Command == "ping" )
+	if( Command == "ping" || Command == "p" )
 		SendChat( player,  player->GetNumPings( ) > 0 ? UTIL_ToString( player->GetPing( m_GHost->m_LCPings ) ) + "ms" : "N/A");
 
 	//
 	// !CHECKME
 	//
 
-	if( Command == "checkme" )
+	if( Command == "checkme" || Command == "sc" || Command == "cm" )
 		SendChat( player, m_GHost->m_Language->CheckedPlayer( User, player->GetNumPings( ) > 0 ? UTIL_ToString( player->GetPing( m_GHost->m_LCPings ) ) + "ms" : "N/A", m_GHost->m_DBLocal->FromCheck( UTIL_ByteArrayToUInt32( player->GetExternalIP( ), true ) ), AdminCheck || RootAdminCheck ? "Yes" : "No", IsOwner( User ) ? "Yes" : "No", player->GetSpoofed( ) ? "Yes" : "No", player->GetSpoofedRealm( ).empty( ) ? "N/A" : player->GetSpoofedRealm( ), player->GetReserved( ) ? "Yes" : "No" ) );
 
 
@@ -5621,7 +6145,8 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 	      {
 		if(m_StartedVoteStartTime == 0) { //need >minplayers or admin to START a votestart
 		  if (GetNumHumanPlayers() < m_GHost->m_VoteStartMinPlayers && !votestartAuth) { //need at least eight players to votestart
-		    SendChat( player, "You cannot use !votestart until there " + UTIL_ToString(m_GHost->m_VoteStartMinPlayers) + " or more players!" );
+			uint32_t MinPlayers = m_GHost->m_VoteStartMinPlayers;					
+		    SendChat( player, "You cannot use !votestart until there're " + UTIL_ToString(MinPlayers) +" or more players!" );
 		    return false;
 		  }
                   
@@ -5782,7 +6307,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 	else if( ( Command == "ready" || Command == "rdy" || Command == "go" ) && !m_CountDownStarted && !m_GameLoaded && !m_GameLoading && m_StartVoteStarted && !player->GetStartVote( ) )
 	{
 
-		uint32_t sVotesNeeded = 6;
+		uint32_t sVotesNeeded = 4;
 		uint32_t sVotes = 0;
 		player->SetStartVote( true );
 		SendAllChat( User + " is !ready to start the game." );		

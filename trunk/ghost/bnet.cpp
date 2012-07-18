@@ -1118,7 +1118,7 @@ void CBNET :: ProcessPackets( )
 			case CBNETProtocol :: SID_STARTADVEX3:
 				if( m_Protocol->RECEIVE_SID_STARTADVEX3( Packet->GetData( ) ) )
 				{
-					m_InChat = false;
+					m_InChat = false;					
 					m_GHost->EventBNETGameRefreshed( this );
 				}
 				else
@@ -6299,59 +6299,15 @@ bool CBNET :: IsRootAdmin( string name )
 
 CDBBan *CBNET :: IsBannedName( string name )
 {
-	transform( name.begin( ), name.end( ), name.begin( ), (int(*)(int))tolower );
+    transform( name.begin( ), name.end( ), name.begin( ), (int(*)(int))tolower );
 
-	// todotodo: optimize this - maybe use a map?
+    for( vector<CDBBan *> :: iterator i = m_Bans.begin( ); i != m_Bans.end( ); i++ )
+    {
+        if( (*i)->GetName( ) == name )
+            return *i;
+    }
 
-	// we're using a map to search the bans only from letter x to x+1 ex: 
-	// for name = rider, we'll search from r to t
-
-	uint32_t x, y;
-	vector<uint32_t> idx;
-	idx = m_BanlistIndexes;
-
-	unsigned char letter, letter2;
-	letter = name[0];
-
-	if (idx.size()>letter)
-	{
-		x = idx[letter];
-		y = m_Bans.size()-1;
-		letter2=letter+1;
-		if (idx.size()>letter2)
-		do 
-		{
-			y = idx[letter2];
-			letter2++;
-		} while (letter2<idx.size() && y==999999);
-		// x contains the index of the first ban beginning with the same letter as the name being checked
-		// y contains the index of the ban beginning with the next letter
-		if (y==999999)
-			y = m_Bans.size()-1;
-
-		// if x!=999999, there is at least a ban with the same letter
-		if (x!=999999)
-		{
-//				CONSOLE_Print("[GHOST] Searching bans from "+ m_Bans[x]->GetName()+ " through "+m_Bans[y]->GetName());
-//				for( vector<CDBBan *> :: iterator i = m_Bans.begin()+x; i != m_Bans.begin()+y; i++ )
-			for(uint32_t i=x; i<=y; i++)
-			{	
-				if (m_Bans[i]->GetName() == name)
-					return m_Bans[i];
-
-			}
-		}
-	} 
-
-/*
-	for( vector<CDBBan *> :: iterator i = m_Bans.begin( ); i != m_Bans.end( ); i++ )
-	{
-		if( (*i)->GetName( ) == name )
-			return *i;
-	}
-*/
-
-	return NULL;
+    return NULL;
 }
 
 CDBBan *CBNET :: IsBannedIP( string ip )

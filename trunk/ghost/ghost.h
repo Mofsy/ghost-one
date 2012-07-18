@@ -154,7 +154,7 @@ public:
 	string m_AutoHostMapCFG;				// the map config to auto host with
 	string m_AutoHostOwner;
 	string m_AutoHostServer;
-	uint32_t m_AutoHostMaximumGames;		// maximum number of games to auto host
+	uint32_t m_AutoHostMaximumGames;		// maximum number of games to auto host	
 	uint32_t m_AutoHostAutoStartPlayers;	// when using auto hosting auto start the game when this many players have joined
 	uint32_t m_LastAutoHostTime;			// GetTime when the last auto host was attempted
 	bool m_AutoHostMatchMaking;
@@ -182,6 +182,7 @@ public:
 	bool m_HideIPAddresses;					// config value: hide IP addresses from players
 	bool m_CheckMultipleIPUsage;			// config value: check for multiple IP address usage
 	uint32_t m_SpoofChecks;					// config value: do automatic spoof checks or not
+	uint32_t m_NewOwner;					// config value: new owner in game
 	bool m_RequireSpoofChecks;				// config value: require spoof checks or not
 	bool m_RefreshMessages;					// config value: display refresh messages or not (by default)
 	bool m_AutoLock;						// config value: auto lock games when the owner is present
@@ -228,14 +229,15 @@ public:
 	uint32_t m_DenyIPUsageDuration;			// config value: time to deny due to high multiple IP usage
 	uint32_t m_DenyLoadDuration;			// config value: time to deny due to no load received
 	uint32_t m_PlayerBeforeStartPrintDelay; // config value: delay * 10s is the time between two WaitingForPlayersBeforeStart prints
-	uint32_t m_RehostPrintingDelay;			// config value: delay X times of rehost print should be not sent to prevent spamming in lobby
+	uint32_t m_RehostPrintingDelay;			// config value: delay X times of rehost print should be not sent to prevent spamming in lobby		
+	
 	uint32_t m_ActualRehostPrintingDelay;  // Counts the number of checks before printing again
-
 	bool m_UDPConsole;						// config value: console output redirected to UDP
 	bool m_Verbose;							// config value: show all info or just some
 	bool m_RelayChatCommands;				// config value: show/hide issued commands
-	bool m_BlueCanHCL;
+	bool m_BlueCanHCL;	
 	bool m_BlueIsOwner;
+	bool m_CustomName;
 	bool m_ReplaceBanWithWarn;
 	bool m_forceautohclindota;
 	bool m_PlaceAdminsHigherOnlyInDota;
@@ -455,7 +457,7 @@ public:
 	string m_UDPCommandSpoofTarget;     // the realm to send udp received commands to
 		
 	// Metal_Koola's attempts
-	bool m_dropifdesync;				// config value: Drop desynced players
+	bool m_dropifdesync;				// config value: Drop desynced players	
 	int m_CookieOffset;					// System used to remove need for bnet_bnlswardencookie. May need further optimization.
 };
 
