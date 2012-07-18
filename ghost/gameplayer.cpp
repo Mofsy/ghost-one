@@ -79,53 +79,8 @@ BYTEARRAY CPotentialPlayer :: GetExternalIP( )
 	{	
 		if( m_IncomingGarenaUser != NULL )
 			return GetGarenaIP( );
-		else
-			return m_Socket->GetIP( );
-		bool local=false;
-		IP=	m_Socket->GetIP( );
-		if (IP.size()>=2)
-		{
-			if (IP[0]==10 && IP[1]==0)
-				local=true;
-			if (IP[0]==10 && IP[1]==1)
-				local=true;
-			if (IP[0]==192 && IP[1]==168)
-				local=true;
-			if (IP[0]==169 && IP[1]==254)
-				local=true;
-			if (IP[0]==8 && IP[1]==0)
-				local=true;
-			if (IP[0]==5)
-				local=true;
-		}
-		if (local && m_Game->m_GHost->m_ExternalIP!="")
-		{
-			IP=UTIL_CreateByteArray(m_Game->m_GHost->m_ExternalIPL,true);
-		}
-		return IP;
-	}
-
-	return UTIL_CreateByteArray( Zeros, 4 );
-}
-
-string CPotentialPlayer :: GetExternalIPString( )
-{
-	BYTEARRAY IP;
-	string EIP;
-	if( m_Socket )
-	{
-		bool local=m_LAN;
-		if (!m_LANSet)
-		{	
-			if( m_IncomingGarenaUser != NULL ) 
-			{
-				BYTEARRAY GarenaIP = GetGarenaIP( );
-				return UTIL_ToString(GarenaIP[0]) + "." + UTIL_ToString(GarenaIP[1]) + "." + UTIL_ToString(GarenaIP[2]) + "." + UTIL_ToString(GarenaIP[3]);
-			} 	
-			else 
-			{
-				return m_Socket->GetIPString( );
-			}
+		else {
+			bool local=false;
 			IP=	m_Socket->GetIP( );
 			if (IP.size()>=2)
 			{
@@ -142,19 +97,60 @@ string CPotentialPlayer :: GetExternalIPString( )
 				if (IP[0]==5)
 					local=true;
 			}
-			if (UTIL_IsLocalIP(IP, m_Game->m_GHost->m_LocalAddresses))
-				local = true;
-			m_LANSet = true;
-			m_LAN = local;
+			if (local && m_Game->m_GHost->m_ExternalIP!="")
+			{
+				IP=UTIL_CreateByteArray(m_Game->m_GHost->m_ExternalIPL,true);
+			}
+			return IP;
 		}
-		EIP=m_Socket->GetIPString( );
-		if (local && m_Game->m_GHost->m_ExternalIP!="")
-		{
-			EIP=m_Game->m_GHost->m_ExternalIP;
-		}
-		return EIP;
 	}
 
+	return UTIL_CreateByteArray( Zeros, 4 );
+}
+
+string CPotentialPlayer :: GetExternalIPString( )
+{
+	BYTEARRAY IP;
+	string EIP;
+	if( m_Socket )
+	{
+		if( m_IncomingGarenaUser != NULL ) 
+		{
+			BYTEARRAY GarenaIP = GetGarenaIP( );
+			return UTIL_ToString(GarenaIP[0]) + "." + UTIL_ToString(GarenaIP[1]) + "." + UTIL_ToString(GarenaIP[2]) + "." + UTIL_ToString(GarenaIP[3]);
+		} else {	
+			bool local=m_LAN;
+			if (!m_LANSet)
+			{				
+				IP=	m_Socket->GetIP( );
+				if (IP.size()>=2)
+				{
+					if (IP[0]==10 && IP[1]==0)
+						local=true;
+					if (IP[0]==10 && IP[1]==1)
+						local=true;
+					if (IP[0]==192 && IP[1]==168)
+						local=true;
+					if (IP[0]==169 && IP[1]==254)
+						local=true;
+					if (IP[0]==8 && IP[1]==0)
+						local=true;
+					if (IP[0]==5)
+						local=true;
+				}
+				if (UTIL_IsLocalIP(IP, m_Game->m_GHost->m_LocalAddresses))
+					local = true;
+				m_LANSet = true;
+				m_LAN = local;
+			}
+			EIP=m_Socket->GetIPString( );
+			if (local && m_Game->m_GHost->m_ExternalIP!="")
+			{
+			EIP=m_Game->m_GHost->m_ExternalIP;
+			}
+			return EIP;
+		}
+	}
 	return string( );
 }
 
@@ -272,13 +268,13 @@ void CPotentialPlayer :: ProcessPackets( )
 }
 
 bool CGamePlayer :: IsSpammer( )
-{
-	if( m_LastMessages.size() < 6 )
+{	
+	if( m_LastMessages.size() < 7 )		
 		return false;
 
 	string message = m_LastMessages.front( );
 
-	//CONSOLE_Print("6 messages in queue: comparing %s", message.c_str( ) );
+	//CONSOLE_Print("7 messages in queue: comparing %s", message.c_str( ) );
 
 	for(list<string>::iterator i = m_LastMessages.begin( ); i != m_LastMessages.end( ); i++ )
 	{
@@ -295,9 +291,11 @@ bool CGamePlayer :: IsSpammer( )
 
 void CGamePlayer :: PushMessage( string message )
 {
-	if( m_LastMessages.size( ) >= 6)
-		m_LastMessages.pop_front( );
+	if( m_LastMessages.size( ) >= 7)
+		m_LastMessages.pop_front( );	
 	m_LastMessages.push_back(message);
+	if( m_LastMessages.size( ) == 6 )
+		m_Game->SendAllChat("Spam control detects a spammer [" + GetName( ) +"] will be KICKED for flooding");
 }
 
 void CPotentialPlayer :: Send( BYTEARRAY data )
