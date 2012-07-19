@@ -156,6 +156,7 @@ public:
 	string m_AutoHostServer;
 	uint32_t m_AutoHostMaximumGames;		// maximum number of games to auto host	
 	uint32_t m_AutoHostAutoStartPlayers;	// when using auto hosting auto start the game when this many players have joined
+	uint32_t m_BotAutoStartPlayers;			// use this variable to reset the number of ppls needed for autostart in autohosting game
 	uint32_t m_LastAutoHostTime;			// GetTime when the last auto host was attempted
 	bool m_AutoHostMatchMaking;
 	double m_AutoHostMinimumScore;
@@ -450,6 +451,8 @@ public:
 	void LoadIPToCountryData( );
 	void LoadIPToCountryDataOpt( );
 	void CreateGame( CMap *map, unsigned char gameState, bool saveGame, string gameName, string ownerName, string creatorName, string creatorServer, bool whisper );
+	CTCPServer *m_GameBroadcastersListener; // listening socket for game broadcasters
+	vector<CTCPSocket *> m_GameBroadcasters;// vector of sockets that broadcast the games
 	void DenyIP( string ip, uint32_t duration, string reason );
 	bool CheckDeny( string ip );
 	// UDPCommandSocket patch

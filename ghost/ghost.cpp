@@ -1862,7 +1862,8 @@ bool CGHost :: Update( unsigned long usecBlock )
 
 	// autohost	
 	if( !m_AutoHostGameName.empty( ) && m_AutoHostMaximumGames != 0 && m_AutoHostAutoStartPlayers != 0 && GetTime( ) - m_LastAutoHostTime >= 10 )
-	{
+	{		
+		m_AutoHostAutoStartPlayers = m_BotAutoStartPlayers;
 		// copy all the checks from CGHost :: CreateGame here because we don't want to spam the chat when there's an error
 		// instead we fail silently and try again soon		
 		if( !m_ExitingNice && m_Enabled && !m_CurrentGame && m_Games.size( ) < m_MaxGames && m_Games.size( ) < m_AutoHostMaximumGames && !m_AutoHostMap.empty( ) )
@@ -1881,12 +1882,17 @@ bool CGHost :: Update( unsigned long usecBlock )
 				int DPos = AutoHostMapStr.find("mapcfgs") ;
 				if (DPos!= string ::npos)				
 				AutoHostMapStr = AutoHostMapStr.substr(DPos+8);
-				string GameName = m_AutoHostGameName + " #" + UTIL_ToString( m_HostCounter );				
+				DPos = AutoHostMapStr.find(")") ;
+				if (DPos!= string ::npos)				
+				AutoHostMapStr = AutoHostMapStr.substr(DPos+1);
+				string GameName;
 				if( m_CustomName )				
-				if( AutoHostMapStr.size( ) < 28 ) //don't name mapcfgs too long, only 27 characters + " #10" (4 plus caractères)
 					GameName = AutoHostMapStr + " #" + UTIL_ToString( m_HostCounter );
 					
-				if( GameName.size( ) <= 31 )
+				else
+					GameName = m_AutoHostGameName + " #" + UTIL_ToString( m_HostCounter );				
+					
+				if( GameName.size( ) <= 31 ) //don't name it  too long, only 29 characters + " #10" (4 plus caractères)
 				{					
 					m_AutoHosted = true;
 					if ( m_NewOwner < 2 )
@@ -1901,11 +1907,13 @@ bool CGHost :: Update( unsigned long usecBlock )
 					if( m_CurrentGame )
 					{						
 						if( m_AutoHostAutoStartPlayers > m_CurrentGame->GetNumHumanPlayers( ) + m_CurrentGame->GetSlotsOpen( ) )
-							m_CurrentGame->SetAutoStartPlayers( m_CurrentGame->GetNumHumanPlayers( ) + m_CurrentGame->GetSlotsOpen( ) );
-							//fixed thanks to Gen's efforts & 0x6D48 & ukaf.b
-							
+							m_AutoHostAutoStartPlayers = m_CurrentGame->GetNumHumanPlayers( ) + m_CurrentGame->GetSlotsOpen( ) ;
+							//fixed thanks to Gen's efforts & 0x6D48 & ukaf.b							
 						else
-							m_CurrentGame->SetAutoStartPlayers( m_AutoHostAutoStartPlayers ); //use m_AutoHostAutoStartPlayers as it's pre-defined in ghost.cfg by bot_autohostautostartplayers
+							m_AutoHostAutoStartPlayers = m_BotAutoStartPlayers;
+							
+						m_CurrentGame->SetAutoStartPlayers( m_AutoHostAutoStartPlayers ); //use m_AutoHostAutoStartPlayers as it's pre-defined in ghost.cfg by bot_autohostautostartplayers
+						CONSOLE_Print( "[GHOST] will autostart game once " + UTIL_ToString(m_AutoHostAutoStartPlayers) + " players filled." );
 
 						if( m_AutoHostMatchMaking )
 						{
@@ -2000,12 +2008,8 @@ void CGHost :: EventBNETGameRefreshed( CBNET *bnet )
 {		
 	if(m_CurrentGame)
 	{
-		if ( m_RehostPrintingDelay <3 )
+		if ( m_RehostPrintingDelay <3 || m_RehostPrintingDelay == NULL )
 		m_RehostPrintingDelay = 4;
-		if ( m_RehostPrintingDelay >7 )
-		m_RehostPrintingDelay = 7;
-		if ( m_RehostPrintingDelay == NULL )
-		m_RehostPrintingDelay = 5;
 		
 		m_LastGameName = m_CurrentGame->GetGameName();
 		if(m_CurrentGame->m_Rehost)
@@ -2220,6 +2224,7 @@ void CGHost :: SetConfigs( CConfig *CFG )
 	m_BanMethod = CFG->GetInt( "bot_banmethod", 1 );
 	m_IPBlackListFile = CFG->GetString( "bot_ipblacklistfile", "ipblacklist.txt" );
 	m_RehostPrintingDelay = CFG->GetInt( "bot_rehostprintingdelay", 5 );
+	m_BotAutoStartPlayers = CFG->GetInt( "bot_autohostautostartplayers", 8 );
 	m_CustomName = CFG->GetInt( "bot_cfgname", 0 ) == 0 ? false : true; //Gen
 	m_LobbyTimeLimit = CFG->GetInt( "bot_lobbytimelimit", 111 );	
 	m_Latency = CFG->GetInt( "bot_latency", 100 );
@@ -2246,6 +2251,8 @@ void CGHost :: SetConfigs( CConfig *CFG )
 	m_MatchMakingMethod = CFG->GetInt( "bot_matchmakingmethod", 1 );
 	m_PlayerBeforeStartPrintDelay = CFG->GetInt( "bot_playerbeforestartprintdelay", 4 );	
 	m_ActualRehostPrintingDelay = 0;		
+	if ( m_PlayerBeforeStartPrintDelay < 3 )
+		m_PlayerBeforeStartPrintDelay = 3;			
 }
 
 void CGHost :: ExtractScripts( )
@@ -3740,6 +3747,7 @@ void CGHost :: ReloadConfig ()
 	m_UpdateDotaEloAfterGame = CFG->GetInt( "bot_updatedotaeloaftergame", 0 ) == 0 ? false : true;
 	m_UpdateDotaScoreAfterGame = CFG->GetInt( "bot_updatedotascoreaftergame", 1 ) == 0 ? false : true;	
 	m_AutoHostAutoStartPlayers = CFG->GetInt( "bot_autohostautostartplayers", 0 );
+	m_BotAutoStartPlayers = CFG->GetInt( "bot_autohostautostartplayers", 8 );
 	m_AutoHostAllowStart = CFG->GetInt( "bot_autohostallowstart", 0 ) == 0 ? false : true;
 	m_AutoHostLocal = CFG->GetInt( "bot_autohostlocal", 0 ) == 0 ? false : true;
 	m_AutoHostMaximumGames = CFG->GetInt( "bot_autohostmaximumgames", 0 );

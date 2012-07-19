@@ -164,7 +164,7 @@ private:
 	BYTEARRAY m_InternalIP;
 
 public:
-	CIncomingJoinPlayer( uint32_t nHostCounter, string nName, BYTEARRAY &nInternalIP );
+	CIncomingJoinPlayer( uint32_t nHostCounter, uint32_t nEntryKey, string nName, BYTEARRAY &nInternalIP );
 	~CIncomingJoinPlayer( );
 
 	uint32_t GetHostCounter( )	{ return m_HostCounter; }
