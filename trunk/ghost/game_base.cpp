@@ -730,7 +730,7 @@ bool CBaseGame :: Update( void *fd, void *send_fd )
 	// auto rehost if there was a refresh error in autohosted games
 
 	if( m_RefreshError && !m_CountDownStarted && m_GameState == GAME_PUBLIC && !m_GHost->m_AutoHostGameName.empty( ) && m_GHost->m_AutoHostMaximumGames != 0 && m_GHost->m_AutoHostAutoStartPlayers != 0 && m_AutoStartPlayers != 0 )
-	{
+	{		
 		// there's a slim chance that this isn't actually an autohosted game since there is no explicit autohost flag
 		// however, if autohosting is enabled and this game is public and this game is set to autostart, it's probably autohosted
 		// so rehost it using the current autohost game name
@@ -2715,9 +2715,26 @@ void CBaseGame :: EventPlayerJoined( CPotentialPlayer *potential, CIncomingJoinP
 
 	// we use an ID value of 0 to denote joining via LAN
 
-	if( HostCounterID != 0 )
+	if( HostCounterID == 0 )
 	{
-		for( vector<CBNET *> :: iterator i = m_GHost->m_BNETs.begin( ); i != m_GHost->m_BNETs.end( ); i++ )
+		// the player is pretending to join via LAN, which they might or might not be (i.e. it could be spoofed)
+		// however, we've been broadcasting a random entry key to the LAN
+		// if the player is really on the LAN they'll know the entry key, otherwise they won't
+		// or they're very lucky since it's a 32 bit number
+
+		if( joinPlayer->GetEntryKey( ) != m_EntryKey )
+		{
+			// oops!
+
+			CONSOLE_Print( "[GAME: " + m_GameName + "] player [" + joinPlayer->GetName( ) + "|" + potential->GetExternalIPString( ) + "] is trying to join the game over LAN but used an incorrect entry key" );
+			potential->Send( m_Protocol->SEND_W3GS_REJECTJOIN( REJECTJOIN_WRONGPASSWORD ) );
+			potential->SetDeleteMe( true );
+			return;
+		}
+	}
+	else
+	{
+                for( vector<CBNET *> :: iterator i = m_GHost->m_BNETs.begin( ); i != m_GHost->m_BNETs.end( ); ++i )
 		{
 			if( (*i)->GetHostCounterID( ) == HostCounterID )
 				JoinedRealm = (*i)->GetServer( );
@@ -3509,10 +3526,10 @@ void CBaseGame :: EventPlayerJoined( CPotentialPlayer *potential, CIncomingJoinP
 			if( (*i)->GetSocket( ) )
 			{								
 				s = Player->GetJoinedRealm( );
-				if ( s.find("eurobattle") != string::npos )
-					s = "EB";
-				else if ( JoinedRealm.find("AN") !=string::npos || JoinedRealm.find("an") !=string::npos || s.find("AN") != string::npos || s.find("an") != string::npos || s.find("Garena") != string::npos || s.find("garena") != string::npos || s=="LAN" )
+				if ( JoinedRealm.find("AN") !=string::npos || JoinedRealm.find("an") !=string::npos || s.find("AN") != string::npos || s.find("an") != string::npos || s.find("Garena") != string::npos || s.find("garena") != string::npos || s=="LAN" || s.size( )<3 )
 					s = "Ga";
+				else if ( s.find("eurobattle") != string::npos )
+					s = "EB";
 				else s = Player->GetJoinedRealm( ).substr( 0, 2 );
 				if( m_GHost->m_HideIPAddresses )
 					(*i)->Send( m_Protocol->SEND_W3GS_PLAYERINFO( Player->GetPID( ), ( "[" + s + "]" + Player->GetName( ) ).substr( 0, 14 ), BlankIP, BlankIP ) );
@@ -3522,10 +3539,10 @@ void CBaseGame :: EventPlayerJoined( CPotentialPlayer *potential, CIncomingJoinP
 
 			// send info about every other player to the new player
 			s = (*i)->GetJoinedRealm( );
-			if ( s.find("eurobattle") != string::npos )
-					s = "EB";
-			else if ( JoinedRealm.find("AN") !=string::npos || JoinedRealm.find("an") !=string::npos || s.find("AN") != string::npos || s.find("an") != string::npos || s.find("Garena") != string::npos || s.find("garena") != string::npos || s=="LAN" )
+			if ( JoinedRealm.find("AN") !=string::npos || JoinedRealm.find("an") !=string::npos || s.find("AN") != string::npos || s.find("an") != string::npos || s.find("Garena") != string::npos || s.find("garena") != string::npos || s=="LAN" || s.size( )<3 )
 					s = "Ga";
+			else if ( s.find("eurobattle") != string::npos )
+					s = "EB";			
 			else s = (*i)->GetJoinedRealm( ).substr( 0, 2 );
 			if( m_GHost->m_HideIPAddresses )
 				Player->Send( m_Protocol->SEND_W3GS_PLAYERINFO( (*i)->GetPID( ), ( "[" + s + "]" + (*i)->GetName( ) ).substr( 0, 14 ), BlankIP, BlankIP ) );
@@ -7731,7 +7748,7 @@ void CBaseGame :: StartCountDownAuto( bool requireSpoofChecks )
 			PNr = m_Team1+m_Team2+m_Team3+m_Team4;
 		if( PNr < m_AutoStartPlayers )
 		{
-			if(m_GHost->m_PlayerBeforeStartPrintDelay + 3 > m_ActualyPrintPlayerWaitingStartDelay)
+			if(m_GHost->m_PlayerBeforeStartPrintDelay > m_ActualyPrintPlayerWaitingStartDelay)
 			{
 				m_ActualyPrintPlayerWaitingStartDelay++;
 			}
