@@ -1887,11 +1887,13 @@ bool CGHost :: Update( unsigned long usecBlock )
 				AutoHostMapStr = AutoHostMapStr.substr(DPos+1);
 				string GameName;
 				if( m_CustomName )				
-					GameName = AutoHostMapStr + " #" + UTIL_ToString( m_HostCounter );
+					GameName = " " + AutoHostMapStr + " #" + UTIL_ToString( m_HostCounter );
 					
 				else
-					GameName = m_AutoHostGameName + " #" + UTIL_ToString( m_HostCounter );				
-					
+					GameName = " " + m_AutoHostGameName + " #" + UTIL_ToString( m_HostCounter );				
+				
+				if( GameName.size( ) > 31 )
+					GameName = GameName.substr(4,AutoHostMapCFGStr.size( ));
 				if( GameName.size( ) <= 31 ) //don't name it  too long, only 29 characters + " #10" (4 plus caract�res)
 				{					
 					m_AutoHosted = true;
