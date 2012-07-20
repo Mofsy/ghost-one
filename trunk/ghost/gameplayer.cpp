@@ -260,13 +260,39 @@ void CPotentialPlayer :: ProcessPackets( )
 				delete m_IncomingGarenaUser;
 				m_IncomingGarenaUser = m_Game->m_GHost->m_GCBIProtocol->RECEIVE_GCBI_INIT( Packet->GetData( ) );
 				CONSOLE_Print( "[GCBI] Garena user detected; userid=" + UTIL_ToString( m_IncomingGarenaUser->GetUserID( ) ) + ", roomid=" + UTIL_ToString( m_IncomingGarenaUser->GetRoomID( ) ) + ", experience=" + UTIL_ToString( m_IncomingGarenaUser->GetUserExp( ) ) + ", country=" + m_IncomingGarenaUser->GetCountryCode( ) );
+				uint32_t RoomID = m_IncomingGarenaUser->GetRoomID( ) ;
+				if (RoomID == 1179686)
+					m_RoomName = "Europe RPG Room 2";
+					else if (RoomID == 1179884)
+						m_RoomName = "Europe RPG Room 1";
+						else if (RoomID == 65933)
+							m_RoomName = "Europe RPG Room 3";
+							else if (RoomID == 1179883)
+								m_RoomName = "Europe RPG Room 4";
+								else if (RoomID == 65937)
+									m_RoomName = "Europe RPG Room 5";
+									else if (RoomID == 1048589)
+										m_RoomName = "Hero Defense 1";
+										else if (RoomID == 1048588)
+											m_RoomName = "Hero Defense 2";
+											else if (RoomID == 1048587)
+												m_RoomName = "Hero Defense 3";
+												else if (RoomID == 1048586)
+													m_RoomName = "Hero Defense 4";
+													else if (RoomID == 1048585)
+														m_RoomName = "Hero Defense 5";
+														else if (RoomID == 1048590)
+															m_RoomName = "Green TD 01";
+															else if (RoomID == 1114333)
+																m_RoomName = "Green TD 02";
+																else if (RoomID == 1114334)
+																	m_RoomName = "Green TD 03";
 			}
 		}
 
 		delete Packet;
 	}
 }
-
 bool CGamePlayer :: IsSpammer( )
 {	
 	if( m_LastMessages.size() < 7 )		

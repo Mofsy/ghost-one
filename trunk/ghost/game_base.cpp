@@ -917,7 +917,7 @@ bool CBaseGame :: Update( void *fd, void *send_fd )
 	
 	if ( !m_CountDownStarted && GetTime( ) - m_LastOwnerInfoShow >= 313 )
 	{
-		SendAllChat("Type !owner to gain control of lobby: !a, !as, !close, !closeall, !open, !openall, !comp, !holds, !hold, !unhold,  !startn");		
+		SendAllChat("Type !owner to gain control of lobby: !a, !as, !close, !closeall, !open, !openall, !holds, !hold, !unhold, !startn");		
 		m_LastOwnerInfoShow = GetTime( );
 	}
 	// end game countdown every 1000 ms
@@ -2347,26 +2347,38 @@ void CBaseGame :: SendWelcomeMessage( CGamePlayer *player )
 	}
 	
 	SendChat( player, " " );
+	SendChat( player, "=============================================================" );
+	
 //	SendChat( player, "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-" );
 	if (m_CountryCheck || m_CountryCheck2 || m_ProviderCheck || m_ProviderCheck2)
 	{	
 		string C1 = m_Countries;
 		string C2 = m_Countries2;
 		Replace(C1, "??", string());
-		Replace(C2, "??", string());
+		Replace(C2, "??", string());	
 		if (m_CountryCheck)
-			SendChat( player, "Allowed Countries = "+C1 );
+			SendChat( player,"=     Allowed Countries = "+C1 );
 		if (m_CountryCheck2 && !m_CountryCheck)
-			SendChat( player, "Denied Countries = "+C2 );
+			SendChat( player,"=     Denied Countries  = "+C2 );
 		if (m_ProviderCheck)
-			SendChat( player, "Allowed Providers = "+m_Providers );
+			SendChat( player,C3+"=     Allowed Providers = "+m_Providers);
 		if (m_ProviderCheck2)
-			SendChat( player, "Denied Providers = "+m_Providers2 );
+			SendChat( player,"=     Denied Providers  = "+m_Providers2);
+		}
 	}
 //	SendChat( player, "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-" );
 //	SendChat( player, "Owner: "+m_OwnerName+"    Game Name:     " + m_GameName );
-	if( !m_HCLCommandString.empty( ) )
-		SendChat( player, "     HCL Command String:  " + m_HCLCommandString );
+	if( !m_HCLCommandString.empty( ) )		
+		SendChat( player,"= $" + m_GameName + "$ autoHCL Command String:  " + m_HCLCommandString);
+	uint32_t N = m_GHost->m_AutoHostAutoStartPlayers;	
+	SendChat( player, "=            $AutoStarT$ once >= "+ UTIL_ToString(N) +" players filled");
+	SendChat( player, "=                                                           " );	
+	SendChat( player, "= (\\_       No admins here? To FORCE START:                 " );
+	SendChat( player, "= (_ \\ ( '>  Type !owner to gain control of lobby           " );
+	SendChat( player, "=   ) \\/_)= OR all should write !go (4 votes to startgame)  " );
+	SendChat( player, "=   (_(_ )_                                                 " );
+	SendChat( player, "=============================================================" );
+	SendChat( player, " " );
 
 }
 
@@ -3699,8 +3711,12 @@ void CBaseGame :: EventPlayerJoined( CPotentialPlayer *potential, CIncomingJoinP
 	}
 
 	// check for multiple IP usage
-	SendAllChat( "Player [" + joinPlayer->GetName( ) + "] has joined from [" + ( JoinedRealm == string( ) ? "LAN" : JoinedRealm ) + "]" );
-	CONSOLE_Print("[GAME: " + m_GameName + "] player [" + joinPlayer->GetName( ) + "(" + Player->GetExternalIPString( ) + "|" + From + ")] has joined from [" + ( JoinedRealm == string( ) ? "LAN" : JoinedRealm ) + "]" );
+	string Room;
+	if (JoinedRealm.find("LAN") != string::npos || JoinedRealm == "LAN" || JoinedRealm.size() < 3 )
+		Room=potential->GetRoomName( );
+	else Room=".";
+	SendAllChat( "Player [" + joinPlayer->GetName( ) + "] has joined from [" + ( JoinedRealm == string( ) ? "LAN" : JoinedRealm ) + "] "+ Room );
+	CONSOLE_Print("[GAME: " + m_GameName + "] player [" + joinPlayer->GetName( ) + "(" + Player->GetExternalIPString( ) + "|" + From + ")] has joined from [" + ( JoinedRealm == string( ) ? "LAN" : JoinedRealm ) + "] "+ Room );
 	if( m_GHost->m_CheckMultipleIPUsage )
 	{
 		string Others;

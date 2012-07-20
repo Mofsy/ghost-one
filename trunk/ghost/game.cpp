@@ -5404,7 +5404,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 			/**********************
 			* TEMP OWNER COMMANDS *
 			**********************/
-			// !a, !as, !close, !closeall, !open, !openall, !comp, !holds, !hold, !unhold, !start, !startn. It's helpful for lobby control, we don't allow a sudden ending of the game by !end, no such command and no ingame command in here.
+			// !a, !as, !close, !closeall, !open, !openall, !holds, !hold, !unhold, !start, !startn. It's helpful for lobby control, we don't allow a sudden ending of the game by !end, no such command and no ingame command in here.
 			if( !RootAdminCheck && User != m_DefaultOwner && IsOwner( User ) )
 			{				
 				//
