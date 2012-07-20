@@ -2361,10 +2361,9 @@ void CBaseGame :: SendWelcomeMessage( CGamePlayer *player )
 		if (m_CountryCheck2 && !m_CountryCheck)
 			SendChat( player,"=     Denied Countries  = "+C2 );
 		if (m_ProviderCheck)
-			SendChat( player,C3+"=     Allowed Providers = "+m_Providers);
+			SendChat( player,"=     Allowed Providers = "+m_Providers);
 		if (m_ProviderCheck2)
-			SendChat( player,"=     Denied Providers  = "+m_Providers2);
-		}
+			SendChat( player,"=     Denied Providers  = "+m_Providers2);		
 	}
 //	SendChat( player, "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-" );
 //	SendChat( player, "Owner: "+m_OwnerName+"    Game Name:     " + m_GameName );
