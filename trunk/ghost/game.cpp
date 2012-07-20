@@ -2653,15 +2653,14 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 								if (IsAdmin(Player->GetName()) || IsRootAdmin(Player->GetName()))
 									isAdmin = true;
 							}
+							else if ( !( m_Slots[SID-1].GetSlotStatus( ) == SLOTSTATUS_OPEN ) )
+								SendChat( player->GetPID(), "You have closed computer slot, type !comp "+ Payload +" to make it a comp again");
 							if (isAdmin && !((IsOwner(User) && User == m_DefaultOwner) || RootAdminCheck))
 							{
 								SendChat( player->GetPID(), "You can't kick an admin!");
 								return HideCommand;
-							} else {
+							} else 
 								CloseSlot( (unsigned char)( SID - 1 ), true );
-								if (!Player)
-									SendChat( player->GetPID(), "You have closed computer slot, type !comp "+ Payload +" to make it a comp again");
-								}
 						}
 					}
 				}
@@ -4313,6 +4312,9 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 								if (IsRootAdmin(Player->GetName()))
 									isRootAdmin = true;
 							}
+							else if (!( m_Slots[SID-1].GetSlotStatus( ) == SLOTSTATUS_CLOSED ) )
+									SendChat( player->GetPID(), "You have closed computer slot, type !comp "+ Payload +" to make it a comp again");
+							
 							if (isRootAdmin)
 							{
 								SendChat( player->GetPID(), "You can't kick a rootadmin!");
@@ -4322,11 +4324,8 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 							{
 								SendChat( player->GetPID(), "You can't kick an admin!");
 								return HideCommand;
-							} else {
-								OpenSlot( (unsigned char)( SID - 1 ), true );
-								if (!Player)
-									SendChat( player->GetPID(), "You have closed computer slot, type !comp "+ Payload +" to make it a comp again");
-								}
+							} else
+								OpenSlot( (unsigned char)( SID - 1 ), true );								
 						}
 					}
 				}
@@ -5482,7 +5481,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 							{
 								if (IsAdmin(Player->GetName()) || IsRootAdmin(Player->GetName()) || Player->GetName()==m_DefaultOwner)
 									isAdmin = true;
-							} else {							
+							} else if ( !( m_Slots[SID-1].GetSlotStatus( ) == SLOTSTATUS_OPEN ) ) {							
 								SendChat( player->GetPID(), "You can't kick a computer!");
 								return HideCommand;
 							}
@@ -5699,10 +5698,10 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 									isAdmin = true;
 								if (IsRootAdmin(Player->GetName()) || Player->GetName() == m_DefaultOwner)
 									isRootAdmin = true;
-							}	else	{
-								SendChat( player->GetPID(), "You can't kick a computer!");
-								return HideCommand;
-							}
+							}	else if ( !( m_Slots[SID-1].GetSlotStatus( ) == SLOTSTATUS_CLOSED ) ){
+									SendChat( player->GetPID(), "You can't kick a computer!");
+									return HideCommand;
+								}
 							if (isRootAdmin)
 							{
 								SendChat( player->GetPID(), "You can't kick a rootadmin!");
@@ -5837,14 +5836,22 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 									sameteam = m_Slots[SID1-1].GetTeam() == m_Slots[SID2-1].GetTeam();
 								CGamePlayer *Player = GetPlayerFromSID( SID1 - 1 );
 								CGamePlayer *Player2 = GetPlayerFromSID( SID2 - 1 );
-								if (Player)
+								if (Player){
 									if (Player->GetName()!=User)
 										if (IsRootAdmin(Player->GetName()))
 											isRootAdmin = true;
-								if (Player2)
+								}	else if (m_Slots[SID1-1].GetSlotStatus( ) == SLOTSTATUS_OCCUPIED)	{
+											SendChat( player->GetPID(), "You can't swap a computer!");
+											return HideCommand;
+										}
+								if (Player2){
 									if (Player2->GetName()!=User)
 										if (IsRootAdmin(Player2->GetName()))
 											isRootAdmin = true;
+								}	else if (m_Slots[SID2-1].GetSlotStatus( ) == SLOTSTATUS_OCCUPIED)	{
+											SendChat( player->GetPID(), "You can't swap a computer!");
+											return HideCommand;
+										}
 								if (m_GHost->m_onlyownerscanswapadmins && !sameteam)
 								{
 									CGamePlayer *Player = GetPlayerFromSID( SID1 - 1 );
@@ -5862,11 +5869,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 											isAdmin = true;
 									}
 								}
-								if (!(Player && Player2))
-								{
-									SendChat( player->GetPID(), "You can't swap a computer!");
-									return HideCommand;
-								}
+							
 								if (isRootAdmin)
 								{
 									SendChat( player->GetPID(), "You can't swap a rootadmin!");
