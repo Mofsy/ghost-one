@@ -4059,6 +4059,59 @@ string CGHost :: GetMars ()
 	m_MarsLast.push_back(m_Mars[0]);
 	return m_Mars[0];
 }
+string CGHost :: GetFPName ()
+{
+	if (m_FPNames.size()==0)
+		return string();
+	bool ok = true;
+	// delete the oldest message
+	if (m_FPNamesLast.size()>=m_FPNames.size() || m_FPNamesLast.size()>15)
+	if (m_FPNamesLast.size()>0)
+		m_FPNamesLast.erase(m_FPNamesLast.begin());
+	do
+	{
+		ok = true;
+		random_shuffle( m_FPNames.begin( ), m_FPNames.end( ) );
+		for (uint32_t i = 0; i<m_FPNamesLast.size(); i++)
+		{
+			if (m_FPNamesLast[i]==m_FPNames[0])
+			{
+				ok = false;
+				break;
+			}
+		}
+	} while (!ok);
+
+	m_FPNames.push_back(m_FPNames[0]);
+	return m_FPNames[0];
+}
+void CGHost :: ReadFP()
+{
+	string file = "fpnames.txt";
+	ifstream in;
+	in.open( file.c_str( ) );
+	m_FPNames.clear();
+	if( in.fail( ) )
+		CONSOLE_Print( "[GHOST] warning - unable to read file [" + file + "]" );
+	else
+	{
+		CONSOLE_Print( "[GHOST] loading file [" + file + "]" );
+		string Line;
+
+		while( !in.eof( ) )
+		{
+			getline( in, Line );
+
+			// ignore blank lines and comments
+
+			if( Line.empty( ) || Line[0] == '#' )
+				continue;
+			m_FPNames.push_back(Line);
+		}
+	}
+	in.close( );
+	srand((unsigned)time(0));
+}
 
 void CGHost :: ReadMars ()
 {

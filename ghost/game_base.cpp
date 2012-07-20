@@ -2194,7 +2194,13 @@ void CBaseGame :: SendFakePlayerInfo( CGamePlayer *player )
 
 	for( vector<unsigned char> :: iterator i = m_FakePlayers.begin( ); i != m_FakePlayers.end( ); ++i )
 	{
-		Send( player, m_Protocol->SEND_W3GS_PLAYERINFO( *i, "Troll[" + UTIL_ToString( *i ) + "]", IP, IP ) );
+		string s =m_GHost->GetFPName();
+		string t;
+		if (s.size()<=0){
+			s = "Wizard[";
+			t = "]";
+		}
+		Send( player, m_Protocol->SEND_W3GS_PLAYERINFO( *i, s + UTIL_ToString( *i ) + t, IP, IP ) );
 	}	
 }
 

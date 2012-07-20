@@ -264,6 +264,8 @@ public:
 	vector<string> m_Providers;				//
 	vector<string> m_Welcome;				// our welcome message
 	vector<string> m_ChannelWelcome;				// our welcome message
+	vector<string> m_FPNames;					// our fake player names
+	vector<string> m_FPNamesLast;					// our last fake player names
 	vector<string> m_Mars;					// our mars messages
 	vector<string> m_MarsLast;				// our last mars messages
 	uint32_t m_ChannelJoinTime;				// when we enter a channel
@@ -394,10 +396,12 @@ public:
 	string Commands(unsigned int idx);
 	bool CommandAllowedToShow( string c);
 	void ReadProviders();
-	void ReadWelcome();
+	void ReadWelcome();	
 	void ReadChannelWelcome();
 	void ReadMars();
 	string GetMars();
+	void ReadFP();
+	string GetFPName();
 	void SetTimerResolution();
 	void EndTimer();
 	void AdminGameMessage(string name, string message);
