@@ -1887,8 +1887,7 @@ bool CGHost :: Update( unsigned long usecBlock )
 				AutoHostMapStr = AutoHostMapStr.substr(DPos+1);
 				string GameName;
 				if( m_CustomName )				
-					GameName = " " + AutoHostMapStr + " #" + UTIL_ToString( m_HostCounter );
-					
+					GameName = " " + AutoHostMapStr + " #" + UTIL_ToString( m_HostCounter );					
 				else
 					GameName = " " + m_AutoHostGameName + " #" + UTIL_ToString( m_HostCounter );				
 				
@@ -2811,6 +2810,16 @@ void CGHost :: UDPCommands( string Message )
 	if (Command == "readwelcome")
 	{
 		ReadWelcome();
+	}
+	
+	if (Command == "readfp")
+	{
+		ReadFP();
+	}
+	
+	if (Command == "readroom")
+	{
+		ReadRoomData();
 	}
 
 	if (Command == "ping")
@@ -3950,6 +3959,8 @@ void CGHost :: ReloadConfig ()
 	ReadWelcome();
 	ReadChannelWelcome();
 	ReadMars();
+	ReadRoomData();
+	ReadFP();
 }
 
 void CGHost :: ReadChannelWelcome ()
@@ -4084,6 +4095,57 @@ string CGHost :: GetFPName ()
 
 	m_FPNames.push_back(m_FPNames[0]);
 	return m_FPNames[0];
+}
+string CGHost :: GetRoomName (string RoomID)
+{
+	string s;
+	bool ok = false;
+	int l = RoomID.size();
+	int DPos;
+	if (m_LanRoomName.size()==0)
+		return s=string();
+	else if (l>4)
+		for (uint32_t i = 0; i<m_LanRoomName.size(); i++)
+			{
+				{
+					DPos = m_LanRoomName[i].find(RoomID);
+					if (DPos!= string ::npos){
+						return s=m_LanRoomName[i].substr(DPos+l+2);
+						ok = true;
+						break;
+					}
+				}
+			}	
+	if (!ok)
+		return s=string(); //room matching that RoomID is not found
+	return s;
+}
+void CGHost :: ReadRoomData()
+{
+	string file = "rooms.txt";
+	ifstream in;
+	in.open( file.c_str( ) );
+	m_LanRoomName.clear();
+	if( in.fail( ) )
+		CONSOLE_Print( "[GHOST] warning - unable to read file [" + file + "]" );
+	else
+	{
+		CONSOLE_Print( "[GHOST] loading file [" + file + "]" );
+		string Line;
+
+		while( !in.eof( ) )
+		{
+			getline( in, Line );
+
+			// ignore blank lines and comments
+
+			if( Line.empty( ) || Line[0] == '#' )
+				continue;
+			m_LanRoomName.push_back(Line);
+		}
+	}
+	in.close( );
+	srand((unsigned)time(0));
 }
 void CGHost :: ReadFP()
 {

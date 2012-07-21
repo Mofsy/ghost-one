@@ -259,8 +259,10 @@ void CPotentialPlayer :: ProcessPackets( )
 			{
 				delete m_IncomingGarenaUser;
 				m_IncomingGarenaUser = m_Game->m_GHost->m_GCBIProtocol->RECEIVE_GCBI_INIT( Packet->GetData( ) );
-				CONSOLE_Print( "[GCBI] Garena user detected; userid=" + UTIL_ToString( m_IncomingGarenaUser->GetUserID( ) ) + ", roomid=" + UTIL_ToString( m_IncomingGarenaUser->GetRoomID( ) ) + ", experience=" + UTIL_ToString( m_IncomingGarenaUser->GetUserExp( ) ) + ", country=" + m_IncomingGarenaUser->GetCountryCode( ) );
-				uint32_t RoomID = m_IncomingGarenaUser->GetRoomID( ) ;
+				string RoomID = UTIL_ToString(m_IncomingGarenaUser->GetRoomID( ));
+				m_RoomName = m_Game->m_GHost->GetRoomName( string( RoomID.begin( ), RoomID.end( ) ) );
+				CONSOLE_Print( "[GCBI] Garena user detected; userid=" + UTIL_ToString( m_IncomingGarenaUser->GetUserID( ) ) + ", roomid=" + RoomID + ", RoomName=" + m_RoomName + ", experience=" + UTIL_ToString( m_IncomingGarenaUser->GetUserExp( ) ) + ", country=" + m_IncomingGarenaUser->GetCountryCode( ) );				
+/*				uint32_t RoomID = m_IncomingGarenaUser->GetRoomID( ) ;
 				if (RoomID == 1179686)
 					m_RoomName = "Europe RPG Room 2";
 					else if (RoomID == 1179884)
@@ -287,6 +289,7 @@ void CPotentialPlayer :: ProcessPackets( )
 																m_RoomName = "Green TD 02";
 																else if (RoomID == 1114334)
 																	m_RoomName = "Green TD 03";
+*/ /*See string m_RoomName; virtual string GetRoomName( )					{ return m_RoomName; } in gameplayer.h */
 			}
 		}
 

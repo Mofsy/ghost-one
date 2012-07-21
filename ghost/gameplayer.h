@@ -71,7 +71,7 @@ public:
 	virtual bool GetDeleteMe( )						{ return m_DeleteMe; }
 	virtual bool GetError( )						{ return m_Error; }
 	virtual string GetErrorString( )				{ return m_ErrorString; }
-	virtual string GetRoomName( )					{ return m_RoomName; }
+	virtual string GetGaRoomName( )					{ return m_RoomName; }
 	virtual CIncomingJoinPlayer *GetJoinPlayer( )	{ return m_IncomingJoinPlayer; }
 	virtual CIncomingGarenaUser *GetGarenaUser( )	{ return m_IncomingGarenaUser; }
  	virtual BYTEARRAY GetGarenaIP( );
