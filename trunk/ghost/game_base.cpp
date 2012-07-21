@@ -899,9 +899,9 @@ bool CBaseGame :: Update( void *fd, void *send_fd )
 		StartCountDownAuto( m_GHost->m_RequireSpoofChecks );
 		m_LastAutoStartTime = GetTime( );
 	}
-	// display player count info every 193 seconds, we prefer the prime numbers
+	// display player count info every 197 seconds, we prefer the prime numbers
 
-	if ( !m_CountDownStarted && GetTime( ) - m_LastInfoShow >= 193 )
+	if ( !m_CountDownStarted && GetTime( ) - m_LastInfoShow >= 197 )
 	{		
 		SendAllChat("If no admin & no owner in lobby, to start the game all should type !go. Tat ca cung bam !go de nhanh vao game.");
 		m_LastInfoShow = GetTime( );
@@ -913,11 +913,11 @@ bool CBaseGame :: Update( void *fd, void *send_fd )
 		SendAllChat("View game list in TheGenMaps.tk for PRO gaming exp. Join our Garena+ GroupID 56934.");		
 		m_LastGenInfoShow = GetTime( );
 	}
-	// display !owner every 313 seconds
+	// display !owner every 317 seconds
 	
-	if ( !m_CountDownStarted && GetTime( ) - m_LastOwnerInfoShow >= 313 )
+	if ( !m_CountDownStarted && GetTime( ) - m_LastOwnerInfoShow >= 317 )
 	{
-		SendAllChat("Type !owner to gain control of lobby: !a, !as, !close, !closeall, !open, !openall, !holds, !hold, !unhold, !startn");		
+		SendAllChat("Type !owner to gain control of lobby: !a, !as, !close, !closeall, !swap, !open, !openall, !holds, !hold, !unhold, !startn");		
 		m_LastOwnerInfoShow = GetTime( );
 	}
 	// end game countdown every 1000 ms
@@ -2196,7 +2196,7 @@ void CBaseGame :: SendFakePlayerInfo( CGamePlayer *player )
 	{
 		string s =m_GHost->GetFPName();
 		string t;
-		if (s.size()<=0){
+		if (s.size()<1){
 			s = "Wizard[";
 			t = "]";
 		}
@@ -3718,7 +3718,7 @@ void CBaseGame :: EventPlayerJoined( CPotentialPlayer *potential, CIncomingJoinP
 	// check for multiple IP usage
 	string Room;
 	if (JoinedRealm.find("LAN") != string::npos || JoinedRealm == "LAN" || JoinedRealm.size() < 3 )
-		Room=potential->GetRoomName( );
+		Room=potential->GetGaRoomName( );
 	else Room=".";
 	SendAllChat( "Player [" + joinPlayer->GetName( ) + "] has joined from [" + ( JoinedRealm == string( ) ? "LAN" : JoinedRealm ) + "] "+ Room );
 	CONSOLE_Print("[GAME: " + m_GameName + "] player [" + joinPlayer->GetName( ) + "(" + Player->GetExternalIPString( ) + "|" + From + ")] has joined from [" + ( JoinedRealm == string( ) ? "LAN" : JoinedRealm ) + "] "+ Room );
@@ -7943,8 +7943,13 @@ void CBaseGame :: CreateFakePlayer( )
 		IP.push_back( 0 );
 		IP.push_back( 0 );
 		IP.push_back( 0 );
-		
-		SendAll( m_Protocol->SEND_W3GS_PLAYERINFO( FakePlayerPID, "Troll[" + UTIL_ToString( FakePlayerPID ) + "]", IP, IP ) );
+		string s =m_GHost->GetFPName();
+		string t;
+		if (s.size()<1){
+			s = "Wizard[";
+			t = "]";
+		}
+		SendAll( m_Protocol->SEND_W3GS_PLAYERINFO( FakePlayerPID, s + UTIL_ToString( FakePlayerPID ) + t, IP, IP ) );
 		m_Slots[SID] = CGameSlot( FakePlayerPID, 100, SLOTSTATUS_OCCUPIED, 0, m_Slots[SID].GetTeam( ), m_Slots[SID].GetColour( ), m_Slots[SID].GetRace( ) );
 		m_FakePlayers.push_back( FakePlayerPID );
 		SendAllSlotInfo( );
