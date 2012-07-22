@@ -3195,7 +3195,14 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 				// !DELFAKE
 				//
 					
-				if( ( Command == "deletefake" || Command == "deletefakes" || Command == "df" || Command == "delfakes" || Command == "delfake" ) && m_FakePlayers.size( ) && !m_CountDownStarted )
+				if( ( Command == "deletefake" || Command == "df" || Command == "delfake" ) && m_FakePlayers.size( ) && !m_CountDownStarted )
+					DeleteAFakePlayer( );
+				
+				//
+				// !DELFAKES
+				//
+					
+				if( ( Command == "deletefakes" || Command == "dfs" || Command == "delfakes" ) && m_FakePlayers.size( ) && !m_CountDownStarted )
 					DeleteFakePlayer( );
 
 				//
@@ -5031,14 +5038,15 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 				//
 
 				if( Command == "startn" && !m_CountDownStarted )
-				{		
+				{
 					if (m_GHost->m_onlyownerscanstart)
 					if ((!IsOwner( User) && GetPlayerFromName(m_OwnerName, false)) && !RootAdminCheck )
 					{
 						SendChat( player->GetPID(), "Only the owner can start the game.");
 						return HideCommand;
 					}
-					
+					if(m_GHost->m_FakePlayersLobby && !m_FakePlayers.empty())					
+						DeleteFakePlayer();
 					// skip checks and start the game right now
 
 					if (GetTicks()-m_LastLeaverTicks<1000)
@@ -5061,14 +5069,15 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 				//
 
 				if( Command == "start" && !m_CountDownStarted )
-				{
+				{					
 					if (m_GHost->m_onlyownerscanstart)
 					if ((!IsOwner( User) && GetPlayerFromName(m_OwnerName, false)) && !RootAdminCheck )
 					{
 						SendChat( player->GetPID(), "Only the owner can start the game.");
 						return HideCommand;
 					}
-
+					if(m_GHost->m_FakePlayersLobby && !m_FakePlayers.empty())					
+						DeleteFakePlayer();
 					// if the player sent "!start force" skip the checks and start the countdown
 					// otherwise check that the game is ready to start
 
@@ -5403,7 +5412,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 			/**********************
 			* TEMP OWNER COMMANDS *
 			**********************/
-			// !a, !as, !close, !closeall, !swap, !open, !openall, !holds, !hold, !unhold, !start, !startn. It's helpful for lobby control, we don't allow a sudden ending of the game by !end, no such command and no ingame command in here.
+			// !a, !as, !close, !closeall, !fp, !df, !dfs, !swap, !open, !openall, !holds, !hold, !unhold, !start, !startn. It's helpful for lobby control, we don't allow a sudden ending of the game by !end, no such command and no ingame command in here.
 			if( !RootAdminCheck && User != m_DefaultOwner && IsOwner( User ) )
 			{				
 				//
@@ -5520,7 +5529,14 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 				// !DELFAKE
 				//
 					
-				if( ( Command == "deletefake" || Command == "deletefakes" || Command == "df" || Command == "delfakes" || Command == "delfake" ) && m_FakePlayers.size( ) && !m_CountDownStarted )
+				if( ( Command == "deletefake" || Command == "df" || Command == "delfake" ) && m_FakePlayers.size( ) && !m_CountDownStarted )
+					DeleteAFakePlayer( );
+				
+				//
+				// !DELFAKES
+				//
+					
+				if( ( Command == "deletefakes" || Command == "dfs" || Command == "delfakes" ) && m_FakePlayers.size( ) && !m_CountDownStarted )
 					DeleteFakePlayer( );
 					
 				//
@@ -5738,6 +5754,15 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 
 				if( Command == "startn" && !m_CountDownStarted )
 				{		
+					if(m_GHost->m_FakePlayersLobby && !m_FakePlayers.empty())					
+						DeleteFakePlayer();
+					ReCalculateTeams();
+					if (m_GetMapNumTeams==2)
+						if (m_Team1<1 || m_Team2<1)
+						{
+							SendAllChat("Both teams must contain at least one player!");
+							return HideCommand;
+						}
 					if (m_GHost->m_onlyownerscanstart)
 					if ((!IsOwner( User) && GetPlayerFromName(m_OwnerName, false)) && !RootAdminCheck )
 					{
@@ -5768,6 +5793,15 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 
 				if( Command == "start" && !m_CountDownStarted )
 				{
+					if(m_GHost->m_FakePlayersLobby && !(m_FakePlayers.empty()))					
+						DeleteFakePlayer();
+					ReCalculateTeams();
+					if (m_GetMapNumTeams==2)
+						if (m_Team1<1 || m_Team2<1)
+						{
+							SendAllChat("Both teams must contain at least one player!");
+							return HideCommand;
+						}
 					if (m_GHost->m_onlyownerscanstart)
 					if ((!IsOwner( User) && GetPlayerFromName(m_OwnerName, false)) && !RootAdminCheck )
 					{
@@ -6133,7 +6167,8 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 		  for( vector<CGamePlayer *> :: iterator i = m_Players.begin( ); i != m_Players.end( ); ++i )
 		    (*i)->SetStartVote( false );
 		  m_StartedVoteStartTime = GetTime();
-		  
+		  if(m_GHost->m_FakePlayersLobby && !(m_FakePlayers.empty()))					
+						DeleteFakePlayer();
 		  CONSOLE_Print( "[GAME: " + m_GameName + "] votestart started by player [" + User + "]" );
 		}
 		
@@ -6299,10 +6334,13 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 		}
 		SendAllChat( UTIL_ToString(sVotes) + "/" + UTIL_ToString( GetNumHumanPlayers( ) ) + " ppls are ready. " + UTIL_ToString(sVotesNeeded) + " votes needed to start game." );
 		
+		if(m_GHost->m_FakePlayersLobby && !(m_FakePlayers.empty()))					
+						DeleteFakePlayer();
+		
 		if( sVotes >= sVotesNeeded )
 		{
 			CONSOLE_Print ( "[GAME: " + m_GameName + "] Everybody is ready to start the game!" );
-			SendAllChat( "Everybody is !ready to start the game. Enjoy it." );
+			SendAllChat( "Everybody is !ready to start the game. Enjoy it." );			
 			StartCountDown( true );
 		}
 	}
@@ -6648,7 +6686,8 @@ for( vector<CGamePlayer *> :: iterator i = m_Players.begin( ); i != m_Players.en
 	{
 		// if the player sent "!start force" skip the checks and start the countdown
 		// otherwise check that the game is ready to start
-
+		if(m_GHost->m_FakePlayersLobby && !(m_FakePlayers.empty()))					
+						DeleteFakePlayer();
 		ReCalculateTeams();
 		if (m_Team1<1 || m_Team2<1)
 		{
@@ -6669,7 +6708,8 @@ for( vector<CGamePlayer *> :: iterator i = m_Players.begin( ); i != m_Players.en
 	if( (Command == "startn") && !m_CountDownStarted && m_GHost->m_AutoHostAllowStart && m_AutoStartPlayers>0 )
 	{
 		// skip checks and start the game right now
-
+		if(m_GHost->m_FakePlayersLobby && !(m_FakePlayers.empty()))					
+						DeleteFakePlayer();		
 		ReCalculateTeams();
 		if (m_Team1<1 || m_Team2<1)
 		{
@@ -6681,8 +6721,7 @@ for( vector<CGamePlayer *> :: iterator i = m_Players.begin( ); i != m_Players.en
 		{
 			SendAllChat( "Sure you want to start right now? Someone just left");
 			return HideCommand;
-		}
-
+		}		
 		m_CountDownStarted = true;
 		m_CountDownCounter = 0;
 	}

@@ -199,7 +199,7 @@ CBaseGame :: CBaseGame( CGHost *nGHost, CMap *nMap, CSaveGame *nSaveGame, uint16
 	m_Desynced = false;
 	m_Lagging = false;
 	m_EndGameTime = 0;
-	m_ShowRealSlotCount = m_GHost->m_ShowRealSlotCount;
+	m_ShowRealSlotCount = m_GHost->m_ShowRealSlotCount;	
 	m_SwitchTime = 0;
 	m_SwitchNr = 0;
 	m_Switched = false;
@@ -439,7 +439,10 @@ uint32_t CBaseGame :: GetSlotsOpen( )
 
 	return NumSlotsOpen;
 }
-
+uint32_t CBaseGame :: GetNumFakePlayers( )
+{
+	return m_FakePlayers.size( );
+}
 uint32_t CBaseGame :: GetNumPlayers( )
 {
 	return GetNumHumanPlayers( ) + m_FakePlayers.size( );
@@ -767,7 +770,6 @@ bool CBaseGame :: Update( void *fd, void *send_fd )
 
 		uint32_t slotstotal = m_Slots.size( );
 		uint32_t slotsopen = GetSlotsOpen();
-
 		for( vector<CBNET *> :: iterator i = m_GHost->m_BNETs.begin( ); i != m_GHost->m_BNETs.end( ); i++ )
 		{
 			// don't queue a game refresh message if the queue contains more than 1 packet because they're very low priority
@@ -917,7 +919,7 @@ bool CBaseGame :: Update( void *fd, void *send_fd )
 	
 	if ( !m_CountDownStarted && GetTime( ) - m_LastOwnerInfoShow >= 317 )
 	{
-		SendAllChat("Type !owner to gain control of lobby: !a, !as, !close, !closeall, !swap, !open, !openall, !holds, !hold, !unhold, !startn");		
+		SendAllChat("Type !owner to gain control of lobby: !a, !as, !fp, !dfs, !close, !closeall, !swap, !open, !openall, !holds, !hold, !unhold, !startn");
 		m_LastOwnerInfoShow = GetTime( );
 	}
 	// end game countdown every 1000 ms
@@ -1535,7 +1537,7 @@ bool CBaseGame :: Update( void *fd, void *send_fd )
 
 		// start the gameover timer if there's only one player left
 
-		if( m_Players.size( ) == 1 && m_FakePlayers.size( ) == 0 && m_GameOverTime == 0 && ( m_GameLoading || m_GameLoaded ) )
+		if( m_Players.size( ) == 1 && m_GameOverTime == 0 && ( m_GameLoading || m_GameLoaded ) )
 		{
 			CONSOLE_Print( "[GAME: " + m_GameName + "] gameover timer started (one player left)" );
 			m_GameOverTime = GetTime( );
@@ -2191,11 +2193,10 @@ void CBaseGame :: SendFakePlayerInfo( CGamePlayer *player )
 	IP.push_back( 0 );
 	IP.push_back( 0 );
 	IP.push_back( 0 );
-
 	for( vector<unsigned char> :: iterator i = m_FakePlayers.begin( ); i != m_FakePlayers.end( ); ++i )
 	{
-		string s =m_GHost->GetFPName();
 		string t;
+		string s = m_GHost->GetFPName();
 		if (s.size()<1){
 			s = "Wizard[";
 			t = "]";
@@ -2732,32 +2733,15 @@ void CBaseGame :: EventPlayerJoined( CPotentialPlayer *potential, CIncomingJoinP
 
 	// we use an ID value of 0 to denote joining via LAN
 
-	if( HostCounterID == 0 )
+	if( HostCounterID != 0 )
 	{
-		// the player is pretending to join via LAN, which they might or might not be (i.e. it could be spoofed)
-		// however, we've been broadcasting a random entry key to the LAN
-		// if the player is really on the LAN they'll know the entry key, otherwise they won't
-		// or they're very lucky since it's a 32 bit number
-
-		if( joinPlayer->GetEntryKey( ) != m_EntryKey )
-		{
-			// oops!
-
-			CONSOLE_Print( "[GAME: " + m_GameName + "] player [" + joinPlayer->GetName( ) + "|" + potential->GetExternalIPString( ) + "] is trying to join the game over LAN but used an incorrect entry key" );
-			potential->Send( m_Protocol->SEND_W3GS_REJECTJOIN( REJECTJOIN_WRONGPASSWORD ) );
-			potential->SetDeleteMe( true );
-			return;
-		}
-	}
-	else
-	{
-                for( vector<CBNET *> :: iterator i = m_GHost->m_BNETs.begin( ); i != m_GHost->m_BNETs.end( ); ++i )
+		for( vector<CBNET *> :: iterator i = m_GHost->m_BNETs.begin( ); i != m_GHost->m_BNETs.end( ); i++ )
 		{
 			if( (*i)->GetHostCounterID( ) == HostCounterID )
-				JoinedRealm = (*i)->GetServer( );
+			JoinedRealm = (*i)->GetServer( );
 		}
 	}
-
+	
 	// test if player is reserved/admin/safelisted
 
 	bool RootAdminCheck = false;
@@ -3413,6 +3397,9 @@ void CBaseGame :: EventPlayerJoined( CPotentialPlayer *potential, CIncomingJoinP
 	} else
 		ResetReservedSlot(joinPlayer->GetName());
 
+	//auto delete fake player(s)	
+	if ( GetSlotsOpen( ) < 2 && !m_FakePlayers.empty() && m_GHost->m_FakePlayersLobby )
+		DeleteAFakePlayer( );
 	// we have a slot for the new player
 	// make room for them by deleting the virtual host player if we have to
 
@@ -3663,7 +3650,7 @@ void CBaseGame :: EventPlayerJoined( CPotentialPlayer *potential, CIncomingJoinP
 	// update LastPlayerJoined
 
 	m_LastPlayerJoined = Player->GetPID();
-	m_LastPlayerJoinedTime = GetTime();
+	m_LastPlayerJoinedTime = GetTime();		
 
 	// pings are no longer updated / will be sent to GUI in 3 seconds
 	m_PingsUpdated = false;
@@ -4479,7 +4466,6 @@ void CBaseGame :: EventPlayerLeft( CGamePlayer *player, uint32_t reason )
 	if (show && !m_GameEnded)
 		m_GHost->UDPChatSend("|leaver "+UTIL_ToString(GameNr)+" "+player->GetName());
 
-
 	m_LastLeaverTicks = GetTicks();
 	player->SetDeleteMe( true );
 	if( reason == PLAYERLEAVE_GPROXY )
@@ -4508,6 +4494,32 @@ void CBaseGame :: EventPlayerLeft( CGamePlayer *player, uint32_t reason )
  
         m_GHost->m_DB->ThreadedBanAdd(" ",player->GetName( ), player->GetExternalIPString( ), "in lobby", "Autobot","DL and leave",2,0);
 	}
+	//auto insert fake player(s)
+	if ( m_GHost->m_FakePlayersLobby && GetSlotsOpen() > 2 && GetNumHumanPlayers( ) < 4 && !m_GameLoading && !m_GameLoaded )
+		CreateFakePlayer( );
+	
+	/*uint32_t b;
+	if (!m_GHost->m_FakePlayersLobby)
+		b=0;
+	else{
+		if ( GetNumHumanPlayers( ) < 3 )
+		{
+			if ( GetSlotsOpen() + GetNumPlayers() > 7 )
+			{
+				if (m_GetMapNumTeams < 2)
+					b = 4; // we allows only a maximum of 4 fakeplayers when it's a (>=8) game
+				else 
+					b = 3;
+			} else 	b = 3; // we allows only a maximum of 3 fakeplayers as to prevent a trash lobby
+		} else if ( GetNumHumanPlayers( ) < 4 )
+			b = 2; // we allows only a maximum of 2 fakeplayers as to prevent a trash lobby
+		if ( ( GetSlotsOpen() + GetNumPlayers() > 9 ) && m_GetMapNumTeams < 2 && GetNumHumanPlayers( ) < 4 )
+			b = 4; // we allows only a maximum of 5 fakeplayers when it's a (>=10) game
+	}
+	while ( b != 0 && GetSlotsOpen() > 2 && m_FakePlayers.size( ) < b  && GetNumHumanPlayers( ) < 4 && !m_GameLoading && !m_GameLoaded )
+		CreateFakePlayer( );*/
+		
+	// return m_OwnerName to DefaultOwner as the TEMP Owner left, reset NewOwner value to 0 meaning no TEMP Owner, so the !owner command will allow the player who has typed it become new TEMP Owner & set NewOwner=1 to again disable second player from becoming another TEMP owner by typing !owner
 	if (IsOwner(player->GetName())){
 		if ( m_GHost->m_NewOwner < 2 )
 			m_GHost->m_NewOwner = 0;
@@ -6277,6 +6289,23 @@ unsigned char CBaseGame :: GetHostPID( )
 	return 255;
 }
 
+unsigned char CBaseGame :: GetEmptySlotForFakePlayers( )
+{
+	if( m_Slots.size( ) > 255 )
+		return 255;
+
+		// look for an empty slot for a new fake player to occupy
+		// if reserved is true then we're willing to use closed or occupied slots as long as it wouldn't displace a player with a reserved slot
+
+		for( unsigned char i = m_Slots.size( ); i-- > 0 ; )
+		{
+			if( m_Slots[i].GetSlotStatus( ) == SLOTSTATUS_OPEN )
+				return i;
+		}
+
+	return 255;
+}
+
 unsigned char CBaseGame :: GetEmptySlot( bool reserved )
 {
 	if( m_Slots.size( ) > 255 )
@@ -6302,6 +6331,7 @@ unsigned char CBaseGame :: GetEmptySlot( bool reserved )
 		// look for an empty slot for a new player to occupy
 		// if reserved is true then we're willing to use closed or occupied slots as long as it wouldn't displace a player with a reserved slot
 
+		// for( unsigned char i = m_Slots.size( ); i-- > 0 ; )
 		for( unsigned char i = 0; i < m_Slots.size( ); i++ )
 		{
 			if( m_Slots[i].GetSlotStatus( ) == SLOTSTATUS_OPEN )
@@ -7928,9 +7958,10 @@ void CBaseGame :: CreateFakePlayer( )
 {
 	if( m_FakePlayers.size( ) > 10 )
 			return;
-
-	unsigned char SID = GetEmptySlot( false );
-
+	unsigned char SID;
+	do	{
+			SID = GetEmptySlotForFakePlayers( );
+	} while (SID==0);
 	if( SID < m_Slots.size( ) )
 	{
 		if( GetSlotsOccupied( ) >= m_Slots.size() - 1 )
@@ -7943,7 +7974,7 @@ void CBaseGame :: CreateFakePlayer( )
 		IP.push_back( 0 );
 		IP.push_back( 0 );
 		IP.push_back( 0 );
-		string s =m_GHost->GetFPName();
+		string s = m_GHost->GetFPName();
 		string t;
 		if (s.size()<1){
 			s = "Wizard[";
@@ -7954,6 +7985,49 @@ void CBaseGame :: CreateFakePlayer( )
 		m_FakePlayers.push_back( FakePlayerPID );
 		SendAllSlotInfo( );
 	}
+}
+
+void CBaseGame :: CreateInitialFakePlayers( )
+{
+	uint32_t b;
+	if ( GetNumHumanPlayers( ) < 3 )
+	{
+		if ( GetSlotsOpen() + GetNumPlayers() > 7 )
+		{
+			if (m_GetMapNumTeams < 2)
+				b = 4; // we allows only a maximum of 4 fakeplayers when it's a (>=8) game
+			else 
+				b = 3;
+		} 
+		else 	b = 3; // we allows only a maximum of 3 fakeplayers as to prevent a trash lobby
+	} 
+	else if ( GetNumHumanPlayers( ) < 4 )
+		b = 2; // we allows only a maximum of 2 fakeplayers as to prevent a trash lobby
+	if ( ( GetSlotsOpen() + GetNumPlayers() > 9 ) && m_GetMapNumTeams < 2 && GetNumHumanPlayers( ) < 4 )
+		b = 4; // we allows only a maximum of 4 fakeplayers when it's a (>=10) game
+	while ( GetSlotsOpen() > 2 && GetNumFakePlayers( ) < b  && GetNumHumanPlayers( ) < 4 )
+		CreateFakePlayer( );
+}
+
+void CBaseGame :: DeleteAFakePlayer( )
+{
+	if( m_FakePlayers.empty( ) )
+		return;
+
+	for( unsigned char i = 0; i < m_Slots.size( ); ++i )
+	{
+		for( vector<unsigned char> :: iterator j = m_FakePlayers.begin( ); j != m_FakePlayers.end( ); ++j )
+		{
+			if( m_Slots[i].GetPID( ) == *j )
+			{
+				m_Slots[i] = CGameSlot( 0, 255, SLOTSTATUS_OPEN, 0, m_Slots[i].GetTeam( ), m_Slots[i].GetColour( ), m_Slots[i].GetRace( ) );
+				SendAll( m_Protocol->SEND_W3GS_PLAYERLEAVE_OTHERS( *j, PLAYERLEAVE_LOBBY ) );
+				m_FakePlayers.erase(j);
+				return;
+			}
+		}
+	}
+	SendAllSlotInfo( );
 }
 
 void CBaseGame :: DeleteFakePlayer( )
@@ -7976,7 +8050,6 @@ void CBaseGame :: DeleteFakePlayer( )
 	m_FakePlayers.clear( );
 	SendAllSlotInfo( );
 }
-
 
 void CBaseGame :: CreateWTVPlayer( string name, bool lobbyhost )
 {

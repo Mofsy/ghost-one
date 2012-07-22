@@ -1914,6 +1914,11 @@ bool CGHost :: Update( unsigned long usecBlock )
 							m_AutoHostAutoStartPlayers = m_BotAutoStartPlayers;
 							
 						m_CurrentGame->SetAutoStartPlayers( m_AutoHostAutoStartPlayers ); //use m_AutoHostAutoStartPlayers as it's pre-defined in ghost.cfg by bot_autohostautostartplayers
+						//auto insert fake player(s)
+						
+						if (m_FakePlayersLobby)
+						m_CurrentGame->CreateInitialFakePlayers( );
+							
 						CONSOLE_Print( "[GHOST] will autostart game once " + UTIL_ToString(m_AutoHostAutoStartPlayers) + " players filled." );
 
 						if( m_AutoHostMatchMaking )
@@ -2227,6 +2232,7 @@ void CGHost :: SetConfigs( CConfig *CFG )
 	m_RehostPrintingDelay = CFG->GetInt( "bot_rehostprintingdelay", 5 );
 	m_BotAutoStartPlayers = CFG->GetInt( "bot_autohostautostartplayers", 8 );
 	m_CustomName = CFG->GetInt( "bot_cfgname", 0 ) == 0 ? false : true; //Gen
+	m_FakePlayersLobby = CFG->GetInt( "bot_fakeplayersinlobby", 0 ) == 0 ? false : true; //Gen
 	m_LobbyTimeLimit = CFG->GetInt( "bot_lobbytimelimit", 111 );	
 	m_Latency = CFG->GetInt( "bot_latency", 100 );
 	m_SyncLimit = CFG->GetInt( "bot_synclimit", 50 );
@@ -3857,6 +3863,7 @@ void CGHost :: ReloadConfig ()
 
 	m_RehostPrintingDelay = CFG->GetInt( "bot_rehostprintingdelay", 5 );
 	m_CustomName = CFG->GetInt( "bot_cfgname", 0 ) == 0 ? false : true; //Gen
+	m_FakePlayersLobby = CFG->GetInt( "bot_fakeplayersinlobby", 0 ) == 0 ? false : true; //Gen
 	m_LobbyTimeLimit = CFG->GetInt( "bot_lobbytimelimit", 111 );	
 	m_LobbyTimeLimitMax = CFG->GetInt( "bot_lobbytimelimitmax", 150 );
 	m_LANWar3Version = CFG->GetInt( "lan_war3version", 24 );
@@ -4110,9 +4117,8 @@ string CGHost :: GetRoomName (string RoomID)
 				{
 					DPos = m_LanRoomName[i].find(RoomID);
 					if (DPos!= string ::npos){
-						return s=m_LanRoomName[i].substr(DPos+l+2);
 						ok = true;
-						break;
+						return s=m_LanRoomName[i].substr(DPos+l+2);
 					}
 				}
 			}	

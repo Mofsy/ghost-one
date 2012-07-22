@@ -314,6 +314,7 @@ public:
 	virtual uint32_t GetSlotsOccupied( );
 	virtual uint32_t GetSlotsOpen( );
 	virtual uint32_t GetNumPlayers( );
+	virtual uint32_t GetNumFakePlayers( );
 	virtual uint32_t GetNumHumanPlayers( );
 	virtual string GetDescription( );
 
@@ -408,6 +409,7 @@ public:
 	virtual BYTEARRAY Silence(BYTEARRAY PIDs);
 	virtual unsigned char GetHostPID( );
 	virtual unsigned char GetEmptySlot( bool reserved );
+	virtual unsigned char GetEmptySlotForFakePlayers( );
 	virtual unsigned char GetEmptySlotAdmin( bool reserved );
 	virtual unsigned char GetEmptySlot( unsigned char team, unsigned char PID );
 	virtual void SwapSlots( unsigned char SID1, unsigned char SID2 );
@@ -439,7 +441,9 @@ public:
 	virtual void CreateVirtualHost( );
 	virtual void DeleteVirtualHost( );
 	virtual void CreateFakePlayer( );
+	virtual void CreateInitialFakePlayers( );
 	virtual void DeleteFakePlayer( );
+	virtual void DeleteAFakePlayer( );
 	virtual void CreateWTVPlayer( string name="Waaagh!TV", bool lobbyhost=false );
 	virtual void DeleteWTVPlayer( );
 	virtual bool IsMuted ( string name);

@@ -239,6 +239,7 @@ public:
 	bool m_BlueCanHCL;	
 	bool m_BlueIsOwner;
 	bool m_CustomName;
+	bool m_FakePlayersLobby;
 	bool m_ReplaceBanWithWarn;
 	bool m_forceautohclindota;
 	bool m_PlaceAdminsHigherOnlyInDota;
