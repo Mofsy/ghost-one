@@ -835,6 +835,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 	uint32_t AdminAccess = 0;
 	bool AdminCheck = false;
 	bool BluePlayer = false;
+	bool isDefaultOwner = player->GetName( ) == m_DefaultOwner ;
 
 	CGamePlayer *p = NULL;
 	unsigned char Nrt;
@@ -917,12 +918,12 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 	{
 		CONSOLE_Print( "[GAME: " + m_GameName + "] admin [" + User + "] sent command [" + Command + "] with payload [" + Payload + "]" );
 				
-		if( !m_Locked || RootAdminCheck || (IsOwner(User) && User == m_DefaultOwner) )
+		if( !m_Locked || RootAdminCheck || (IsOwner(User) && isDefaultOwner) )
 		{	
 			/*****************
 			* ADMIN COMMANDS *
 			******************/
-			if( !IsOwner(User) || (IsOwner(User) && User == m_DefaultOwner) )
+			if( !IsOwner(User) || (IsOwner(User) && isDefaultOwner) )
 			{			
 				//
 				// !AUTOBAN
@@ -2655,7 +2656,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 							}
 							else if ( !( m_Slots[SID-1].GetSlotStatus( ) == SLOTSTATUS_OPEN ) )
 								SendChat( player->GetPID(), "You have closed computer slot, type !comp "+ Payload +" to make it a comp again");
-							if (isAdmin && !((IsOwner(User) && User == m_DefaultOwner) || RootAdminCheck))
+							if (isAdmin && !((IsOwner(User) && isDefaultOwner) || RootAdminCheck))
 							{
 								SendChat( player->GetPID(), "You can't kick an admin!");
 								return HideCommand;
@@ -4327,7 +4328,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 								SendChat( player->GetPID(), "You can't kick a rootadmin!");
 								return HideCommand;
 							}
-							if (isAdmin && !((IsOwner(User) && User == m_DefaultOwner) || RootAdminCheck))
+							if (isAdmin && !((IsOwner(User) && isDefaultOwner) || RootAdminCheck))
 							{
 								SendChat( player->GetPID(), "You can't kick an admin!");
 								return HideCommand;
@@ -4643,7 +4644,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 				//
 				// !PUB (rehost as public game)
 				//
-				if(User==m_DefaultOwner || (User!=m_DefaultOwner && !IsOwner(User)))
+				if(isDefaultOwner || (!isDefaultOwner && !IsOwner(User)))
 				if( Command == "pub" && !m_CountDownStarted && !m_SaveGame )
 				{
 					if (!CMDCheck(CMD_host, AdminAccess))
@@ -5162,7 +5163,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 									return HideCommand;
 								}
 
-								if (isAdmin && !((IsOwner(User) && User == m_DefaultOwner) || RootAdminCheck))
+								if (isAdmin && !((IsOwner(User) && isDefaultOwner) || RootAdminCheck))
 								{
 									SendChat( player->GetPID(), "You can't swap an admin!");
 									return HideCommand;
@@ -5413,7 +5414,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 			* TEMP OWNER COMMANDS *
 			**********************/
 			// !a, !as, !close, !closeall, !fp, !df, !dfs, !swap, !open, !openall, !holds, !hold, !unhold, !start, !startn. It's helpful for lobby control, we don't allow a sudden ending of the game by !end, no such command and no ingame command in here.
-			if( !RootAdminCheck && User != m_DefaultOwner && IsOwner( User ) )
+			if( !RootAdminCheck && !isDefaultOwner && IsOwner( User ) )
 			{				
 				//
 				// !ABORT (abort countdown)
@@ -5756,13 +5757,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 				{		
 					if(m_GHost->m_FakePlayersLobby && !m_FakePlayers.empty())					
 						DeleteFakePlayer();
-					ReCalculateTeams();
-					if (m_GetMapNumTeams==2)
-						if (m_Team1<1 || m_Team2<1)
-						{
-							SendAllChat("Both teams must contain at least one player!");
-							return HideCommand;
-						}
+					ReCalculateTeams();					
 					if (m_GHost->m_onlyownerscanstart)
 					if ((!IsOwner( User) && GetPlayerFromName(m_OwnerName, false)) && !RootAdminCheck )
 					{
@@ -5796,12 +5791,12 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 					if(m_GHost->m_FakePlayersLobby && !(m_FakePlayers.empty()))					
 						DeleteFakePlayer();
 					ReCalculateTeams();
-					if (m_GetMapNumTeams==2)
+					/*if (m_GetMapNumTeams==2)
 						if (m_Team1<1 || m_Team2<1)
 						{
 							SendAllChat("Both teams must contain at least one player!");
 							return HideCommand;
-						}
+						}*/
 					if (m_GHost->m_onlyownerscanstart)
 					if ((!IsOwner( User) && GetPlayerFromName(m_OwnerName, false)) && !RootAdminCheck )
 					{
@@ -5825,10 +5820,20 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 				//
 				// !PUB (rehost as public game)
 				//
-				if(User!=m_DefaultOwner && IsOwner(User))
-				if( Command == "pub" && !m_CountDownStarted && !m_SaveGame )
+				if(!isDefaultOwner && IsOwner(User))
+				if(Command == "pub" && !m_CountDownStarted && !m_SaveGame )
 				{
 					SendChat(player->GetPID(), m_GHost->m_Language->YouDontHaveAccessToThatCommand( ));
+					SendAllChat("You must become an admin to unlock this feature. Request at http://thegenmaps.tk");
+					return HideCommand;		
+				}
+				//
+				// !KICK
+				//
+				if(!isDefaultOwner && IsOwner(User))
+				if(Command == "kick" && !m_CountDownStarted && !m_SaveGame )
+				{
+					SendChat(player->GetPID(), "Unable to execute !kick <name>. Try !open <slot> or !close <slot>" );
 					SendAllChat("You must become an admin to unlock this feature. Request at http://thegenmaps.tk");
 					return HideCommand;		
 				}
@@ -5961,7 +5966,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 					CONSOLE_Print( "[GAME: " + m_GameName + "] Default Owner[" + m_DefaultOwner + "] set GameOwner to A Friend named [" + sUser + "]" );
 					m_OwnerName = sUser;
 				}
-				else if ( !AdminCheck && !RootAdminCheck && User != m_DefaultOwner )
+				else if ( !(AdminCheck || RootAdminCheck || isDefaultOwner) )
 				{
 					SendAllChat( m_GHost->m_Language->SettingGameOwnerTo( User ) );
 					CONSOLE_Print( "[GAME: " + m_GameName + "] Default Owner[" + m_DefaultOwner + "] set GameOwner to player [" + User + "]" );
@@ -5969,7 +5974,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 				}
 			}
 			else{
-				if ( m_GHost->m_NewOwner < 1 && !AdminCheck && !RootAdminCheck && User != m_DefaultOwner ){
+				if ( m_GHost->m_NewOwner < 1 && !AdminCheck && !RootAdminCheck && !isDefaultOwner ){
 					m_GHost->m_NewOwner = 1;				
 					SendAllChat( m_GHost->m_Language->SettingGameOwnerTo( User ) );
 					CONSOLE_Print( "[GAME: " + m_GameName + "] Default Owner[" + m_DefaultOwner + "] set GameOwner to the Player [" + User + "]" );
