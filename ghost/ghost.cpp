@@ -1891,8 +1891,8 @@ bool CGHost :: Update( unsigned long usecBlock )
 				else
 					GameName = "ï€€ " + m_AutoHostGameName + " #" + UTIL_ToString( m_HostCounter );				
 				
-				if( GameName.size( ) > 31 )
-					GameName = GameName.substr(4,AutoHostMapCFGStr.size( ));
+				if( GameName.size( ) > 31 || !m_AppleIcon )
+					GameName = GameName.substr(4);
 				if( GameName.size( ) <= 31 ) //don't name it  too long, only 29 characters + " #10" (4 plus caractères)
 				{					
 					m_AutoHosted = true;
@@ -2232,7 +2232,8 @@ void CGHost :: SetConfigs( CConfig *CFG )
 	m_RehostPrintingDelay = CFG->GetInt( "bot_rehostprintingdelay", 5 );
 	m_BotAutoStartPlayers = CFG->GetInt( "bot_autohostautostartplayers", 8 );
 	m_CustomName = CFG->GetInt( "bot_cfgname", 0 ) == 0 ? false : true; //Gen
-	m_FakePlayersLobby = CFG->GetInt( "bot_fakeplayersinlobby", 0 ) == 0 ? false : true; //Gen
+	m_FakePlayersLobby = CFG->GetInt( "bot_fakeplayersinlobby", 0 ) == 1 ? true : false; //Gen
+	m_AppleIcon = CFG->GetInt( "bot_appleicon", 0 ) == 1 ? true : false; //Gen
 	m_LobbyTimeLimit = CFG->GetInt( "bot_lobbytimelimit", 111 );	
 	m_Latency = CFG->GetInt( "bot_latency", 100 );
 	m_SyncLimit = CFG->GetInt( "bot_synclimit", 50 );
@@ -3754,8 +3755,18 @@ void CGHost :: ReloadConfig ()
 	m_DynamicLatencyAddedToPing = CFG->GetInt( "bot_dynamiclatencyaddedtoping", 25 );
 	m_DynamicLatencyIncreasewhenLobby = CFG->GetInt( "bot_dynamiclatencyincreasewhenlobby", 1 ) == 0 ? false : true;
 	m_SyncLimit = CFG->GetInt( "bot_synclimit", 50 );
-	m_VoteKickAllowed = CFG->GetInt( "bot_votekickallowed", 1 ) == 0 ? false : true;
+	m_VoteKickAllowed = CFG->GetInt( "bot_votekickallowed", 1 ) == 0 ? false : true;	
+	m_VoteStartAllowed = CFG->GetInt( "bot_votestartallowed", 1 ) == 0 ? false : true;
+	m_VoteStartAutohostOnly = CFG->GetInt( "bot_votestartautohostonly", 1 ) == 0 ? false : true;
+	m_VoteStartMinPlayers = CFG->GetInt( "bot_votestartplayers", 6 );
 	m_VoteKickPercentage = CFG->GetInt( "bot_votekickpercentage", 100 );
+	if ( m_VoteStartMinPlayers < 3)
+		m_VoteStartMinPlayers = 4;
+	if( m_VoteKickPercentage > 100 )
+	{
+		m_VoteKickPercentage = 100;
+		CONSOLE_Print( "[GHOST] warning - bot_votekickpercentage is greater than 100, using 100 instead" );
+	}
 	m_LanAdmins = CFG->GetInt( "bot_lanadmins", 0 ) == 0 ? false : true;
 	m_LanRootAdmins = CFG->GetInt( "bot_lanrootadmins", 0 ) == 0 ? false : true;
 	m_LocalAdmins = CFG->GetInt( "bot_localadmins", 0 ) == 0 ? false : true;
@@ -3863,7 +3874,8 @@ void CGHost :: ReloadConfig ()
 
 	m_RehostPrintingDelay = CFG->GetInt( "bot_rehostprintingdelay", 5 );
 	m_CustomName = CFG->GetInt( "bot_cfgname", 0 ) == 0 ? false : true; //Gen
-	m_FakePlayersLobby = CFG->GetInt( "bot_fakeplayersinlobby", 0 ) == 0 ? false : true; //Gen
+	m_FakePlayersLobby = CFG->GetInt( "bot_fakeplayersinlobby", 0 ) == 1 ? true : false; //Gen
+	m_AppleIcon = CFG->GetInt( "bot_appleicon", 0 ) == 1 ? true : false; //Gen
 	m_LobbyTimeLimit = CFG->GetInt( "bot_lobbytimelimit", 111 );	
 	m_LobbyTimeLimitMax = CFG->GetInt( "bot_lobbytimelimitmax", 150 );
 	m_LANWar3Version = CFG->GetInt( "lan_war3version", 24 );

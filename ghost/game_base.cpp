@@ -3529,12 +3529,12 @@ void CBaseGame :: EventPlayerJoined( CPotentialPlayer *potential, CIncomingJoinP
 			string s;
 			if( (*i)->GetSocket( ) )
 			{								
-				s = Player->GetJoinedRealm( );
-				if ( JoinedRealm.find("AN") !=string::npos || JoinedRealm.find("an") !=string::npos || s.find("AN") != string::npos || s.find("an") != string::npos || s.find("Garena") != string::npos || s.find("garena") != string::npos || s=="LAN" || s.size( )<3 )
-					s = "Ga";
-				else if ( s.find("eurobattle") != string::npos )
+				s = Player->GetJoinedRealm( ) == string( ) ? "Ga" : Player->GetJoinedRealm( );
+				if ( s.find("eurobattle") != string::npos )
 					s = "EB";
-				else s = Player->GetJoinedRealm( ).substr( 0, 2 );
+				else if ( s.find("warcraft3.eu") != string::npos )
+					s = "EU";
+				else s = s.substr( 0, 2 );
 				if( m_GHost->m_HideIPAddresses )
 					(*i)->Send( m_Protocol->SEND_W3GS_PLAYERINFO( Player->GetPID( ), ( "[" + s + "]" + Player->GetName( ) ).substr( 0, 14 ), BlankIP, BlankIP ) );
 				else
@@ -3542,11 +3542,11 @@ void CBaseGame :: EventPlayerJoined( CPotentialPlayer *potential, CIncomingJoinP
 			}
 
 			// send info about every other player to the new player
-			s = (*i)->GetJoinedRealm( );
-			if ( JoinedRealm.find("AN") !=string::npos || JoinedRealm.find("an") !=string::npos || s.find("AN") != string::npos || s.find("an") != string::npos || s.find("Garena") != string::npos || s.find("garena") != string::npos || s=="LAN" || s.size( )<3 )
-					s = "Ga";
-			else if ( s.find("eurobattle") != string::npos )
-					s = "EB";			
+			s = (*i)->GetJoinedRealm( ) == string( ) ? "Ga" : (*i)->GetJoinedRealm( );
+			if ( s.find("eurobattle") != string::npos )
+					s = "EB";
+			else if ( s.find("warcraft3.eu") != string::npos )
+					s = "EU";				
 			else s = (*i)->GetJoinedRealm( ).substr( 0, 2 );
 			if( m_GHost->m_HideIPAddresses )
 				Player->Send( m_Protocol->SEND_W3GS_PLAYERINFO( (*i)->GetPID( ), ( "[" + s + "]" + (*i)->GetName( ) ).substr( 0, 14 ), BlankIP, BlankIP ) );
@@ -4495,8 +4495,12 @@ void CBaseGame :: EventPlayerLeft( CGamePlayer *player, uint32_t reason )
         m_GHost->m_DB->ThreadedBanAdd(" ",player->GetName( ), player->GetExternalIPString( ), "in lobby", "Autobot","DL and leave",2,0);
 	}
 	//auto insert fake player(s)
-	if ( m_GHost->m_FakePlayersLobby && GetSlotsOpen() > 2 && GetNumHumanPlayers( ) < 4 && !m_GameLoading && !m_GameLoaded )
-		CreateFakePlayer( );
+	if ( m_GHost->m_FakePlayersLobby && !m_GameLoading && !m_GameLoaded ){
+		if (GetNumHumanPlayers( ) < 4 && GetSlotsOpen() > 2)
+			CreateInitialFakePlayers( );
+		else if (GetSlotsOpen() > 3)
+			CreateFakePlayer( );
+	}
 	
 	/*uint32_t b;
 	if (!m_GHost->m_FakePlayersLobby)
@@ -4523,7 +4527,13 @@ void CBaseGame :: EventPlayerLeft( CGamePlayer *player, uint32_t reason )
 	if (IsOwner(player->GetName())){
 		if ( m_GHost->m_NewOwner < 2 )
 			m_GHost->m_NewOwner = 0;
-		m_OwnerName = m_DefaultOwner;
+		m_OwnerName = m_DefaultOwner;		
+		if( m_GHost->m_AutoHostAutoStartPlayers > GetNumHumanPlayers( ) + GetSlotsOpen( ) )
+							m_GHost->m_AutoHostAutoStartPlayers = GetNumHumanPlayers( ) + GetSlotsOpen( ) ;
+							//fixed thanks to Gen's efforts & 0x6D48 & ukaf.b							
+						else
+							m_GHost->m_AutoHostAutoStartPlayers = m_GHost->m_BotAutoStartPlayers;
+		SetAutoStartPlayers( m_GHost->m_AutoHostAutoStartPlayers );
 		CONSOLE_Print( "[GAME: " + m_GameName + "] Return OwnerName [" + m_OwnerName +"] = DefaultOwner [" + m_DefaultOwner + "]" );
 	}
 }
@@ -4881,6 +4891,7 @@ void CBaseGame :: EventPlayerChatToHost( CGamePlayer *player, CIncomingChatPlaye
 			// relay the chat message to other players
 
 			bool isAdmin = IsOwner(player->GetName());
+			bool isDefaultOwner = player->GetName() == m_DefaultOwner;
 			bool isRootAdmin = isAdmin;
 			for( vector<CBNET *> :: iterator j = m_GHost->m_BNETs.begin( ); j != m_GHost->m_BNETs.end( ); j++ )
 			{
@@ -5051,6 +5062,7 @@ void CBaseGame :: EventPlayerChatToHost( CGamePlayer *player, CIncomingChatPlaye
 					
 					if( player->IsSpammer() )
 					{
+						if (!(isAdmin || isRootAdmin || isDefaultOwner))
 						//count << "SPAMMER!!!!! " << player->GetName( ) << endl;
 						OpenSlot( GetSIDFromPID( player->GetPID( ) ), true );
 					}
