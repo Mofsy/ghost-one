@@ -5057,7 +5057,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 					}
 
 					m_CountDownStarted = true;
-					m_CountDownCounter = 0;
+					m_CountDownCounter = 10;
 					if (m_NormalCountdown)
 					{
 						m_CountDownCounter = 5;
@@ -5774,7 +5774,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 					}
 
 					m_CountDownStarted = true;
-					m_CountDownCounter = 0;
+					m_CountDownCounter = 10;
 					if (m_NormalCountdown)
 					{
 						m_CountDownCounter = 5;
