@@ -745,6 +745,7 @@ bool CBNET :: Update( void *fd, void *send_fd )
 	{
 		m_TodayGamesCount = m_CallableTodayGamesCount->GetResult( );
 		m_LastGameCountRefreshTime  = GetTime();
+		m_GHost->m_DB->RecoverCallable( m_CallableTodayGamesCount );
 		delete m_CallableTodayGamesCount;
 		m_CallableTodayGamesCount = NULL;
 	}

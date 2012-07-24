@@ -3547,7 +3547,7 @@ void CBaseGame :: EventPlayerJoined( CPotentialPlayer *potential, CIncomingJoinP
 					s = "EB";
 			else if ( s.find("warcraft3.eu") != string::npos )
 					s = "EU";				
-			else s = (*i)->GetJoinedRealm( ).substr( 0, 2 );
+			else s = s.substr( 0, 2 );
 			if( m_GHost->m_HideIPAddresses )
 				Player->Send( m_Protocol->SEND_W3GS_PLAYERINFO( (*i)->GetPID( ), ( "[" + s + "]" + (*i)->GetName( ) ).substr( 0, 14 ), BlankIP, BlankIP ) );
 			else
@@ -7706,7 +7706,7 @@ void CBaseGame :: StartCountDown( bool force )
 		if( force )
 		{
 			m_CountDownStarted = true;
-			m_CountDownCounter = 10;
+			m_CountDownCounter = 5;
 			if (m_NormalCountdown)
 			SendAll( m_Protocol->SEND_W3GS_COUNTDOWN_START( ) );
 		}
@@ -7790,7 +7790,7 @@ void CBaseGame :: StartCountDown( bool force )
 			if( StillDownloading.empty( ) && NotSpoofChecked.empty( ) && NotPinged.empty( ) )
 			{
 				m_CountDownStarted = true;
-				m_CountDownCounter = 10;
+				m_CountDownCounter = 5;
 				if (m_NormalCountdown)
 				SendAll( m_Protocol->SEND_W3GS_COUNTDOWN_START( ));
 			}
@@ -7811,7 +7811,7 @@ void CBaseGame :: StartCountDownAuto( bool requireSpoofChecks )
 			PNr = m_Team1+m_Team2+m_Team3+m_Team4;
 		if( PNr < m_AutoStartPlayers )
 		{
-			if(m_GHost->m_PlayerBeforeStartPrintDelay > m_ActualyPrintPlayerWaitingStartDelay)
+			if(m_GHost->m_PlayerBeforeStartPrintDelay + 3 > m_ActualyPrintPlayerWaitingStartDelay)
 			{
 				m_ActualyPrintPlayerWaitingStartDelay++;
 			}
