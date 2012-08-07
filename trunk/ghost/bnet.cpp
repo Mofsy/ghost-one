@@ -85,6 +85,8 @@ CBNET :: CBNET( CGHost *nGHost, string nServer, string nServerAlias, string nBNL
 		m_ServerAlias = "Europe";
 	else if( LowerServer == "server.eurobattle.net" )
 		m_ServerAlias = "XPAM";
+	else if( LowerServer == "europe.warcraft3.eu" )
+		m_ServerAlias = "W3EU";
 	else if( LowerServer == "200.51.203.231" )
 		m_ServerAlias = "Ombu";
 	else
@@ -1433,7 +1435,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 
 		if( Event == CBNETProtocol :: EID_WHISPER && m_GHost->m_CurrentGame )
 		{
-			if( Message == "s" || Message == "sc" || Message == "spoof" || Message == "check" || Message == "spoofcheck" )
+			if( Message == "s" || Message == "sc" || Message == "spoof" || Message == "check" || Message == "spoofcheck" || Message == "cm" || Message == "checkme" )
 				m_GHost->m_CurrentGame->AddToSpoofed( m_Server, User, true );
 			else if( Message.find( m_GHost->m_CurrentGame->GetGameName( ) ) != string :: npos )
 			{
@@ -3021,14 +3023,16 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					if ( m_PasswordHashType == "pvpgn")
 					{
 						string user = User;
+						string s;
 	
 						if( m_GHost->m_CurrentGame )
 							ImmediateChatCommand( "/w "+user+" ("+UTIL_ToString(m_TodayGamesCount) +" today) "+m_GHost->m_Language->GameIsInTheLobby( m_GHost->m_CurrentGame->GetDescription( ), UTIL_ToString( m_GHost->m_Games.size( ) ), UTIL_ToString( m_GHost->m_MaxGames ) ));
 	
 						for (uint32_t i=0; i<m_GHost->m_Games.size( ); i++ )
 						{
-							ImmediateChatCommand( "/w "+user+" ("+UTIL_ToString(m_TodayGamesCount) +" today) "+m_GHost->m_Games[i]->GetGameInfo());
+							s = s + " " + UTIL_ToString(i) + "." + m_GHost->m_Games[i]->GetGameInfo();
 						}
+						ImmediateChatCommand( "/w "+user+" ("+UTIL_ToString(m_TodayGamesCount) +" today) "+ s );
 						return;
 					}
 
