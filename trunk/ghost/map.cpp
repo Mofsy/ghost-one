@@ -45,7 +45,7 @@ CMap :: CMap( CGHost *nGHost )
 	m_MapInfo = UTIL_ExtractNumbers( "251 57 68 98", 4 );
 	m_MapCRC = UTIL_ExtractNumbers( "108 250 204 59", 4 );
 	m_MapSHA1 = UTIL_ExtractNumbers( "35 81 104 182 223 63 204 215 1 17 87 234 220 66 3 185 82 99 6 13", 20 );
-	if (m_GHost->m_LANWar3Version == 23)
+	if (m_GHost->m_LANWar3Version == 23 )
 	{
 		m_MapCRC = UTIL_ExtractNumbers( "112 185 65 97", 4 );
 		m_MapSHA1 = UTIL_ExtractNumbers( "187 28 143 4 97 223 210 52 218 28 95 52 217 203 121 202 24 120 59 213", 20 );
@@ -391,6 +391,7 @@ void CMap :: Load( CConfig *CFG, string nCFGFile )
 	BYTEARRAY MapHeight;
 	uint32_t MapNumPlayers = 0;
 	uint32_t MapNumTeams = 0;
+	uint32_t MapFilterType = MAPFILTER_TYPE_SCENARIO;
 	vector<CGameSlot> Slots;
 
 	if( !m_MapData.empty( ) )
@@ -607,6 +608,7 @@ void CMap :: Load( CConfig *CFG, string nCFGFile )
 									(*i).SetTeam( Team++ );
 									(*i).SetRace( SLOTRACE_RANDOM );
 								}
+								MapFilterType = MAPFILTER_TYPE_MELEE;
 							}
 						}
 					}
@@ -805,6 +807,12 @@ void CMap :: Load( CConfig *CFG, string nCFGFile )
 	m_MapVisibility = CFG->GetInt( "map_visibility", MAPVIS_DEFAULT );
 	m_MapObservers = CFG->GetInt( "map_observers", MAPOBS_NONE );
 	m_MapFlags = CFG->GetInt( "map_flags", MAPFLAG_TEAMSTOGETHER | MAPFLAG_FIXEDTEAMS );
+	if( CFG->Exists( "map_filter_type" ) )
+	{
+		CONSOLE_Print( "[MAP] overriding calculated map_filter_type with config value map_filter_type = " + CFG->GetString( "map_filter_type", string( ) ) );
+		MapFilterType = CFG->GetInt( "map_filter_type", MAPFILTER_TYPE_SCENARIO );
+	}		
+	m_MapFilterType = MapFilterType;
 	m_MapGameType = CFG->GetInt( "map_gametype", 1 );
 
 	if( MapWidth.empty( ) )

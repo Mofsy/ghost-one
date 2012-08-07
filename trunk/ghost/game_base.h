@@ -164,6 +164,7 @@ protected:
 	bool m_MuteLobby;								// if we should stop forwarding lobby chat messages
 	bool m_CountDownStarted;						// if the game start countdown has started or not
 	bool m_StartVoteStarted;
+//	bool m_UnhostAllow;
 //	bool m_GameLoading;								// if the game is currently loading or not
 	bool m_GameLoaded;								// if the game has loaded or not
 	bool m_LoadInGame;								// if the load-in-game feature is enabled or not
@@ -272,6 +273,7 @@ public:
 	virtual unsigned char GetGameState( )			{ return m_GameState; }
 	virtual unsigned char GetGProxyEmptyActions( )	{ return m_GProxyEmptyActions; }
 	virtual string GetGameName( )					{ return m_GameName; }
+//	virtual string GetMapName( );
 	virtual string GetLastGameName( )				{ return m_LastGameName; }
 	virtual void SetGameName( string nGameName)		{ m_GameName = nGameName; }
 	virtual void SetHostCounter( uint32_t nHostCounter)			{ m_HostCounter = nHostCounter; }
@@ -312,7 +314,11 @@ public:
 
 	virtual uint32_t GetNextTimedActionTicks( );
 	virtual uint32_t GetSlotsOccupied( );
+	virtual uint32_t GetSlotsOccupiedT1( );
+	virtual uint32_t GetSlotsOccupiedT2( );
 	virtual uint32_t GetSlotsOpen( );
+	virtual uint32_t GetSlotsOpenT1( );
+	virtual uint32_t GetSlotsOpenT2( );
 	virtual uint32_t GetNumPlayers( );
 	virtual uint32_t GetNumFakePlayers( );
 	virtual uint32_t GetNumHumanPlayers( );
@@ -397,6 +403,7 @@ public:
 	virtual CGamePlayer *GetPlayerFromName( string name, bool sensitive );
 	virtual uint32_t GetPlayerFromNamePartial( string name, CGamePlayer **player );
 	virtual CGamePlayer *GetPlayerFromColour( unsigned char colour );
+//	virtual string GetPlayerList( );
 	virtual unsigned char GetNewPID( );
 	virtual unsigned char GetNewColour( );
 	virtual BYTEARRAY GetPIDs( );
@@ -441,6 +448,7 @@ public:
 	virtual void CreateVirtualHost( );
 	virtual void DeleteVirtualHost( );
 	virtual void CreateFakePlayer( );
+//	virtual void CreateInitialFakePlayers( uint32_t m );
 	virtual void CreateInitialFakePlayers( );
 	virtual void DeleteFakePlayer( );
 	virtual void DeleteAFakePlayer( );

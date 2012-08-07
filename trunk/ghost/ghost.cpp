@@ -854,7 +854,7 @@ CGHost :: CGHost( CConfig *CFG )
 	m_CRC->Initialize( );
 	m_SHA = new CSHA1( );
 	m_CurrentGame = NULL;
-	string DBType = CFG->GetString( "db_type", "sqlite3" );
+	DBType = CFG->GetString( "db_type", "sqlite3" );
 	CONSOLE_Print( "[GHOST] opening primary database" );
 
 	if( DBType == "mysql" )
@@ -2234,6 +2234,7 @@ void CGHost :: SetConfigs( CConfig *CFG )
 	m_CustomName = CFG->GetInt( "bot_cfgname", 0 ) == 0 ? false : true; //Gen
 	m_FakePlayersLobby = CFG->GetInt( "bot_fakeplayersinlobby", 0 ) == 1 ? true : false; //Gen
 	m_AppleIcon = CFG->GetInt( "bot_appleicon", 0 ) == 1 ? true : false; //Gen
+	m_PrefixName = CFG->GetInt( "bot_realmprefixname", 0 ) == 1 ? true : false; //Gen
 	m_LobbyTimeLimit = CFG->GetInt( "bot_lobbytimelimit", 111 );	
 	m_Latency = CFG->GetInt( "bot_latency", 100 );
 	m_SyncLimit = CFG->GetInt( "bot_synclimit", 50 );
@@ -2257,10 +2258,8 @@ void CGHost :: SetConfigs( CConfig *CFG )
 	m_TCPNoDelay = CFG->GetInt( "tcp_nodelay", 0 ) == 0 ? false : true;
 	m_dropifdesync = CFG->GetInt( "bot_dropifdesync", 1 ) == 0 ? false : true; //Metal_Koola
 	m_MatchMakingMethod = CFG->GetInt( "bot_matchmakingmethod", 1 );
-	m_PlayerBeforeStartPrintDelay = CFG->GetInt( "bot_playerbeforestartprintdelay", 4 );	
+	
 	m_ActualRehostPrintingDelay = 0;		
-	if ( m_PlayerBeforeStartPrintDelay < 3 )
-		m_PlayerBeforeStartPrintDelay = 3;			
 }
 
 void CGHost :: ExtractScripts( )
@@ -3731,7 +3730,6 @@ void CGHost :: ReloadConfig ()
 	m_HideIPAddresses = CFG->GetInt( "bot_hideipaddresses", 0 ) == 0 ? false : true;
 	m_RefreshMessages = CFG->GetInt( "bot_refreshmessages", 0 ) == 0 ? false : true;
 	m_SpoofChecks = CFG->GetInt( "bot_spoofchecks", 2 );
-	m_NewOwner = CFG->GetInt( "bot_newownerinagame", 0 );
 	m_RequireSpoofChecks = CFG->GetInt( "bot_requirespoofchecks", 0 ) == 0 ? false : true;
 	m_AutoLock = CFG->GetInt( "bot_autolock", 0 ) == 0 ? false : true;
 	m_AutoSave = CFG->GetInt( "bot_autosave", 0 ) == 0 ? false : true;
@@ -3756,10 +3754,12 @@ void CGHost :: ReloadConfig ()
 	m_DynamicLatencyIncreasewhenLobby = CFG->GetInt( "bot_dynamiclatencyincreasewhenlobby", 1 ) == 0 ? false : true;
 	m_SyncLimit = CFG->GetInt( "bot_synclimit", 50 );
 	m_VoteKickAllowed = CFG->GetInt( "bot_votekickallowed", 1 ) == 0 ? false : true;	
+	m_VoteKickPercentage = CFG->GetInt( "bot_votekickpercentage", 100 );
+	m_NewOwner = CFG->GetInt( "bot_newownerinagame", 0 );
+
 	m_VoteStartAllowed = CFG->GetInt( "bot_votestartallowed", 1 ) == 0 ? false : true;
 	m_VoteStartAutohostOnly = CFG->GetInt( "bot_votestartautohostonly", 1 ) == 0 ? false : true;
 	m_VoteStartMinPlayers = CFG->GetInt( "bot_votestartplayers", 6 );
-	m_VoteKickPercentage = CFG->GetInt( "bot_votekickpercentage", 100 );
 	if ( m_VoteStartMinPlayers < 3)
 		m_VoteStartMinPlayers = 4;
 	if( m_VoteKickPercentage > 100 )
@@ -3774,6 +3774,9 @@ void CGHost :: ReloadConfig ()
 	m_ShowRealSlotCount = CFG->GetInt( "lan_showrealslotcount", 0 ) == 0 ? false : true;
 	m_UpdateDotaEloAfterGame = CFG->GetInt( "bot_updatedotaeloaftergame", 0 ) == 0 ? false : true;
 	m_UpdateDotaScoreAfterGame = CFG->GetInt( "bot_updatedotascoreaftergame", 1 ) == 0 ? false : true;	
+	m_PlayerBeforeStartPrintDelay = CFG->GetInt( "bot_playerbeforestartprintdelay", 4 );
+	if ( m_PlayerBeforeStartPrintDelay < 3 )
+		m_PlayerBeforeStartPrintDelay = 3;	
 	m_AutoHostAutoStartPlayers = CFG->GetInt( "bot_autohostautostartplayers", 0 );
 	m_BotAutoStartPlayers = CFG->GetInt( "bot_autohostautostartplayers", 8 );
 	m_AutoHostAllowStart = CFG->GetInt( "bot_autohostallowstart", 0 ) == 0 ? false : true;
@@ -3876,6 +3879,7 @@ void CGHost :: ReloadConfig ()
 	m_CustomName = CFG->GetInt( "bot_cfgname", 0 ) == 0 ? false : true; //Gen
 	m_FakePlayersLobby = CFG->GetInt( "bot_fakeplayersinlobby", 0 ) == 1 ? true : false; //Gen
 	m_AppleIcon = CFG->GetInt( "bot_appleicon", 0 ) == 1 ? true : false; //Gen
+	m_PrefixName = CFG->GetInt( "bot_realmprefixname", 0 ) == 1 ? true : false; //Gen
 	m_LobbyTimeLimit = CFG->GetInt( "bot_lobbytimelimit", 111 );	
 	m_LobbyTimeLimitMax = CFG->GetInt( "bot_lobbytimelimitmax", 150 );
 	m_LANWar3Version = CFG->GetInt( "lan_war3version", 24 );
