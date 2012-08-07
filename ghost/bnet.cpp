@@ -222,6 +222,8 @@ CBNET :: ~CBNET( )
 
 	for( vector<PairedDPSCheck> :: iterator i = m_PairedDPSChecks.begin( ); i != m_PairedDPSChecks.end( ); i++ )
 		m_GHost->m_Callables.push_back( i->second );
+	for( vector<PairedGameUpdate> :: iterator i = m_PairedGameUpdates.begin( ); i != m_PairedGameUpdates.end( ); ++i )
+		m_GHost->m_Callables.push_back( i->second );
 
 	if( m_CallableAdminList )
 		m_GHost->m_Callables.push_back( m_CallableAdminList );
@@ -671,6 +673,20 @@ bool CBNET :: Update( void *fd, void *send_fd )
 				sMsg = m_GHost->m_Games[m_GHost->m_Games.size()-1]->GetGameInfo();
 			}
 		QueueChatCommand(sMsg, sUser, true);
+	}
+	for( vector<PairedGameUpdate> :: iterator i = m_PairedGameUpdates.begin( ); i != m_PairedGameUpdates.end( ); )
+	{
+	if( i->second->GetReady( ) )
+	{
+		string response = i->second->GetResult( );
+
+			  QueueChatCommand( response, i->first, !i->first.empty( ) );
+		m_GHost->m_DB->RecoverCallable( i->second );
+		delete i->second;
+		i = m_PairedGameUpdates.erase( i );
+	}
+	else
+						  ++i;
 	}
 
 	// refresh the admin list every 5 minutes
@@ -1824,7 +1840,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				if( ( Command == "addban" || Command == "ban" || Command == "b" ) && !Payload.empty( ) )
 				{
 					// extract the victim and the reason
-					// e.g. "Gen leaver after dying" -> victim: "Gen", reason: "leaver after dying"
+					// e.g. "Varlock leaver after dying" -> victim: "Varlock", reason: "leaver after dying"
 
 					if (!CMDCheck(CMD_ban, AdminAccess))
 					{
@@ -1925,7 +1941,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				if( ( Command == "tempban" || Command == "tban" || Command == "tb" ) && !Payload.empty( ) )
 				{
 					// extract the victim and the reason
-					// e.g. "Gen leaver after dying" -> victim: "Gen", reason: "leaver after dying"
+					// e.g. "Varlock leaver after dying" -> victim: "Varlock", reason: "leaver after dying"
 
 					if (!CMDCheck(CMD_ban, AdminAccess))
 					{
@@ -2010,7 +2026,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				if( ( (Command == "addwarn" || Command == "warn" ) || (m_GHost->m_ReplaceBanWithWarn && (Command == "ban" || Command == "addban" || Command == "b")) ) && !Payload.empty( ) )
 				{
 					// extract the victim and the reason
-					// e.g. "Gen leaver after dying" -> victim: "Gen", reason: "leaver after dying"
+					// e.g. "Varlock leaver after dying" -> victim: "Varlock", reason: "leaver after dying"
 
 					if (!CMDCheck(CMD_ban, AdminAccess))
 					{
@@ -5669,10 +5685,18 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 			if( m_OutPackets.size( ) <= 3 )
 			{
 				//
+				// !GAMES
+				//
+				if( Command == "games" || Command == "g" )
+				{
+					m_PairedGameUpdates.push_back( PairedGameUpdate( Whisper ? User : string( ), m_GHost->m_DB->ThreadedGameUpdate("", "", "", "", 0, "", 0, 0, 0, false ) ) );
+				}
+				
+				//
 				// !STATS
 				//
 
-				if( Command == "stats" )
+				else if( Command == "stats" )
 				{
 					string StatsUser = User;
 

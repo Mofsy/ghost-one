@@ -47,6 +47,7 @@ class CSaveGame;
 //UDPCommandSocket patch
 class CUDPServer;
 class CConfig;
+class CCallableGameUpdate;
 struct DenyInfo;
 
 class CMyCallableDownloadFile : public CBaseCallable
@@ -159,7 +160,7 @@ public:
 	uint32_t m_BotAutoStartPlayers;			// use this variable to reset the number of ppls needed for autostart in autohosting game
 	uint32_t m_LastAutoHostTime;			// GetTime when the last auto host was attempted
 	uint32_t m_LastGameUpdateTime;      	// GetTime when the gamelist was last updated
-//	CCallableGameUpdate *m_CallableGameUpdate;// threaded database game update in progress
+	CCallableGameUpdate *m_CallableGameUpdate;// threaded database game update in progress
 	bool m_AutoHostMatchMaking;
 	double m_AutoHostMinimumScore;
 	double m_AutoHostMaximumScore;
