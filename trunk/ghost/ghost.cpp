@@ -854,6 +854,7 @@ CGHost :: CGHost( CConfig *CFG )
 	m_CRC->Initialize( );
 	m_SHA = new CSHA1( );
 	m_CurrentGame = NULL;
+	m_CallableGameUpdate = NULL;
 	DBType = CFG->GetString( "db_type", "sqlite3" );
 	CONSOLE_Print( "[GHOST] opening primary database" );
 
@@ -968,6 +969,7 @@ CGHost :: CGHost( CConfig *CFG )
 	m_AutoHostMaximumGames = 0;
 	m_AutoHostAutoStartPlayers = 0;
 	m_LastAutoHostTime = 0;
+	m_LastGameUpdateTime  = GetTime( );
 	m_AutoHostMatchMaking = false;
 	m_AutoHostMinimumScore = 0.0;
 	m_AutoHostMaximumScore = 0.0;
@@ -1970,6 +1972,32 @@ bool CGHost :: Update( unsigned long usecBlock )
 
 		m_LastAutoHostTime = GetTime( );
 	}
+    // update gamelist every 10 seconds
+	if( !m_CallableGameUpdate && GetTime() - m_LastGameUpdateTime >= 10) {
+   	uint32_t TotalGames = m_Games.size( );
+   	uint32_t TotalPlayers = 0;
+   	
+   	for( vector<CBaseGame *> :: iterator i = m_Games.begin( ); i != m_Games.end( ); ++i )
+   		TotalPlayers += (*i)->GetNumHumanPlayers( );
+   	
+       if(m_CurrentGame) {
+       	TotalGames++;
+       	TotalPlayers += m_CurrentGame->GetNumHumanPlayers( );
+       	
+           m_CallableGameUpdate = m_DB->ThreadedGameUpdate(m_CurrentGame->GetMapName(), m_CurrentGame->GetGameName(), m_CurrentGame->GetOwnerName(), m_CurrentGame->GetCreatorName(), m_CurrentGame->GetSlotsOccupied(), m_CurrentGame->GetPlayerList( ), m_CurrentGame->GetSlotsOccupied() + m_CurrentGame->GetSlotsOpen(), TotalGames, TotalPlayers, true);
+       } else {
+           m_CallableGameUpdate = m_DB->ThreadedGameUpdate("", "", "", "", 0, "", 0, TotalGames, TotalPlayers, true);
+       }
+
+       m_LastGameUpdateTime = GetTime();
+   }
+
+   if( m_CallableGameUpdate && m_CallableGameUpdate->GetReady()) {
+       m_LastGameUpdateTime = GetTime();
+       m_DB->RecoverCallable( m_CallableGameUpdate );
+       delete m_CallableGameUpdate;
+       m_CallableGameUpdate = NULL;
+   }
 
 	return m_Exiting || AdminExit || BNETExit;
 }
@@ -2715,6 +2743,24 @@ void CGHost :: CreateGame( CMap *map, unsigned char gameState, bool saveGame, st
 
 		if( (*i)->GetHoldClan( ) )
 			(*i)->HoldClan( m_CurrentGame );
+	}
+	   // update mysql current games list
+	if( m_CallableGameUpdate && m_CallableGameUpdate->GetReady()) {
+       m_DB->RecoverCallable( m_CallableGameUpdate );
+       delete m_CallableGameUpdate;
+       m_CallableGameUpdate = NULL;
+       m_LastGameUpdateTime = GetTime();
+	}
+
+	if(!m_CallableGameUpdate) {
+		uint32_t TotalGames = m_Games.size( ) + 1;
+		uint32_t TotalPlayers = 0;
+		
+		for( vector<CBaseGame *> :: iterator i = m_Games.begin( ); i != m_Games.end( ); ++i )
+			TotalPlayers += (*i)->GetNumHumanPlayers( );
+		
+		   m_CallableGameUpdate = m_DB->ThreadedGameUpdate(m_CurrentGame->GetMapName( ), m_CurrentGame->GetGameName(), m_CurrentGame->GetOwnerName(), m_CurrentGame->GetCreatorName(), m_CurrentGame->GetSlotsOccupied(), m_CurrentGame->GetPlayerList( ), m_CurrentGame->GetSlotsOccupied() + m_CurrentGame->GetSlotsOpen(), TotalGames, TotalPlayers, true);
+		   m_LastGameUpdateTime = GetTime();
 	}
 
 	// WaaaghTV
