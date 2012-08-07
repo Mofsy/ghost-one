@@ -45,6 +45,9 @@
 #define MAPGAMETYPE_UNKNOWN0                    1
 #define MAPGAMETYPE_SAVEDGAME                   1 << 9
 #define MAPGAMETYPE_PRIVATEGAME			1 << 11
+#define MAPFILTER_TYPE_MELEE                    1
+#define MAPFILTER_TYPE_SCENARIO                 2
+
 
 #include "gameslot.h"
 
@@ -69,6 +72,7 @@ private:
 	unsigned char m_MapVisibility;
 	unsigned char m_MapObservers;
 	unsigned char m_MapFlags;
+	unsigned char m_MapFilterType;
 	unsigned char m_MapGameType;
 	BYTEARRAY m_MapWidth;						// config value: map width (2 bytes)
 	BYTEARRAY m_MapHeight;						// config value: map height (2 bytes)

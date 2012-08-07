@@ -158,10 +158,11 @@ public:
 	uint32_t m_AutoHostAutoStartPlayers;	// when using auto hosting auto start the game when this many players have joined
 	uint32_t m_BotAutoStartPlayers;			// use this variable to reset the number of ppls needed for autostart in autohosting game
 	uint32_t m_LastAutoHostTime;			// GetTime when the last auto host was attempted
+	uint32_t m_LastGameUpdateTime;      	// GetTime when the gamelist was last updated
+//	CCallableGameUpdate *m_CallableGameUpdate;// threaded database game update in progress
 	bool m_AutoHostMatchMaking;
 	double m_AutoHostMinimumScore;
 	double m_AutoHostMaximumScore;
-	string m_LastGameName;
 	bool m_AllGamesFinished;				// if all games finished (used when exiting nicely)
 	uint32_t m_AllGamesFinishedTime;		// GetTime when all games finished (used when exiting nicely)
 	string m_LanguageFile;					// config value: language file
@@ -241,6 +242,7 @@ public:
 	bool m_CustomName;
 	bool m_AppleIcon;
 	bool m_FakePlayersLobby;
+	bool m_PrefixName;
 	bool m_ReplaceBanWithWarn;
 	bool m_forceautohclindota;
 	bool m_PlaceAdminsHigherOnlyInDota;
@@ -253,6 +255,7 @@ public:
 	string DBType;
 	bool m_UpdateDotaEloAfterGame;
 	bool m_UpdateDotaScoreAfterGame;	
+	string m_LastGameName;
 	string m_ExternalIP;					// our external IP
 	uint32_t m_ExternalIPL;					// our external IP long format
 	string m_Country;						// our country
@@ -265,10 +268,10 @@ public:
 	vector<string> m_CachedSpoofedNames;
 	vector<string> m_Providers;				//
 	vector<string> m_Welcome;				// our welcome message
-	vector<string> m_ChannelWelcome;				// our welcome message
-	vector<string> m_FPNames;					// our fake player names
-	vector<string> m_FPNamesLast;					// our last fake player names
-	vector<string> m_LanRoomName;					// our fake player names
+	vector<string> m_ChannelWelcome;		// our welcome message
+	vector<string> m_FPNames;				// our fake player names
+	vector<string> m_FPNamesLast;			// our last fake player names
+	vector<string> m_LanRoomName;			// our lan room name
 	vector<string> m_Mars;					// our mars messages
 	vector<string> m_MarsLast;				// our last mars messages
 	uint32_t m_ChannelJoinTime;				// when we enter a channel

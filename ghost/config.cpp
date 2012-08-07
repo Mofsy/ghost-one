@@ -93,7 +93,13 @@ int CConfig :: GetInt( string key, int x )
 	else
 		return atoi( m_CFG[key].c_str( ) );
 }
-
+uint32_t CConfig :: GetUInt( string key, uint32_t x )
+{
+if( m_CFG.find( key ) == m_CFG.end( ) )
+return x;
+else
+return strtoul( m_CFG[key].c_str( ),NULL,0);
+}
 long CConfig :: GetLong( string key, long x )
 {
 	if( m_CFG.find( key ) == m_CFG.end( ) )

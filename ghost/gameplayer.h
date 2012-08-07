@@ -53,6 +53,7 @@ protected:
 	bool m_LAN;
 	string m_ErrorString;
 	string m_RoomName;
+//	string m_RoomVersion;
 	CIncomingJoinPlayer *m_IncomingJoinPlayer;
 	CIncomingGarenaUser *m_IncomingGarenaUser;
 	
@@ -145,7 +146,7 @@ private:
 	bool m_Lagging;								// if the player is lagging or not (on the lag screen)
 	bool m_DropVote;							// if the player voted to drop the laggers or not (on the lag screen)
 	bool m_KickVote;							// if the player voted to kick a player or not	
-	bool m_StartVote;						                    // if the player !ready or not
+	bool m_StartVote;						    // if the player !ready or not
 	bool m_HasFFed;		
 	uint32_t m_TimeOfFF;       
 	bool m_CanFF; 
@@ -160,6 +161,7 @@ private:
 	queue<BYTEARRAY> m_GProxyBuffer;
 	uint32_t m_GProxyReconnectKey;
 	uint32_t m_LastGProxyAckTime;
+//	uint32_t m_TimeActive;           			// AFK detection
 	bool m_ScoreSet;
 	bool m_RankSet;
 	string m_ScoreS;
@@ -296,6 +298,10 @@ public:
 	void PushMessage( string message );
 
 	void AddLoadInGameData( BYTEARRAY nLoadInGameData )								{ m_LoadInGameData.push( nLoadInGameData ); }
+	
+	// AFK detection
+//	uint32_t  GetTimeActive( )     { return m_TimeActive; }
+//	void SetTimeActive      ( uint32_t nTimeActive )          { m_TimeActive = nTimeActive; } 
 
 	// processing functions
 
