@@ -828,7 +828,8 @@ bool CBaseGame :: Update( void *fd, void *send_fd )
 
 			if( (*i)->GetOutPacketsQueued( ) <= 1 )
 			{
-				(*i)->QueueGameRefresh( m_GameState, m_GameName, string( ), m_Map, m_SaveGame, GetTime( ) - m_CreationTime, m_HostCounter, slotstotal, slotsopen );
+				// (*i)->QueueGameRefresh( m_GameState, m_GameName, string( ), m_Map, m_SaveGame, GetTime( ) - m_CreationTime, m_HostCounter, slotstotal, slotsopen );
+				(*i)->QueueGameRefresh( m_GameState, m_GameName, string( ), m_Map, m_SaveGame, 0, m_HostCounter, slotstotal, slotsopen );
 				Refreshed = true;
 			}
 		}
@@ -2427,7 +2428,7 @@ void CBaseGame :: SendWelcomeMessage( CGamePlayer *player )
 //	SendChat( player, "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-" );
 //	SendChat( player, "Owner: "+m_OwnerName+"    Game Name:     " + m_GameName );
 	if( !m_HCLCommandString.empty( ) )		
-		SendChat( player,"= $" + m_GameName + "$ autoHCL Command String:  " + m_HCLCommandString);
+		SendChat( player,"= $ " + m_GameName.substr(0,m_GameName.size( )-4) + " $ autoHCL Command String:  " + m_HCLCommandString +"  (GameMode= -" + m_HCLCommandString +" )" );
 	uint32_t N = m_GHost->m_AutoHostAutoStartPlayers;	
 	SendChat( player, "=            $AutoStarT$ once >= "+ UTIL_ToString(N) +" players filled");
 	SendChat( player, "=                                                           " );	

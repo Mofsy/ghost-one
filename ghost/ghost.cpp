@@ -996,8 +996,9 @@ CGHost :: CGHost( CConfig *CFG )
 	ReloadConfig();
 	// load the battle.net connections
 	// we're just loading the config data and creating the CBNET classes here, the connections are established later (in the Update function)
+	// for( uint32_t i = 1; i < 10; i++ )
 
-	for( uint32_t i = 1; i < 10; i++ )
+	for( uint32_t i = 1; i < 19; i++ )
 	{
 		string Prefix;
 
@@ -1898,8 +1899,8 @@ bool CGHost :: Update( unsigned long usecBlock )
 				if( GameName.size( ) <= 31 ) //don't name it  too long, only 29 characters + " #10" (4 plus caractères)
 				{					
 					m_AutoHosted = true;
-					if ( m_NewOwner < 2 )
-					m_NewOwner = 0;					
+					if ( m_NewOwner > 2 )
+					m_NewOwner = 1;					
 
 					CreateGame( AutoHostMap, GAME_PUBLIC, false, GameName, m_AutoHostOwner, m_AutoHostOwner, m_AutoHostServer, false );
 					CONSOLE_Print( "[GHOST] adding \".cfg\" to autohost game map -> new name is [" + AutoHostMapStr + "]" );
