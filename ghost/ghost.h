@@ -219,6 +219,7 @@ public:
 	uint32_t m_ReplayBuildNumber;			// config value: replay build number (for saving replays)
 	bool m_TCPNoDelay;						// config value: use Nagle's algorithm or not
 	uint32_t m_MatchMakingMethod;			// config value: the matchmaking method
+	uint32_t m_MapGameType;                 // config value: the MapGameType overwrite (aka: refresh hack)
 	
 	uint32_t m_DenyMaxDownloadTime;			// config value: the maximum download time in milliseconds
 	uint32_t m_DenyMaxMapsizeTime;			// config value: the maximum time in milliseconds to wait for a MAPSIZE packet
@@ -244,6 +245,7 @@ public:
 	bool m_AppleIcon;
 	bool m_FakePlayersLobby;
 	bool m_PrefixName;
+	bool m_QueueGameRefresh;
 	bool m_ReplaceBanWithWarn;
 	bool m_forceautohclindota;
 	bool m_PlaceAdminsHigherOnlyInDota;
