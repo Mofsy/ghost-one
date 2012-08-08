@@ -5515,8 +5515,12 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 							{
 								SendChat( player->GetPID(), "You can't kick an admin!");
 								return HideCommand;
-							} else 							
-								CloseSlot( (unsigned char)( SID - 1 ), true );
+							} else if ( GetNumPlayers() < 3 ){
+									SendChat( player->GetPID(), "Command disabled when < 3 players in lobby to prevent the abuse & misuse!");
+									return HideCommand;
+								}
+								else
+									CloseSlot( (unsigned char)( SID - 1 ), true );
 						}
 					}
 				}
@@ -5530,6 +5534,10 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 					if (!CMDCheck(CMD_close, AdminAccess))
 					{
 						SendChat(player->GetPID(), m_GHost->m_Language->YouDontHaveAccessToThatCommand( ));
+						return HideCommand;
+					}
+					if ( GetNumPlayers() < 3 ){
+						SendChat( player->GetPID(), "Command disabled when < 3 players in lobby to prevent the abuse & misuse!");
 						return HideCommand;
 					}
 					CloseAllSlots( );
@@ -5747,8 +5755,11 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 							{
 								SendChat( player->GetPID(), "You can't kick an admin!");
 								return HideCommand;
-							} else
-								OpenSlot( (unsigned char)( SID - 1 ), true );							
+							} else	if ( GetNumPlayers() < 3 ){
+									SendChat( player->GetPID(), "Command disabled when < 3 players in lobby to prevent the abuse & misuse!");
+									return HideCommand;
+								} else
+									OpenSlot( (unsigned char)( SID - 1 ), true );							
 								
 						}
 					}
@@ -5765,6 +5776,10 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 						SendChat(player->GetPID(), m_GHost->m_Language->YouDontHaveAccessToThatCommand( ));
 						return HideCommand;
 					}
+					if ( GetNumPlayers() < 3 ){
+						SendChat( player->GetPID(), "Command disabled when < 3 players in lobby to prevent the abuse & misuse!");
+						return HideCommand;
+					}
 					OpenAllSlots( );
 				}
 				
@@ -5777,12 +5792,18 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 					if(m_GHost->m_FakePlayersLobby && !m_FakePlayers.empty())					
 						DeleteFakePlayer();
 					ReCalculateTeams();					
-					if (m_GetMapNumTeams==2 || m_Map->GetMapType( ).find("2teams") != string::npos )
+					if (m_GetMapNumTeams==2 || m_Map->GetMapType( ).find("2teams") != string::npos ) {
 						if (GetSlotsOccupiedT1( )<1 || GetSlotsOccupiedT2( )<1)
 						{
 							SendAllChat("Both teams must contain at least one player!");
 							return HideCommand;
 						}
+						if ( GetNumSlotsT1( ) == GetNumSlotsT2( ) && GetSlotsOccupiedT1( )!=GetSlotsOccupiedT2( ) )
+						{
+							SendAllChat("Team unbalanced. Please !swap players to balance the game & !startn again");
+							return HideCommand;
+						}
+					}
 					if (m_GHost->m_onlyownerscanstart)
 					if ((!IsOwner( User) && GetPlayerFromName(m_OwnerName, false)) && !RootAdminCheck )
 					{
@@ -5816,12 +5837,18 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 					if(m_GHost->m_FakePlayersLobby && !(m_FakePlayers.empty()))					
 						DeleteFakePlayer();
 					ReCalculateTeams();
-					if (m_GetMapNumTeams==2 || m_Map->GetMapType( ).find("2teams") != string::npos )
+					if (m_GetMapNumTeams==2 || m_Map->GetMapType( ).find("2teams") != string::npos ) {
 						if (GetSlotsOccupiedT1( )<1 || GetSlotsOccupiedT2( )<1)
 						{
 							SendAllChat("Both teams must contain at least one player!");
 							return HideCommand;
 						}
+						if ( GetNumSlotsT1( ) == GetNumSlotsT2( ) && GetSlotsOccupiedT1( )!=GetSlotsOccupiedT2( ) )
+						{
+							SendAllChat("Team unbalanced. Please !swap players to balance the game & !startn again");
+							return HideCommand;
+						}
+					}
 					if (m_GHost->m_onlyownerscanstart)
 					if ((!IsOwner( User) && GetPlayerFromName(m_OwnerName, false)) && !RootAdminCheck )
 					{
