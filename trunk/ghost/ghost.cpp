@@ -2286,6 +2286,7 @@ void CGHost :: SetConfigs( CConfig *CFG )
 	m_TCPNoDelay = CFG->GetInt( "tcp_nodelay", 0 ) == 0 ? false : true;
 	m_dropifdesync = CFG->GetInt( "bot_dropifdesync", 1 ) == 0 ? false : true; //Metal_Koola
 	m_MatchMakingMethod = CFG->GetInt( "bot_matchmakingmethod", 1 );
+	m_MapGameType = CFG->GetUInt( "bot_mapgametype", 0 );
 	
 	m_ActualRehostPrintingDelay = 0;		
 }
