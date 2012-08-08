@@ -314,6 +314,8 @@ public:
 
 	virtual uint32_t GetNextTimedActionTicks( );
 	virtual uint32_t GetSlotsOccupied( );
+	virtual uint32_t GetNumSlotsT1( );
+	virtual uint32_t GetNumSlotsT2( );
 	virtual uint32_t GetSlotsOccupiedT1( );
 	virtual uint32_t GetSlotsOccupiedT2( );
 	virtual uint32_t GetSlotsOpen( );

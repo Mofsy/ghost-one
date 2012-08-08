@@ -430,6 +430,30 @@ uint32_t CBaseGame :: GetSlotsOccupied( )
 
 	return NumSlotsOccupied;
 }
+uint32_t CBaseGame :: GetNumSlotsT1( )
+{
+	uint32_t NumSlotsT1 = 0;
+
+	for( vector<CGameSlot> :: iterator i = m_Slots.begin( ); i != m_Slots.end( ); i++ )
+	{
+		if( (*i).GetSlotStatus( ) != SLOTSTATUS_CLOSED && (*i).GetComputer( ) == 0 && (*i).GetTeam( ) == 0 )
+			NumSlotsT1++;
+	}
+
+	return NumSlotsT1;
+}
+uint32_t CBaseGame :: GetNumSlotsT2( )
+{
+	uint32_t NumSlotsT2 = 0;
+
+	for( vector<CGameSlot> :: iterator i = m_Slots.begin( ); i != m_Slots.end( ); i++ )
+	{
+		if( (*i).GetSlotStatus( ) != SLOTSTATUS_CLOSED && (*i).GetComputer( ) == 0 && (*i).GetTeam( ) == 1 )
+			NumSlotsT2++;
+	}
+
+	return NumSlotsT2;
+}
 uint32_t CBaseGame :: GetSlotsOccupiedT1( )
 {
 	uint32_t NumSlotsOccupiedT1 = 0;
