@@ -87,8 +87,10 @@ CBNET :: CBNET( CGHost *nGHost, string nServer, string nServerAlias, string nBNL
 		m_ServerAlias = "XPAM";
 	else if( LowerServer == "europe.warcraft3.eu" )
 		m_ServerAlias = "W3EU";
+	else if( LowerServer == "battle.lp.ro" )
+		m_ServerAlias = "BattleRo";
 	else if( LowerServer == "200.51.203.231" )
-		m_ServerAlias = "Ombu";
+		m_ServerAlias = "OMBU";
 	else
 		m_ServerAlias = m_Server;
 
