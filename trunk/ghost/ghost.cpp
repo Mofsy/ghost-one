@@ -1915,6 +1915,7 @@ bool CGHost :: Update( unsigned long usecBlock )
 							//fixed thanks to Gen's efforts & 0x6D48 & ukaf.b							
 						else
 							m_AutoHostAutoStartPlayers = m_BotAutoStartPlayers;
+						m_NumPlayersforAutoStart = m_AutoHostAutoStartPlayers;
 							
 						m_CurrentGame->SetAutoStartPlayers( m_AutoHostAutoStartPlayers ); //use m_AutoHostAutoStartPlayers as it's pre-defined in ghost.cfg by bot_autohostautostartplayers
 						//auto insert fake player(s)
@@ -2264,6 +2265,7 @@ void CGHost :: SetConfigs( CConfig *CFG )
 	m_FakePlayersLobby = CFG->GetInt( "bot_fakeplayersinlobby", 0 ) == 1 ? true : false; //Gen
 	m_AppleIcon = CFG->GetInt( "bot_appleicon", 0 ) == 1 ? true : false; //Gen
 	m_PrefixName = CFG->GetInt( "bot_realmprefixname", 0 ) == 1 ? true : false; //Gen
+	m_SquirrelTxt = CFG->GetInt( "bot_squirreltxt", 0 ) == 0 ? false : true; //Gen
 	m_LobbyTimeLimit = CFG->GetInt( "bot_lobbytimelimit", 111 );	
 	m_Latency = CFG->GetInt( "bot_latency", 100 );
 	m_SyncLimit = CFG->GetInt( "bot_synclimit", 50 );
@@ -3928,6 +3930,7 @@ void CGHost :: ReloadConfig ()
 	m_FakePlayersLobby = CFG->GetInt( "bot_fakeplayersinlobby", 0 ) == 1 ? true : false; //Gen
 	m_AppleIcon = CFG->GetInt( "bot_appleicon", 0 ) == 1 ? true : false; //Gen
 	m_PrefixName = CFG->GetInt( "bot_realmprefixname", 0 ) == 1 ? true : false; //Gen
+	m_SquirrelTxt = CFG->GetInt( "bot_squirreltxt", 0 ) == 0 ? false : true; // Gen
 	m_LobbyTimeLimit = CFG->GetInt( "bot_lobbytimelimit", 111 );	
 	m_LobbyTimeLimitMax = CFG->GetInt( "bot_lobbytimelimitmax", 150 );
 	m_LANWar3Version = CFG->GetInt( "lan_war3version", 24 );

@@ -132,7 +132,7 @@ protected:
 	uint32_t m_StartedVoteStartTime;// GetTime when the votestart was started
 	uint32_t m_GameOverTime;						// GetTime when the game was over
 	uint32_t m_LastPlayerLeaveTicks;				// GetTicks when the most recent player left the game
-	uint32_t m_ActualyPrintPlayerWaitingStartDelay; // Counts the number of checks before the waiting for x players before start get printed again	
+	uint32_t m_ActualyPrintPlayerWaitingStartDelay; // Counts the number of checks before the waiting for x players before start get printed again
 	double m_MinimumScore;							// the minimum allowed score for matchmaking mode
 	double m_MaximumScore;							// the maximum allowed score for matchmaking mode
 	bool m_SlotInfoChanged;							// if the slot info has changed and hasn't been sent to the players yet (optimization)
@@ -173,6 +173,8 @@ protected:
 	bool m_AutoSave;								// if we should auto save the game before someone disconnects
 	bool m_MatchMaking;								// if matchmaking mode is enabled
 	bool m_LocalAdminMessages;						// if local admin messages should be relayed or not
+	bool m_FPEnable;
+	bool m_SquirrelText;
 	uint32_t m_LastInfoShow;
 	uint32_t m_LastGenInfoShow;
 	uint32_t m_LastOwnerInfoShow;
@@ -321,6 +323,7 @@ public:
 	virtual uint32_t GetSlotsOpen( );
 	virtual uint32_t GetSlotsOpenT1( );
 	virtual uint32_t GetSlotsOpenT2( );
+	virtual uint32_t GetSlotsClosed( );
 	virtual uint32_t GetNumPlayers( );
 	virtual uint32_t GetNumFakePlayers( );
 	virtual uint32_t GetNumHumanPlayers( );

@@ -2649,12 +2649,15 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 						{
 							bool isAdmin = false;
 							CGamePlayer *Player = GetPlayerFromSID( SID - 1 );
+							if (SID - 1>=m_Slots.size())
+								return HideCommand;
 							if (Player)
 							{
 								if (IsAdmin(Player->GetName()) || IsRootAdmin(Player->GetName()) || Player->GetName()==m_DefaultOwner)
 									isAdmin = true;
 							}
-							else { if ( m_Slots[SID-1].GetSlotStatus( ) == SLOTSTATUS_OCCUPIED && m_Slots[SID-1].GetComputer( ) == 1 )
+							else { 
+								if ( m_Slots[SID-1].GetSlotStatus( ) == SLOTSTATUS_OCCUPIED && m_Slots[SID-1].GetComputer( ) == 1 )
 										SendChat( player->GetPID(), "You have closed computer slot, type !comp "+ Payload +" to make it a comp again");
 									else if ( m_Slots[SID-1].GetSlotStatus( ) == SLOTSTATUS_CLOSED )
 											return HideCommand;		
@@ -3192,9 +3195,8 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 				// !FAKEPLAYER
 				//
 
-				if( ( Command == "fakeplayer" || Command == "fp" ) && !m_CountDownStarted )
+				if( ( Command == "fakeplayer" || Command == "fp" ) && !m_CountDownStarted && GetSlotsOpen( ) > 2 )
 					CreateFakePlayer( );
-					
 				//
 				// !DELFAKE
 				//
@@ -4316,6 +4318,8 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 							bool isAdmin = false;
 							bool isRootAdmin = false;
 							CGamePlayer *Player = GetPlayerFromSID( SID - 1 );
+							if (SID - 1>=m_Slots.size())
+								return HideCommand;
 							if (Player)
 							{
 								if (IsAdmin(Player->GetName()) || IsRootAdmin(Player->GetName()))
@@ -5501,6 +5505,8 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 						{
 							bool isAdmin = false;
 							CGamePlayer *Player = GetPlayerFromSID( SID - 1 );
+							if (SID - 1>=m_Slots.size())
+								return HideCommand;
 							if (Player)
 							{
 								if (IsAdmin(Player->GetName()) || IsRootAdmin(Player->GetName()) || Player->GetName()==m_DefaultOwner)
@@ -5515,12 +5521,13 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 							{
 								SendChat( player->GetPID(), "You can't kick an admin!");
 								return HideCommand;
-							} else if ( GetNumPlayers() < 3 ){
-									SendChat( player->GetPID(), "Command disabled when < 3 players in lobby to prevent the abuse & misuse!");
+							} else {
+								if ( GetNumPlayers() < 3 || ((GetSlotsClosed( ) - GetSlotsOpen( ) - GetSlotsOccupied( )) > 2 )){
+									SendChat( player->GetPID(), "Command disabled temporarily to prevent an abuse or a misuse!" );
 									return HideCommand;
 								}
-								else
 									CloseSlot( (unsigned char)( SID - 1 ), true );
+							}
 						}
 					}
 				}
@@ -5536,20 +5543,19 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 						SendChat(player->GetPID(), m_GHost->m_Language->YouDontHaveAccessToThatCommand( ));
 						return HideCommand;
 					}
-					if ( GetNumPlayers() < 3 ){
-						SendChat( player->GetPID(), "Command disabled when < 3 players in lobby to prevent the abuse & misuse!");
+					if ( GetNumPlayers() < 3 || ((GetSlotsClosed( ) - GetSlotsOpen( ) - GetSlotsOccupied( )) > 2 )){
+						SendChat( player->GetPID(), "Command disabled temporarily to prevent an abuse or a misuse!");
 						return HideCommand;
 					}
 					CloseAllSlots( );
 				}
 				
 				//
-				// !FAKEPLAYER
+				// !FAKEPLAYER !FP
 				//
 
-				if( ( Command == "fakeplayer" || Command == "fp" ) && !m_CountDownStarted )
+				if( ( Command == "fakeplayer" || Command == "fp" ) && !m_CountDownStarted && GetSlotsOpen( ) > 2 )
 					CreateFakePlayer( );
-					
 				//
 				// !DELFAKE
 				//
@@ -5734,6 +5740,8 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 							bool isAdmin = false;
 							bool isRootAdmin = false;
 							CGamePlayer *Player = GetPlayerFromSID( SID - 1 );
+							if (SID - 1>=m_Slots.size())
+								return HideCommand;
 							if (Player)
 							{
 								if (IsAdmin(Player->GetName()) || IsRootAdmin(Player->GetName()))
@@ -5755,12 +5763,13 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 							{
 								SendChat( player->GetPID(), "You can't kick an admin!");
 								return HideCommand;
-							} else	if ( GetNumPlayers() < 3 ){
-									SendChat( player->GetPID(), "Command disabled when < 3 players in lobby to prevent the abuse & misuse!");
+							} else {
+								if ( GetNumPlayers() < 3 || ((GetSlotsOpen( ) - GetSlotsClosed( ) - GetSlotsOccupied( )) > 3 )){
+									SendChat( player->GetPID(), "Command disabled temporarily to prevent an abuse or a misuse!");
 									return HideCommand;
-								} else
+								}
 									OpenSlot( (unsigned char)( SID - 1 ), true );							
-								
+							}	
 						}
 					}
 				}
@@ -5776,8 +5785,8 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 						SendChat(player->GetPID(), m_GHost->m_Language->YouDontHaveAccessToThatCommand( ));
 						return HideCommand;
 					}
-					if ( GetNumPlayers() < 3 ){
-						SendChat( player->GetPID(), "Command disabled when < 3 players in lobby to prevent the abuse & misuse!");
+					if ( GetNumPlayers() < 3 || ((GetSlotsOpen( ) - GetSlotsClosed( ) - GetSlotsOccupied( )) > 3 )){
+						SendChat( player->GetPID(), "Command disabled temporarily to prevent an abuse or a misuse!");
 						return HideCommand;
 					}
 					OpenAllSlots( );
@@ -5798,7 +5807,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 							SendAllChat("Both teams must contain at least one player!");
 							return HideCommand;
 						}
-						if ( GetNumSlotsT1( ) == GetNumSlotsT2( ) && GetSlotsOccupiedT1( )!=GetSlotsOccupiedT2( ) )
+						if ( GetNumSlotsT1( ) == GetNumSlotsT2( ) && GetSlotsOccupiedT1( )!=GetSlotsOccupiedT2( ) && m_Map->GetMapType( ).find("noteam") == string::npos )
 						{
 							SendAllChat("Team unbalanced. Please !swap players to balance the game & !startn again");
 							return HideCommand;
@@ -5843,7 +5852,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 							SendAllChat("Both teams must contain at least one player!");
 							return HideCommand;
 						}
-						if ( GetNumSlotsT1( ) == GetNumSlotsT2( ) && GetSlotsOccupiedT1( )!=GetSlotsOccupiedT2( ) )
+						if ( GetNumSlotsT1( ) == GetNumSlotsT2( ) && GetSlotsOccupiedT1( )!=GetSlotsOccupiedT2( ) && m_Map->GetMapType( ).find("noteam") == string::npos )
 						{
 							SendAllChat("Team unbalanced. Please !swap players to balance the game & !startn again");
 							return HideCommand;
@@ -6118,7 +6127,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 	// !CHECKME
 	//
 
-	if( Command == "checkme" || Command == "sc" || Command == "cm" )
+	if( Command == "checkme" || Command == "sc" || Command == "cm" || Command == "spoofcheck" || Command == "check me" || Command == "spoof c" || Command == "spoofc" )
 		SendChat( player, m_GHost->m_Language->CheckedPlayer( User, player->GetNumPings( ) > 0 ? UTIL_ToString( player->GetPing( m_GHost->m_LCPings ) ) + "ms" : "N/A", m_GHost->m_DBLocal->FromCheck( UTIL_ByteArrayToUInt32( player->GetExternalIP( ), true ) ), AdminCheck || RootAdminCheck ? "Yes" : "No", IsOwner( User ) ? "Yes" : "No", player->GetSpoofed( ) ? "Yes" : "No", player->GetSpoofedRealm( ).empty( ) ? "N/A" : player->GetSpoofedRealm( ), player->GetReserved( ) ? "Yes" : "No" ) );
 
 

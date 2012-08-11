@@ -240,6 +240,8 @@ CBaseGame :: CBaseGame( CGHost *nGHost, CMap *nMap, CSaveGame *nSaveGame, uint16
 	m_LastGenInfoShow = GetTime( );
 	m_LastOwnerInfoShow = GetTime( );
 	m_LocalAdminMessages = m_GHost->m_LocalAdminMessages;
+	m_FPEnable = m_GHost->m_FakePlayersLobby;
+	m_SquirrelText = m_GHost->m_SquirrelTxt;
 
 			uint32_t slotstotal = m_Slots.size( );
 			uint32_t slotsopen = GetSlotsOpen();			
@@ -502,6 +504,18 @@ uint32_t CBaseGame :: GetSlotsOpenT2( )
 
 	return NumSlotsOpenT2;
 }
+uint32_t CBaseGame :: GetSlotsClosed( )
+{
+	uint32_t NumSlotsClosed = 0;
+
+	for( vector<CGameSlot> :: iterator i = m_Slots.begin( ); i != m_Slots.end( ); i++ )
+	{
+		if( (*i).GetSlotStatus( ) == SLOTSTATUS_CLOSED )
+			NumSlotsClosed++;
+	}
+
+	return NumSlotsClosed;
+}
 
 uint32_t CBaseGame :: GetSlotsOpen( )
 {
@@ -744,7 +758,6 @@ bool CBaseGame :: Update( void *fd, void *send_fd )
 
 		if( !m_CountDownStarted )
 		{
-			BYTEARRAY MapGameType;
 			// construct a fixed host counter which will be used to identify players from this "realm" (i.e. LAN)
 			// the fixed host counter's 4 most significant bits will contain a 4 bit ID (0-15)
 			// the rest of the fixed host counter will contain the 28 least significant bits of the actual host counter
@@ -2279,7 +2292,7 @@ void CBaseGame :: SendFakePlayerInfo( CGamePlayer *player )
 			t = "]";
 		}
 		Send( player, m_Protocol->SEND_W3GS_PLAYERINFO( *i, s + UTIL_ToString( *i ) + t, IP, IP ) );
-	}	
+	}
 }
 
 void CBaseGame :: SendWTVPlayerInfo( CGamePlayer *player )
@@ -2453,14 +2466,15 @@ void CBaseGame :: SendWelcomeMessage( CGamePlayer *player )
 //	SendChat( player, "Owner: "+m_OwnerName+"    Game Name:     " + m_GameName );
 	if( !m_HCLCommandString.empty( ) )		
 		SendChat( player,"= $ " + m_GameName.substr(0,m_GameName.size( )-4) + " $ autoHCL Command String:  " + m_HCLCommandString +"  (GameMode= -" + m_HCLCommandString +" )" );
-	uint32_t N = m_GHost->m_AutoHostAutoStartPlayers;	
+	uint32_t N = m_GHost->m_NumPlayersforAutoStart;	
 	SendChat( player, "=            $AutoStarT$ once >= "+ UTIL_ToString(N) +" players filled");
+	if(m_SquirrelText){
 	SendChat( player, "=                                                           " );	
 	SendChat( player, "= (\\_       No admins here? To FORCE START:                 " );
 	SendChat( player, "= (_ \\ ( '>  Type !owner to gain control of lobby           " );
 	SendChat( player, "=   ) \\/_)= OR all should write !go (4 votes to startgame)  " );
 	SendChat( player, "=   (_(_ )_                                                 " );
-	SendChat( player, "=============================================================" );
+	SendChat( player, "=============================================================" );}
 	SendChat( player, " " );
 
 }
@@ -3474,9 +3488,13 @@ void CBaseGame :: EventPlayerJoined( CPotentialPlayer *potential, CIncomingJoinP
 	} else
 		ResetReservedSlot(joinPlayer->GetName());
 
-	//auto delete fake player(s)	
-	if ( GetSlotsOpen( ) < 2 && !m_FakePlayers.empty() && m_GHost->m_FakePlayersLobby )
+	//auto delete fake player(s)
+	if (m_FPEnable){
+	if ( GetSlotsOpen( ) < 2 && !m_FakePlayers.empty() )
 		DeleteAFakePlayer( );
+		else if (GetSlotsOpen( )>3)
+			CreateFakePlayer( );
+	}
 	// we have a slot for the new player
 	// make room for them by deleting the virtual host player if we have to
 
@@ -4545,7 +4563,6 @@ void CBaseGame :: EventPlayerJoinedWithScore( CPotentialPlayer *potential, CInco
 void CBaseGame :: EventPlayerLeft( CGamePlayer *player, uint32_t reason )
 {
 	// this function is only called when a player leave packet is received, not when there's a socket error, kick, etc...
-
 	uint32_t GameNr = GetGameNr();
 
 	bool show = true;
@@ -4568,12 +4585,12 @@ void CBaseGame :: EventPlayerLeft( CGamePlayer *player, uint32_t reason )
 	if( !m_GameLoading && !m_GameLoaded )
 		OpenSlot( GetSIDFromPID( player->GetPID( ) ), false );
 
-	//ban leaver who left the game in 30 secs after finishing map downloading.
+	//ban leaver who left the game in 45 secs after finishing map downloading.
 	if( !m_DownloadOnlyMode && player->GetDownloadFinished( ) && GetTime( ) - player->GetFinishedDownloadingTime( ) < 45 )
 	{
-		SendAllChat(player->GetName() + " BANNED for dl & early leaving in lobby" );
-		SendChat(player->GetPID(), ", left the lobby in 30 secs after downloaded gets banned for 2 days. DL xong, trong 45s ma out la bi ban nick 2 ngay" );
-		string Reason = "Leaver in 30 secs after downloaded gets banned for 2 days";
+		SendAllChat(player->GetName( ) + " BANNED for dl & early leaving in lobby" );
+		SendChat(player->GetPID(), ", left the lobby in 45 secs after downloaded gets banned for 2 days. DL xong, trong 45s ma out la bi ban nick 2 ngay" );
+		string Reason = "Leaver in 45 secs after downloaded gets banned for 2 days";
 		Reason = "Autobanned "+Reason;
 		CONSOLE_Print( "[AUTOBAN2days: " + m_GameName + "] Autobanning " + player->GetName( ) + " (" + Reason +")" );
 			string sk = player->GetJoinedRealm( );
@@ -4591,8 +4608,10 @@ void CBaseGame :: EventPlayerLeft( CGamePlayer *player, uint32_t reason )
 									sk = "Kalimdor (Asia)";
 									else if ( sk.find("europe.battle.net") != string::npos )
 										sk = "Northrend (Europe)";
-										else if ( sk.find("ombu") != string::npos )
-											sk = "OMBU";
+										else if ( sk.find("battle.lp.ro") != string::npos )
+											sk = "BattleRo";
+											else if ( sk.find("ombu") != string::npos || sk.find(".203.231") != string::npos )
+												sk = "OMBU";
 	/*	for( vector<CBNET *> :: iterator j = m_GHost->m_BNETs.begin( ); j != m_GHost->m_BNETs.end( ); j++ )
             { 
 					if( sk == "LAN(Garena)" ){
@@ -4606,40 +4625,40 @@ void CBaseGame :: EventPlayerLeft( CGamePlayer *player, uint32_t reason )
             }	*/
  
 			if (sk == "LAN(Garena)")
-				m_GHost->m_DB->ThreadedBanAdd(" ",player->GetName( ), player->GetExternalIPString( ), "in LAN lobby", "LANautoBot","Download map & left so early",2,0);	 
+				m_GHost->m_DB->ThreadedBanAdd(" ", player->GetName( ), player->GetExternalIPString( ), "in LAN lobby", "LANautoBot","Download map & left so early",2,0);	 
 			else m_GHost->m_Callables.push_back( m_GHost->m_DB->ThreadedBanAdd( player->GetSpoofedRealm(), player->GetName( ), player->GetExternalIPString(), "lobby in " + sk, "Bnet-autobanBot", "DL & left so early", 2, 0 ));
 
 			// m_GHost->m_Callables.push_back( m_GHost->m_DB->ThreadedBanAdd( player->GetSpoofedRealm(), player->GetName( ), player->GetExternalIPString(), "in lobby", "AUTOBAN", "DL & left so early", 2, 0 ));
 	}
-	//auto insert fake player(s)
-	if ( m_GHost->m_FakePlayersLobby && !m_GameLoading && !m_GameLoaded ){
+	/* auto insert fake player
+	if ( m_FPEnable && !m_GameLoading && !m_GameLoaded ){
 		if (GetNumHumanPlayers( ) < 4 && GetSlotsOpen() > 2)
 			CreateInitialFakePlayers( );
 		else if (GetSlotsOpen() > 3)
 			CreateFakePlayer( );
-	}
-	
-	/*uint32_t b;
-	if (!m_GHost->m_FakePlayersLobby)
-		b=0;
-	else{
-		if ( GetNumHumanPlayers( ) < 3 )
-		{
-			if ( GetSlotsOpen() + GetNumPlayers() > 7 )
-			{
-				if (m_GetMapNumTeams < 2)
-					b = 4; // we allows only a maximum of 4 fakeplayers when it's a (>=8) game
-				else 
-					b = 3;
-			} else 	b = 3; // we allows only a maximum of 3 fakeplayers as to prevent a trash lobby
-		} else if ( GetNumHumanPlayers( ) < 4 )
-			b = 2; // we allows only a maximum of 2 fakeplayers as to prevent a trash lobby
-		if ( ( GetSlotsOpen() + GetNumPlayers() > 9 ) && m_GetMapNumTeams < 2 && GetNumHumanPlayers( ) < 4 )
-			b = 4; // we allows only a maximum of 5 fakeplayers when it's a (>=10) game
-	}
-	while ( b != 0 && GetSlotsOpen() > 2 && m_FakePlayers.size( ) < b  && GetNumHumanPlayers( ) < 4 && !m_GameLoading && !m_GameLoaded )
-		CreateFakePlayer( );*/
-		
+	} */
+
+			/*uint32_t b;
+			if (!m_GHost->m_FakePlayersLobby)
+				b=0;
+			else{
+				if ( GetNumHumanPlayers( ) < 3 )
+				{
+					if ( GetSlotsOpen() + GetNumPlayers() > 7 )
+					{
+						if (m_GetMapNumTeams < 2)
+							b = 4; // we allows only a maximum of 4 fakeplayers when it's a (>=8) game
+						else 
+							b = 3;
+					} else 	b = 3; // we allows only a maximum of 3 fakeplayers as to prevent a trash lobby
+				} else if ( GetNumHumanPlayers( ) < 4 )
+					b = 2; // we allows only a maximum of 2 fakeplayers as to prevent a trash lobby
+				if ( ( GetSlotsOpen() + GetNumPlayers() > 9 ) && m_GetMapNumTeams < 2 && GetNumHumanPlayers( ) < 4 )
+					b = 4; // we allows only a maximum of 5 fakeplayers when it's a (>=10) game
+			}
+			while ( b != 0 && GetSlotsOpen() > 2 && m_FakePlayers.size( ) < b  && GetNumHumanPlayers( ) < 4 && !m_GameLoading && !m_GameLoaded )
+				CreateFakePlayer( );*/
+
 	// return m_OwnerName to DefaultOwner as the TEMP Owner left, reset NewOwner value to 0 meaning no TEMP Owner, so the !owner command will allow the player who has typed it become new TEMP Owner & set NewOwner=1 to again disable second player from becoming another TEMP owner by typing !owner
 	if (IsOwner(player->GetName())){
 		if ( m_GHost->m_NewOwner > 2 )
@@ -4654,11 +4673,9 @@ void CBaseGame :: EventPlayerLeft( CGamePlayer *player, uint32_t reason )
 		CONSOLE_Print( "[GAME: " + m_GameName + "] Return OwnerName [" + m_OwnerName +"] = DefaultOwner [" + m_DefaultOwner + "]" );
 	}
 }
-
 void CBaseGame :: EventPlayerLoaded( CGamePlayer *player )
 {
 	CONSOLE_Print( "[GAME: " + m_GameName + "] player [" + player->GetName( ) + "] finished loading in " + UTIL_ToString( (float)( player->GetFinishedLoadingTicks( ) - m_StartedLoadingTicks ) / 1000, 2 ) + " seconds" );
-
 	if( m_LoadInGame )
 	{
 		// send any buffered data to the player now
@@ -5010,6 +5027,7 @@ void CBaseGame :: EventPlayerChatToHost( CGamePlayer *player, CIncomingChatPlaye
 			bool isAdmin = IsOwner(player->GetName());
 			bool isDefaultOwner = player->GetName() == m_DefaultOwner;
 			bool isRootAdmin = isAdmin;
+			bool isSafe=false;
 			for( vector<CBNET *> :: iterator j = m_GHost->m_BNETs.begin( ); j != m_GHost->m_BNETs.end( ); j++ )
 			{
 				if( (*j)->IsAdmin(player->GetName()))
@@ -5020,6 +5038,10 @@ void CBaseGame :: EventPlayerChatToHost( CGamePlayer *player, CIncomingChatPlaye
 				{
 					isRootAdmin = true;
 					isAdmin = true;
+				}
+				if( (*j)->IsSafe(player->GetName()) && m_GHost->m_SafelistedBanImmunity)
+				{
+					isSafe = true;
 				}
 			}
 
@@ -5179,7 +5201,7 @@ void CBaseGame :: EventPlayerChatToHost( CGamePlayer *player, CIncomingChatPlaye
 					
 					if( player->IsSpammer() )
 					{
-						if (!(isAdmin || isRootAdmin || isDefaultOwner))
+						if (!(isAdmin || isRootAdmin || isDefaultOwner || isSafe))
 						//count << "SPAMMER!!!!! " << player->GetName( ) << endl;
 						OpenSlot( GetSIDFromPID( player->GetPID( ) ), true );
 					}
@@ -5632,8 +5654,18 @@ void CBaseGame :: EventPlayerMapSize( CGamePlayer *player, CIncomingMapSize *map
 			if (m_DownloadOnlyMode){
 			SendChat (player->GetPID(),"This is a download only game, you should leave now");
 			} else {
-			SendChat (player->GetPID()," will get banned for 2 days IF you leave in 45s. dl xong, trong 30s ma out la bi Ban nick 2 ngay" );
-			SendAllChat ("@" + player->GetName() + ": WARNING, leaver in 45s after downloaded gets banned for 2 days.  DL xong, trong 45s ma out la bi Ban nick 2 ngay" );
+			//	SendChat (player->GetPID()," will get banned for 2 days IF you leave in 45s. dl xong, trong 45s ma out la bi Ban nick 2 ngay" );
+			//	SendAllChat ("@" + player->GetName() + ": WARNING, leaver in 45s after downloaded gets banned for 2 days" );
+				string sk = player->GetJoinedRealm( );
+				if( sk.size()<3 )
+					SendAllChat ("@" + player->GetName() + ": WARNING, leaver in 45s after downloaded gets banned for 2 days" );
+				else {
+					for( vector<CBNET *> :: iterator j = m_GHost->m_BNETs.begin( ); j != m_GHost->m_BNETs.end( ); j++ )
+					{
+						if( (*j)->GetServer( ) == sk && sk.find("eurobattle") == string::npos )				
+						(*j)->QueueChatCommand( "@" + player->GetName( ) + ": WARNING, leaver in 45s after downloading the map gets banned for 2 days", player->GetName( ), true );
+					}
+				}
 			}
 			// add to database
 
@@ -6445,7 +6477,7 @@ unsigned char CBaseGame :: GetEmptySlotForFakePlayers( )
 
 		for( unsigned char i = m_Slots.size( ); i-- > 0 ; )
 		{
-			if( m_Slots[i].GetSlotStatus( ) == SLOTSTATUS_OPEN )
+			if( m_Slots[i].GetSlotStatus( ) == SLOTSTATUS_OPEN && m_Slots[i].GetTeam()!=12 )
 				return i;
 		}
 
