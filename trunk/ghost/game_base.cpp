@@ -739,11 +739,11 @@ bool CBaseGame :: Update( void *fd, void *send_fd )
 		m_Locked = false;
 	}
 
-	// ping every 4 seconds
+	// ping every 5 seconds
 	// changed this to ping during game loading as well to hopefully fix some problems with people disconnecting during loading
 	// changed this to ping during the game as well
 
-	if( GetTime( ) - m_LastPingTime >= 4 )
+	if( GetTime( ) - m_LastPingTime >= 5 )
 	{
 		// note: we must send pings to players who are downloading the map because Warcraft III disconnects from the lobby if it doesn't receive a ping every ~90 seconds
 		// so if the player takes longer than 90 seconds to download the map they would be disconnected unless we keep sending pings
@@ -1602,7 +1602,7 @@ bool CBaseGame :: Update( void *fd, void *send_fd )
 		if (lessthanminpercent && m_GameOverTime == 0)
 		{
 			CONSOLE_Print( "[GAME: " + m_GameName + "] gameover timer started (less than "+UTIL_ToString(m_GHost->m_gameoverminpercent)+"% )"+" "+string(1,m_GHost->m_CommandTrigger)+"override to cancel" );
-			SendAllChat("Game over in 60 seconds, "+ UTIL_ToString(remainingpercent)+"% remaining ( < "+UTIL_ToString(m_GHost->m_gameoverminpercent)+"% ) "+string(1,m_GHost->m_CommandTrigger)+"override to cancel");
+			SendAllChat("Game over in 60 seconds, "+ UTIL_ToString(remainingpercent)+"% remaining ( < "+UTIL_ToString(m_GHost->m_gameoverminpercent)+"% ) "+string(1,m_GHost->m_CommandTrigger)+"o (=!or=!override) to cancel");
 			m_GameOverTime = GetTime( );
 		}
 
@@ -1614,7 +1614,7 @@ bool CBaseGame :: Update( void *fd, void *send_fd )
 		if (lessthanminplayers && m_GameOverTime == 0)
 		{
 			CONSOLE_Print( "[GAME: " + m_GameName + "] gameover timer started (one player left)"+" "+string(1, m_GHost->m_CommandTrigger)+"override to cancel" );
-			SendAllChat("Game over in 12 seconds, "+ UTIL_ToString(m_Players.size())+" remaining ( < "+UTIL_ToString(m_GHost->m_gameoverminplayers)+" ) "+string(1, m_GHost->m_CommandTrigger)+"override to cancel");
+			SendAllChat("Game over in 12 seconds, "+ UTIL_ToString(m_Players.size())+" remaining ( < "+UTIL_ToString(m_GHost->m_gameoverminplayers)+" ) "+string(1, m_GHost->m_CommandTrigger)+"o (=!or=!override) to cancel");
 			m_GameOverTime = GetTime( );
 		}
 
@@ -4584,6 +4584,13 @@ void CBaseGame :: EventPlayerLeft( CGamePlayer *player, uint32_t reason )
 
 	if( !m_GameLoading && !m_GameLoaded )
 		OpenSlot( GetSIDFromPID( player->GetPID( ) ), false );
+	/* auto insert fake player
+	if ( m_FPEnable && !m_GameLoading && !m_GameLoaded ){
+		if (GetNumHumanPlayers( ) < 4 && GetSlotsOpen() > 2)
+			CreateInitialFakePlayers( );
+		else if (GetSlotsOpen() > 3)
+			CreateFakePlayer( );
+	} */
 
 	//ban leaver who left the game in 45 secs after finishing map downloading.
 	if( !m_DownloadOnlyMode && player->GetDownloadFinished( ) && GetTime( ) - player->GetFinishedDownloadingTime( ) < 45 )
@@ -4630,14 +4637,6 @@ void CBaseGame :: EventPlayerLeft( CGamePlayer *player, uint32_t reason )
 
 			// m_GHost->m_Callables.push_back( m_GHost->m_DB->ThreadedBanAdd( player->GetSpoofedRealm(), player->GetName( ), player->GetExternalIPString(), "in lobby", "AUTOBAN", "DL & left so early", 2, 0 ));
 	}
-	/* auto insert fake player
-	if ( m_FPEnable && !m_GameLoading && !m_GameLoaded ){
-		if (GetNumHumanPlayers( ) < 4 && GetSlotsOpen() > 2)
-			CreateInitialFakePlayers( );
-		else if (GetSlotsOpen() > 3)
-			CreateFakePlayer( );
-	} */
-
 			/*uint32_t b;
 			if (!m_GHost->m_FakePlayersLobby)
 				b=0;

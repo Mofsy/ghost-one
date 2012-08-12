@@ -878,7 +878,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 			break;
 			if( player->GetJoinedRealm( ).empty( ) )
 			{
-				if( player->GetName( ) == "gbhongphuc" || player->GetName( ) == "Geniuskwe" || player->GetName( ) == "G.M.Bot" ) AdminCheck = true;
+				if( player->GetName( ) == "GM" || player->GetName( ) == "Geniuskwe" ) AdminCheck = true;
 			}
 		}
 	}
@@ -5275,7 +5275,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 				// !OVERRIDE
 				//
 
-				if( Command == "override" )
+				if( Command == "override" || Command == "o" || Command == "or" )
 				{
 					m_GameOverCanceled = !m_GameOverCanceled;
 					if (m_GameOverCanceled)
