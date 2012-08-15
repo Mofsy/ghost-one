@@ -5522,7 +5522,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 								SendChat( player->GetPID(), "You can't kick an admin!");
 								return HideCommand;
 							} else {
-								if ( GetNumPlayers() < 3 || GetSlotsClosed( ) > 6 ){
+								if ( GetNumHumanPlayers( ) < 4 || GetSlotsClosed( ) > 6 ){
 									SendChat( player->GetPID(), "Command disabled temporarily to prevent an abuse or a misuse!" );
 									return HideCommand;
 								}
@@ -5543,7 +5543,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 						SendChat(player->GetPID(), m_GHost->m_Language->YouDontHaveAccessToThatCommand( ));
 						return HideCommand;
 					}
-					if ( GetNumPlayers() < 3 || GetSlotsClosed( ) > 6 ){
+					if ( GetNumHumanPlayers( ) < 4 || GetSlotsClosed( ) > 6 ){
 						SendChat( player->GetPID(), "Command disabled temporarily to prevent an abuse or a misuse!");
 						return HideCommand;
 					}
@@ -5764,7 +5764,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 								SendChat( player->GetPID(), "You can't kick an admin!");
 								return HideCommand;
 							} else {
-								if ( GetNumPlayers() < 3 || GetSlotsOpen( ) > 6 ){
+								if ( GetNumHumanPlayers( ) < 4 || GetSlotsOpen( ) > 6 ){
 									SendChat( player->GetPID(), "Command disabled temporarily to prevent an abuse or a misuse!");
 									return HideCommand;
 								}
@@ -5785,7 +5785,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 						SendChat(player->GetPID(), m_GHost->m_Language->YouDontHaveAccessToThatCommand( ));
 						return HideCommand;
 					}
-					if ( GetNumPlayers() < 3 || GetSlotsOpen( ) > 6 ){
+					if ( GetNumHumanPlayers( ) < 4 || GetSlotsOpen( ) > 6 ){
 						SendChat( player->GetPID(), "Command disabled temporarily to prevent an abuse or a misuse!");
 						return HideCommand;
 					}

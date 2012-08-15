@@ -64,7 +64,7 @@ void CReplay :: AddLeaveGameDuringLoading( uint32_t reason, unsigned char PID, u
 	UTIL_AppendByteArray( Block, (uint32_t)1, false );
 	m_LoadingBlocks.push( Block );
 }
-/*	void CReplay :: AddTimeSlot2( queue<CIncomingAction *> actions )
+void CReplay :: AddTimeSlot2( queue<CIncomingAction *> actions )
 {
                 BYTEARRAY Block;
                 Block.push_back( REPLAY_TIMESLOT2 );
@@ -87,7 +87,7 @@ void CReplay :: AddLeaveGameDuringLoading( uint32_t reason, unsigned char PID, u
                 Block[2] = LengthBytes[1];
 
                 m_CompiledBlocks += string( Block.begin( ), Block.end( ) );
-}	*/
+}
 void CReplay :: AddTimeSlot( uint16_t timeIncrement, queue<CIncomingAction *> actions )
 {
 	BYTEARRAY Block;

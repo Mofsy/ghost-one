@@ -379,7 +379,7 @@ CGamePlayer :: CGamePlayer( CGameProtocol *nProtocol, CBaseGame *nGame, CTCPSock
 	m_GProxyDisconnectNoticeSent = false;
 	m_GProxyReconnectKey = GetTicks( );
 	m_LastGProxyAckTime = 0;
-//	m_TimeActive = 0;
+	m_TimeActive = 0;
 	m_DownloadInfo = string();
 	m_ScoreSet = false;
 	m_RankSet = false;
@@ -448,7 +448,7 @@ CGamePlayer :: CGamePlayer( CPotentialPlayer *potential, unsigned char nPID, str
 	m_GProxyDisconnectNoticeSent = false;
 	m_GProxyReconnectKey = GetTicks( );
 	m_LastGProxyAckTime = 0;
-//	m_TimeActive = 0;
+	m_TimeActive = 0;
 	m_DownloadInfo = string();
 	m_ScoreSet = false;
 	m_RankSet = false;

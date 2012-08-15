@@ -161,7 +161,7 @@ private:
 	queue<BYTEARRAY> m_GProxyBuffer;
 	uint32_t m_GProxyReconnectKey;
 	uint32_t m_LastGProxyAckTime;
-//	uint32_t m_TimeActive;           			// AFK detection
+	uint32_t m_TimeActive;           			// AFK detection
 	bool m_ScoreSet;
 	bool m_RankSet;
 	string m_ScoreS;
@@ -300,8 +300,8 @@ public:
 	void AddLoadInGameData( BYTEARRAY nLoadInGameData )								{ m_LoadInGameData.push( nLoadInGameData ); }
 	
 	// AFK detection
-//	uint32_t  GetTimeActive( )     { return m_TimeActive; }
-//	void SetTimeActive      ( uint32_t nTimeActive )          { m_TimeActive = nTimeActive; } 
+	uint32_t  GetTimeActive( )     { return m_TimeActive; }
+	void SetTimeActive      ( uint32_t nTimeActive )          { m_TimeActive = nTimeActive; } 
 
 	// processing functions
 
