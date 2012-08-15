@@ -5013,7 +5013,6 @@ void CBaseGame :: EventPlayerAction( CGamePlayer *player, CIncomingAction *actio
 			BYTEARRAY CRC;
 			BYTEARRAY Action;
 			Action.push_back( 2 );
-			m_Actions.push( new CIncomingAction( m_WTVPlayerPID, CRC, Action ) );
 		//	SendAllChat( "[Anti-Pause] " + GetPlayerFromPID( Action->GetPID( ) )->GetName( ) + " tried to pause the game. Unpausing." );
 			SendAllChat( "[Anti-Pause] " + ( player->GetName( ) )  + " tried to pause the game. Unpausing." );
 		}
