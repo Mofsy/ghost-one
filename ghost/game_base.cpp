@@ -78,6 +78,7 @@ CBaseGame :: CBaseGame( CGHost *nGHost, CMap *nMap, CSaveGame *nSaveGame, uint16
 		m_Replay = new CReplay( );
 	else
 		m_Replay = NULL;
+	m_LastProcessedTicks = 0;
 
 	m_Exiting = false;
 	m_Saving = false;
@@ -949,6 +950,31 @@ bool CBaseGame :: Update( void *fd, void *send_fd )
 		m_LastDownloadTicks = GetTicks( );
 	}
 */
+	// kick AFK players
+  if( m_GameLoaded && ( GetTicks( ) - m_LastProcessedTicks > 1000 ) ) {
+    m_LastProcessedTicks = GetTicks( );
+
+    uint32_t TimeNow = GetTime( );
+    uint32_t TimeLimit = 360;
+
+		for( vector<CGamePlayer *> :: iterator i = m_Players.begin( ); i != m_Players.end( ); i++ )
+		{
+      uint32_t TimeActive = (*i)->GetTimeActive();
+      if( TimeActive > 0 && ( (TimeNow - TimeActive ) > TimeLimit ) )
+      {        
+        string s;
+		(*i)->SetTimeActive( 0 );
+		if ( m_GetMapType == "noafk" || m_GetMapType == "dota" || m_GetMapType == "guard" ) {
+			s = ". KICKING if dota or anti-afk map!";
+	        (*i)->SetDeleteMe( true );
+	        (*i)->SetLeftReason( "was kicked by host" );
+	        (*i)->SetLeftCode( PLAYERLEAVE_LOST );
+		}
+		SendAllChat( "AFK detected. " + (*i)->GetName() + " is away from keyboard(AFK-ing)" + s );          
+        break;    
+      }
+    }    
+  }
 	// announce every m_AnnounceInterval seconds
 
 	if( !m_AnnounceMessage.empty( ) && !m_CountDownStarted && GetTime( ) - m_LastAnnounceTime >= m_AnnounceInterval )
@@ -2382,6 +2408,15 @@ void CBaseGame :: SendAllActions( )
 			Action = m_Actions.front( );
 			m_Actions.pop( );
 
+
+/* for	uakf.b	 when autohosting prevent players from saving the game m_Slots[GetSIDFromPID(Action->GetPID())].GetTeam()
+			if ( !m_GHost->m_AutoHostGameName.empty() && m_Slots[GetSIDFromPID(Action->GetPID())].GetTeam()!=12 && (m_GetMapType == "dota" || m_GetMapType == "guard" || m_GetMapType == "nosave")) {
+				if ((*Action->GetAction())[0] == 0x6) {
+					SendAllChat("[Anti-Save] " + GetPlayerFromPID(Action->GetPID())->GetName() + " tried to save the game. Justice has served.");
+					continue;
+				}
+			} */
+
 			// check if adding the next action to the sub actions queue would put us over the limit (1452 because the INCOMING_ACTION and INCOMING_ACTION2 packets use an extra 8 bytes)
 
 			if( SubActionsLength + Action->GetLength( ) > 1452 )
@@ -2823,6 +2858,32 @@ void CBaseGame :: EventPlayerJoined( CPotentialPlayer *potential, CIncomingJoinP
 	string JoinedRealm;
 
 	// we use an ID value of 0 to denote joining via LAN
+
+/*	if( HostCounterID == 0 )
+	{
+		// the player is pretending to join via LAN, which they might or might not be (i.e. it could be spoofed)
+		// however, we've been broadcasting a random entry key to the LAN
+		// if the player is really on the LAN they'll know the entry key, otherwise they won't
+		// or they're very lucky since it's a 32 bit number
+
+		if( joinPlayer->GetEntryKey( ) != m_EntryKey )
+		{
+			// oops! TESTED & DIDN'T WORK ON GhostOne
+			CONSOLE_Print( "[GAME: " + m_GameName + "] player [" + joinPlayer->GetName( ) + "|" + potential->GetExternalIPString( ) + "] is trying to join the game over LAN but used an incorrect entry key" );
+			potential->Send( m_Protocol->SEND_W3GS_REJECTJOIN( REJECTJOIN_WRONGPASSWORD ) );
+			potential->SetDeleteMe( true );
+			return;
+		}
+	}
+	else
+	{
+                for( vector<CBNET *> :: iterator i = m_GHost->m_BNETs.begin( ); i != m_GHost->m_BNETs.end( ); ++i )
+		{
+			if( (*i)->GetHostCounterID( ) == HostCounterID )
+				JoinedRealm = (*i)->GetServer( );
+		}
+	}
+*/
 
 	if( HostCounterID != 0 )
 	{
@@ -4675,6 +4736,7 @@ void CBaseGame :: EventPlayerLeft( CGamePlayer *player, uint32_t reason )
 void CBaseGame :: EventPlayerLoaded( CGamePlayer *player )
 {
 	CONSOLE_Print( "[GAME: " + m_GameName + "] player [" + player->GetName( ) + "] finished loading in " + UTIL_ToString( (float)( player->GetFinishedLoadingTicks( ) - m_StartedLoadingTicks ) / 1000, 2 ) + " seconds" );
+	player->SetTimeActive( GetTime( ) );
 	if( m_LoadInGame )
 	{
 		// send any buffered data to the player now
@@ -4749,14 +4811,229 @@ void CBaseGame :: EventPlayerLoaded( CGamePlayer *player )
 
 void CBaseGame :: EventPlayerAction( CGamePlayer *player, CIncomingAction *action )
 {
-	m_Actions.push( action );
-
-	// check for players saving the game and notify everyone
-
-	if( !action->GetAction( )->empty( ) && (*action->GetAction( ))[0] == 6 )
+	if( !action->GetAction( )->empty( ) )
 	{
-		CONSOLE_Print( "[GAME: " + m_GameName + "] player [" + player->GetName( ) + "] is saving the game" );
-		SendAllChat( m_GHost->m_Language->PlayerIsSavingTheGame( player->GetName( ) ) );
+		BYTEARRAY *ActionData = action->GetAction( );
+		unsigned int i = 0;
+		string s;
+		string playername;
+		uint32_t PacketLength = ActionData->size( );
+	  
+		if( PacketLength > 0 )
+		{
+		  bool PlayerActivity = false;   // used for AFK detection
+		 
+		  uint32_t ActionSize = 0; 
+		  uint32_t n = 0;
+		  uint32_t p = 0;
+	  
+		  unsigned int CurrentID = 255;
+		  unsigned int PreviousID = 255;
+	  
+		  bool Failed = false;
+		  bool Notified = false;
+	  
+		  while( n < PacketLength && !Failed )
+		  {
+			PreviousID = CurrentID;
+			CurrentID = (*ActionData)[n];
+	  
+			switch ( CurrentID )
+			{
+				case 0x00 : Failed = true; break;
+				case 0x01 : n += 1; break;
+				case 0x02 : n += 1; break;
+				case 0x03 : n += 2; break;
+				case 0x04 : n += 1; break;
+				case 0x05 : n += 1; break;
+				case 0x06 :
+				  Failed = true;
+				  while( n < PacketLength )
+				  {
+					if((*ActionData)[n] == 0)
+					{
+					  Failed = false;
+					  break;
+					}
+					++n;
+				  }
+				  ++n;
+				  
+				  // notify everyone that a player is saving the game
+				if ( !Notified )
+				{
+					CONSOLE_Print( "[GAME: " + m_GameName + "] player [" + player->GetName( ) + "] is saving the game" );
+					SendAllChat( m_GHost->m_Language->PlayerIsSavingTheGame( player->GetName( ) ) );
+					Notified = true;
+				}
+				break;	
+				case 0x07 : n += 5; break;
+				case 0x08 : Failed = true; break;
+				case 0x09 : Failed = true; break;
+						case 0x10 : n += 15; PlayerActivity = true; break;
+						case 0x11 : n += 23; PlayerActivity = true; break;
+						case 0x12 : n += 31; PlayerActivity = true; break;
+						case 0x13 : n += 39; PlayerActivity = true; break;
+						case 0x14 : n += 44; PlayerActivity = true; break;
+				case 0x15 : Failed = true; break;
+						case 0x16 :
+						case 0x17 :
+				  if( n + 4 > PacketLength )
+					Failed = true;
+				  else
+				  {
+					unsigned char i = (*ActionData)[n+2];
+					if( (*ActionData)[n+3] != 0x00 || i > 16 )
+					  Failed = true;
+					else
+					  n += (4 + (i * 8));
+				  }
+				  PlayerActivity = true;
+						break;
+						case 0x18 : n += 3; break;
+						case 0x19 : n += 13; break;
+						case 0x1A : n += 1; break;
+						case 0x1B : n += 10; PlayerActivity = true; break;
+						case 0x1C : n += 10; PlayerActivity = true; break;
+						case 0x1D : n += 9; break;
+				case 0x1E : n += 6; PlayerActivity = true; break;
+				case 0x1F : Failed = true; break;
+				case 0x20 : Failed = true; break;
+				case 0x21 : n += 9; break;
+
+				case 0x50 : n += 6; break;
+				case 0x51 :
+				  n += 10;					    
+							CONSOLE_Print( "[GAME: " + m_GameName + "] ResourceTrade detected by [" + player->GetName( ) + "]" );
+							playername = player->GetName( );
+							if ( m_GetMapType == "dota" || m_GetMapType == "guard" || m_GetMapType == "notrade" )
+							{
+								s = ". Kicked as it's DotA or non-trade map!";
+								m_GHost->m_Callables.push_back( m_GHost->m_DB->ThreadedBanAdd( player->GetJoinedRealm( ), player->GetName( ), player->GetExternalIPString(), m_GameName, "AUTOBAN", "Tradehack detected", 20, 0 ));				
+								player->SetDeleteMe( true );
+								player->SetLeftReason( m_GHost->m_Language->WasKickedByPlayer( "Anti-tradehack" ) );
+								player->SetLeftCode( PLAYERLEAVE_LOST );    
+							}
+							SendAllChat( "[" + playername + "] has used ResourceTrade" + s );						
+	//           		delete action;
+	//         	  	return false;
+				break;
+				case 0x52 : Failed = true; break;
+				case 0x53 : Failed = true; break;
+				case 0x54 : Failed = true; break;
+				case 0x55 : Failed = true; break;
+				case 0x56 : Failed = true; break;
+				case 0x57 : Failed = true; break;
+				case 0x58 : Failed = true; break;
+				case 0x59 : Failed = true; break;
+				case 0x5A : Failed = true; break;
+				case 0x5B : Failed = true; break;
+				case 0x5C : Failed = true; break;
+				case 0x5D : Failed = true; break;
+				case 0x5E : Failed = true; break;
+				case 0x5F : Failed = true; break;
+				case 0x60 :
+				{
+				  n += 9;
+				  unsigned int j = 0;
+				  Failed = true;
+				  while( n < PacketLength && j < 128 )
+				  {
+					if((*ActionData)[n] == 0)
+					{
+					  Failed = false;
+					  break;
+					}
+					++n;
+					++j;
+				  }
+				  ++n;
+				}
+				break;
+				case 0x61 : n += 1; PlayerActivity = true; break;
+				case 0x62 : n += 13; break;
+				case 0x63 : n += 9; break;
+				case 0x64 : n += 9; break;
+				case 0x65 : n += 9; break;
+				case 0x66 : n += 1; PlayerActivity = true; break;
+				case 0x67 : n += 1; PlayerActivity = true; break;
+				case 0x68 : n += 13; break;
+				case 0x69 : n += 17; break;
+				case 0x6A : n += 17; break;
+				case 0x6B : // used by W3MMD
+				{
+				  ++n;
+				  unsigned int j = 0;
+				  while( n < PacketLength && j < 3 )
+				  {
+					if((*ActionData)[n] == 0) {
+					  ++j;
+					}
+					++n;
+				  }
+				  n += 4;
+				}
+				break;
+				case 0x6C : Failed = true; break;
+				case 0x6D : Failed = true; break;
+				case 0x6E : Failed = true; break;
+				case 0x6F : Failed = true; break;
+				case 0x70 : Failed = true; break;
+				case 0x71 : Failed = true; break;
+				case 0x72 : Failed = true; break;
+				case 0x73 : Failed = true; break;
+				case 0x74 : Failed = true; break;
+				case 0x75 : n += 2; break;
+						default:
+				  Failed = true;
+			} 
+			ActionSize = n - p;
+			p = n;
+			 
+			if( ActionSize > 1024 )
+			  Failed = true;
+
+	//         if( PlayerActivity )
+	//         {
+	//           CONSOLE_Print( "[GAME: " + m_GameName + "] player [" + player->GetName( ) + "] debug: activity detected, action ID " + UTIL_ToString(CurrentID) );
+	//           PlayerActivity = false;
+	//         }
+		  }		   
+		  if( Failed )
+			CONSOLE_Print( "[GAME: " + m_GameName + "] player [" + player->GetName( ) + "] error: packet validation failed (" + UTIL_ToString(CurrentID) + "," + UTIL_ToString(PreviousID) + ")" + " ("+ UTIL_ToString(n) + "," + UTIL_ToString(PacketLength) + ")" );
+		  if( PlayerActivity )
+			player->SetTimeActive( GetTime( ) );
+		}
+	}
+	m_Actions.push( action );
+	BYTEARRAY *ActionData = action->GetAction( );
+	if ( m_GetMapType == "nopause" || m_GetMapType == "dota" || m_GetMapType == "guard" ){				
+		if( !ActionData->empty( ) && (*ActionData)[0] == 1 )
+		{
+			BYTEARRAY CRC;
+			BYTEARRAY Action;
+			Action.push_back( 2 );
+			m_Actions.push( new CIncomingAction( m_WTVPlayerPID, CRC, Action ) );
+		//	SendAllChat( "[Anti-Pause] " + GetPlayerFromPID( Action->GetPID( ) )->GetName( ) + " tried to pause the game. Unpausing." );
+			SendAllChat( "[Anti-Pause] " + ( player->GetName( ) )  + " tried to pause the game. Unpausing." );
+		}
+	}	
+	if ( m_GetMapType == "dota" || m_GetMapType == "guard" || m_GetMapType == "nosave" )
+	{	 
+		CIncomingAction *Action = m_Actions.front( );
+		if (m_Slots[GetSIDFromPID(Action->GetPID())].GetTeam()!=12)
+		if (!m_GHost->m_AutoHostGameName.empty()) {
+			CIncomingAction *Action = m_Actions.front( );
+			if ((*ActionData)[0] == 6) {
+				while( !m_Actions.empty( ) )
+				{
+					Action = m_Actions.front( );
+					m_Actions.pop( );
+					SendAllChat("[Anti-Save] " + GetPlayerFromPID(Action->GetPID())->GetName() + " tried to save the game. Justice has served.");
+					continue;
+				}
+			}
+		}
 	}
 }
 
@@ -5021,6 +5298,7 @@ void CBaseGame :: EventPlayerChatToHost( CGamePlayer *player, CIncomingChatPlaye
 	{
 		if( chatPlayer->GetType( ) == CIncomingChatPlayer :: CTH_MESSAGE || chatPlayer->GetType( ) == CIncomingChatPlayer :: CTH_MESSAGEEXTRA )
 		{
+			player->SetTimeActive( GetTime( ) );
 			// relay the chat message to other players
 
 			bool isAdmin = IsOwner(player->GetName());

@@ -85,7 +85,7 @@ protected:
 	string m_OriginalGameName;						// game name
 	string m_VirtualHostName;						// virtual host's name
 	string m_OwnerName;								// name of the player who owns this game (should be considered an admin)
-	string m_DefaultOwner;								// name of the player who owns this game (should be considered an admin)
+	string m_DefaultOwner;							// name of the player who wrote !owner or is given owner right by other in LOBBY only(should be considered as a TEMPORARY admin)
 	string m_CreatorName;							// name of the player who created this game
 	string m_CreatorServer;							// battle.net server the player who created this game was on
 	string m_AnnounceMessage;						// a message to be sent every m_AnnounceInterval seconds
@@ -178,6 +178,7 @@ protected:
 	uint32_t m_LastInfoShow;
 	uint32_t m_LastGenInfoShow;
 	uint32_t m_LastOwnerInfoShow;
+	uint32_t m_LastProcessedTicks;
 	bool m_DoAutoWarns;								// enable automated warns for early leavers
 
 public:
