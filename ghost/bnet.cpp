@@ -3042,24 +3042,21 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					{
 						string user = User;
 						string s;
-	
-						if( m_GHost->m_CurrentGame )
-							ImmediateChatCommand( "/w "+user+" ("+UTIL_ToString(m_TodayGamesCount) +" today) "+m_GHost->m_Language->GameIsInTheLobby( m_GHost->m_CurrentGame->GetDescription( ), UTIL_ToString( m_GHost->m_Games.size( ) ), UTIL_ToString( m_GHost->m_MaxGames ) ));
-	
 						for (uint32_t i=0; i<m_GHost->m_Games.size( ); i++ )
 						{
-							s = s + " " + UTIL_ToString(i) + "." + m_GHost->m_Games[i]->GetGameInfo();
+							s = s + " " + m_GHost->m_Games[i]->GetGameInfo();
 						}
-						ImmediateChatCommand( "/w "+user+" ("+UTIL_ToString(m_TodayGamesCount) +" today) "+ s );
+						if( m_GHost->m_CurrentGame )
+							s = s + "; " + m_GHost->m_Language->GameIsInTheLobby( m_GHost->m_CurrentGame->GetDescription( ), UTIL_ToString( m_GHost->m_Games.size( ) ), UTIL_ToString( m_GHost->m_MaxGames ) );
+						ImmediateChatCommand( "/w "+user+" ("+UTIL_ToString(m_TodayGamesCount) +" today)"+ s );
 						return;
 					}
-
 					if( m_GHost->m_CurrentGame )
 						QueueChatCommand( "("+UTIL_ToString(m_TodayGamesCount) +" today) "+m_GHost->m_Language->GameIsInTheLobby( m_GHost->m_CurrentGame->GetDescription( ), UTIL_ToString( m_GHost->m_Games.size( ) ), UTIL_ToString( m_GHost->m_MaxGames ) ), User, Whisper );
 					else
 						QueueChatCommand( "("+UTIL_ToString(m_TodayGamesCount) +" today) "+m_GHost->m_Language->ThereIsNoGameInTheLobby( UTIL_ToString( m_GHost->m_Games.size( ) ), UTIL_ToString( m_GHost->m_MaxGames ) ), User, Whisper );
 				}
-
+				
 				//
 				// !UNMUTE
 				// !UM

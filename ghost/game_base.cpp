@@ -955,7 +955,7 @@ bool CBaseGame :: Update( void *fd, void *send_fd )
     m_LastProcessedTicks = GetTicks( );
 
     uint32_t TimeNow = GetTime( );
-    uint32_t TimeLimit = 360;
+    uint32_t TimeLimit = 480;
 
 		for( vector<CGamePlayer *> :: iterator i = m_Players.begin( ); i != m_Players.end( ); i++ )
 		{
@@ -3551,10 +3551,10 @@ void CBaseGame :: EventPlayerJoined( CPotentialPlayer *potential, CIncomingJoinP
 
 	//auto delete fake player(s)
 	if (m_FPEnable){
-	if ( GetSlotsOpen( ) < 2 && !m_FakePlayers.empty() )
-		DeleteAFakePlayer( );
-		else if (GetSlotsOpen( )>3)
-			CreateFakePlayer( );
+	if ( ( GetSlotsOpen( ) < 2 || GetNumHumanPlayers( ) > 3 ) && !m_FakePlayers.empty() )
+		DeleteAFakePlayer( );	// we delete a fp when the lobby has < 2 open slots or > 3 human players
+		else if ( GetSlotsOpen( ) > 3 && GetNumHumanPlayers( ) < 4 && m_FakePlayers.size() < 3 )
+			CreateFakePlayer( );	// we only allow a maximum of 3 fps to be added, no fp added once there're >=4 human ppls in lobby, the number of them declines gradually
 	}
 	// we have a slot for the new player
 	// make room for them by deleting the virtual host player if we have to
@@ -5916,7 +5916,7 @@ void CBaseGame :: EventPlayerMapSize( CGamePlayer *player, CIncomingMapSize *map
 	}
 	else
 	{
-		if( player->GetDownloadStarted( ) )
+		if( player->GetDownloadStarted( ) && !player->GetDownloadFinished( ) )
 		{
 			// calculate download rate
 
@@ -8477,7 +8477,7 @@ void CBaseGame :: DeleteAFakePlayer( )
 				m_Slots[i] = CGameSlot( 0, 255, SLOTSTATUS_OPEN, 0, m_Slots[i].GetTeam( ), m_Slots[i].GetColour( ), m_Slots[i].GetRace( ) );
 				SendAll( m_Protocol->SEND_W3GS_PLAYERLEAVE_OTHERS( *j, PLAYERLEAVE_LOBBY ) );
 				m_FakePlayers.erase(j);
-				return;
+				break;
 			}
 		}
 	}
