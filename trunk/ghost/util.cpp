@@ -28,55 +28,77 @@
 BYTEARRAY UTIL_CreateByteArray( char *a, int size )
 {
 	// todotodo: this should be optimized
-
+/* Optimized is in use
 	BYTEARRAY result;
 
 	for( int i = 0; i < size; i++ )
-		result.push_back( a[i] );
-
+		result.push_back( a[i] ); */
+	
+	BYTEARRAY result( size );
+	copy( a, a+size, result.begin() );
 	return result;
 }
 
 
 BYTEARRAY UTIL_CreateByteArray( unsigned char *a, int size )
 {
-	if( size < 1 )
+	/* if( size < 1 )
 		return BYTEARRAY( );
 
-	return BYTEARRAY( a, a + size );
+	return BYTEARRAY( a, a + size ); Optimized is in use below */
+	BYTEARRAY result( size );
+	copy( a, a+size, result.begin() );
+	return result;
 }
 
 BYTEARRAY UTIL_CreateByteArray( unsigned char c )
 {
-	BYTEARRAY result;
-	result.push_back( c );
+/*	BYTEARRAY result;
+	result.push_back( c ); */
+	BYTEARRAY result( 1 );
+	result[0] = c;
 	return result;
 }
 
 BYTEARRAY UTIL_CreateByteArray( uint16_t i, bool reverse )
 {
-	BYTEARRAY result;
+	/* BYTEARRAY result;
 	result.push_back( (unsigned char)i );
-	result.push_back( (unsigned char)( i >> 8 ) );
+	result.push_back( (unsigned char)( i >> 8 ) ); */
+	BYTEARRAY result( 2 );
 
 	if( reverse )
-		return BYTEARRAY( result.rbegin( ), result.rend( ) );
+//		return BYTEARRAY( result.rbegin( ), result.rend( ) );
+	{
+		result[0] = i >> 8;
+		result[1] = (unsigned char)i;
+	}
 	else
-		return result;
+		*(uint16_t*)&result[0] = i;
+		
+	return result;
 }
 
 BYTEARRAY UTIL_CreateByteArray( uint32_t i, bool reverse )
 {
-	BYTEARRAY result;
+/*	BYTEARRAY result;
 	result.push_back( (unsigned char)i );
 	result.push_back( (unsigned char)( i >> 8 ) );
 	result.push_back( (unsigned char)( i >> 16 ) );
-	result.push_back( (unsigned char)( i >> 24 ) );
+	result.push_back( (unsigned char)( i >> 24 ) );	*/
 
+	BYTEARRAY result( 4 );
 	if( reverse )
-		return BYTEARRAY( result.rbegin( ), result.rend( ) );
+//		return BYTEARRAY( result.rbegin( ), result.rend( ) );
+	{
+		result[0] = i >> 24;
+		result[1] = i >> 16;
+		result[2] = i >> 8;
+		result[3] = i;
+	}
 	else
-		return result;
+		*(uint32_t*)&result[0] = i;
+	return result;
 }
 
 uint16_t UTIL_ByteArrayToUInt16( BYTEARRAY b, bool reverse, unsigned int start )

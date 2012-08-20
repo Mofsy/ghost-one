@@ -2647,10 +2647,10 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 						}
 						else
 						{
-							bool isAdmin = false;
-							CGamePlayer *Player = GetPlayerFromSID( SID - 1 );
 							if (SID - 1>=m_Slots.size())
 								return HideCommand;
+							bool isAdmin = false;
+							CGamePlayer *Player = GetPlayerFromSID( SID - 1 );
 							if (Player)
 							{
 								if (IsAdmin(Player->GetName()) || IsRootAdmin(Player->GetName()) || Player->GetName()==m_DefaultOwner)
@@ -2660,7 +2660,11 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 								if ( m_Slots[SID-1].GetSlotStatus( ) == SLOTSTATUS_OCCUPIED && m_Slots[SID-1].GetComputer( ) == 1 )
 										SendChat( player->GetPID(), "You have closed computer slot, type !comp "+ Payload +" to make it a comp again");
 									else if ( m_Slots[SID-1].GetSlotStatus( ) == SLOTSTATUS_CLOSED )
-											return HideCommand;		
+											return HideCommand;
+										else if ( !( m_Slots[SID-1].GetSlotStatus( ) == SLOTSTATUS_OPEN )){
+											SendChat( player->GetPID(), "Please do !df or !dfs command if you are about to kick fake player/s!");
+											return HideCommand;	// here to prevent kicking a fakeplayer which resulted as incorrect slots info and cause all players to be dropped when the game starts
+										}	
 							}
 							if (isAdmin && !(IsOwner(User) || RootAdminCheck))
 							{
@@ -4315,11 +4319,11 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 						}
 						else
 						{
+							if (SID - 1>=m_Slots.size())
+								return HideCommand;
 							bool isAdmin = false;
 							bool isRootAdmin = false;
 							CGamePlayer *Player = GetPlayerFromSID( SID - 1 );
-							if (SID - 1>=m_Slots.size())
-								return HideCommand;
 							if (Player)
 							{
 								if (IsAdmin(Player->GetName()) || IsRootAdmin(Player->GetName()))
@@ -4330,7 +4334,11 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 							else { if ( m_Slots[SID-1].GetSlotStatus( ) == SLOTSTATUS_OCCUPIED && m_Slots[SID-1].GetComputer( ) == 1  )
 										SendChat( player->GetPID(), "You have closed computer slot, type !comp "+ Payload +" to make it a comp again");
 									else if ( m_Slots[SID-1].GetSlotStatus( ) == SLOTSTATUS_OPEN )
-										return HideCommand;		
+										return HideCommand;
+										else if ( !( m_Slots[SID-1].GetSlotStatus( ) == SLOTSTATUS_CLOSED )){
+											SendChat( player->GetPID(), "Please do !df or !dfs command if you are about to kick fake player/s!");
+											return HideCommand;	// here to prevent kicking a fakeplayer which resulted as incorrect slots info and cause all players to be dropped when the game starts
+										}	
 							}
 							if (isRootAdmin)
 							{
@@ -5135,6 +5143,8 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 								CONSOLE_Print( "[GAME: " + m_GameName + "] bad input #2 to swap command" );
 							else
 							{
+								if (SID1-1>=m_Slots.size() || SID2-1>=m_Slots.size())
+									return HideCommand;
 								bool isAdmin = false;
 								bool isRootAdmin = false;
 								bool sameteam = false;
@@ -5503,10 +5513,10 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 						}
 						else
 						{
-							bool isAdmin = false;
-							CGamePlayer *Player = GetPlayerFromSID( SID - 1 );
 							if (SID - 1>=m_Slots.size())
 								return HideCommand;
+							bool isAdmin = false;
+							CGamePlayer *Player = GetPlayerFromSID( SID - 1 );
 							if (Player)
 							{
 								if (IsAdmin(Player->GetName()) || IsRootAdmin(Player->GetName()) || Player->GetName()==m_DefaultOwner)
@@ -5515,7 +5525,11 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 										SendChat( player->GetPID(), "You can't kick a computer!");
 										return HideCommand;
 									} else if ( m_Slots[SID-1].GetSlotStatus( ) == SLOTSTATUS_CLOSED )
-											return HideCommand;		
+										return HideCommand;
+										else if ( !( m_Slots[SID-1].GetSlotStatus( ) == SLOTSTATUS_OPEN ) ) {
+											SendChat( player->GetPID(), "Please do !df or !dfs command if you are about to kick fake player/s!");
+											return HideCommand;	// here to prevent kicking a fakeplayer which resulted as incorrect slots info and cause all players to be dropped when the game starts
+										}
 							}
 							if (isAdmin)
 							{
@@ -5737,11 +5751,11 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 						}
 						else
 						{
+							if (SID - 1>=m_Slots.size())
+								return HideCommand;
 							bool isAdmin = false;
 							bool isRootAdmin = false;
 							CGamePlayer *Player = GetPlayerFromSID( SID - 1 );
-							if (SID - 1>=m_Slots.size())
-								return HideCommand;
 							if (Player)
 							{
 								if (IsAdmin(Player->GetName()) || IsRootAdmin(Player->GetName()))
@@ -5752,7 +5766,11 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 											SendChat( player->GetPID(), "You can't kick a computer!");
 											return HideCommand;
 										} else if ( m_Slots[SID-1].GetSlotStatus( ) == SLOTSTATUS_OPEN )
-											return HideCommand;		
+											return HideCommand;
+											else if ( !( m_Slots[SID-1].GetSlotStatus( ) == SLOTSTATUS_CLOSED ) ){
+											SendChat( player->GetPID(), "Please do !df or !dfs command if you are about to kick fake player/s!");
+											return HideCommand;	// here to prevent kicking a fakeplayer which resulted as incorrect slots info and cause all players to be dropped when the game starts
+											}	
 							}
 							if (isRootAdmin)
 							{
@@ -5931,6 +5949,8 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 								CONSOLE_Print( "[GAME: " + m_GameName + "] bad input #2 to swap command" );
 							else
 							{
+								if (SID1-1>=m_Slots.size() || SID2-1>=m_Slots.size())
+									return HideCommand;
 								bool isAdmin = false;
 								bool isRootAdmin = false;
 								bool sameteam = false;
