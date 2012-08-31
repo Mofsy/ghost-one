@@ -1,0 +1,890 @@
+Index: game.cpp
+===================================================================
+--- game.cpp	(revision 49)
++++ game.cpp	(working copy)
+@@ -2238,8 +2238,11 @@
+ 					else
+ 					{
+ 						uint32_t AutoStartPlayers = UTIL_ToUInt32( Payload );
+-
+-						if( AutoStartPlayers != 0 )
++						if ( m_GHost->m_StartGameWhenAtLeastXPlayers != 0 && AutoStartPlayers < m_GHost->m_StartGameWhenAtLeastXPlayers ){
++							SendChat( player->GetPID(), "Autostart must take a higher value. Try again with "+string( 1, m_GHost->m_CommandTrigger )+"autostart " + UTIL_ToString(m_GHost->m_StartGameWhenAtLeastXPlayers) + " for example");
++							return HideCommand;
++						}
++						if( AutoStartPlayers != 0 && AutoStartPlayers > 1 )
+ 						{
+ 							SendAllChat( m_GHost->m_Language->AutoStartEnabled( UTIL_ToString( AutoStartPlayers ) ) );
+ 							m_AutoStartPlayers = AutoStartPlayers;
+@@ -2658,11 +2661,11 @@
+ 							}
+ 							else { 
+ 								if ( m_Slots[SID-1].GetSlotStatus( ) == SLOTSTATUS_OCCUPIED && m_Slots[SID-1].GetComputer( ) == 1 )
+-										SendChat( player->GetPID(), "You have closed computer slot, type !comp "+ Payload +" to make it a comp again");
++										SendChat( player->GetPID(), "You have closed computer slot, type "+string( 1, m_GHost->m_CommandTrigger )+"comp "+ Payload +" to make it a comp again");
+ 									else if ( m_Slots[SID-1].GetSlotStatus( ) == SLOTSTATUS_CLOSED )
+ 											return HideCommand;
+ 										else if ( !( m_Slots[SID-1].GetSlotStatus( ) == SLOTSTATUS_OPEN )){
+-											SendChat( player->GetPID(), "Please do !df or !dfs command if you are about to kick fake player/s!");
++											SendChat( player->GetPID(), "Please do "+string( 1, m_GHost->m_CommandTrigger )+"df or "+string( 1, m_GHost->m_CommandTrigger )+"dfs command if you are about to kick fake player/s!");
+ 											return HideCommand;	// here to prevent kicking a fakeplayer which resulted as incorrect slots info and cause all players to be dropped when the game starts
+ 										}	
+ 							}
+@@ -4332,11 +4335,11 @@
+ 									isRootAdmin = true;
+ 							}
+ 							else { if ( m_Slots[SID-1].GetSlotStatus( ) == SLOTSTATUS_OCCUPIED && m_Slots[SID-1].GetComputer( ) == 1  )
+-										SendChat( player->GetPID(), "You have closed computer slot, type !comp "+ Payload +" to make it a comp again");
++										SendChat( player->GetPID(), "You have closed computer slot, type "+string( 1, m_GHost->m_CommandTrigger )+"comp "+ Payload +" to make it a comp again");
+ 									else if ( m_Slots[SID-1].GetSlotStatus( ) == SLOTSTATUS_OPEN )
+ 										return HideCommand;
+ 										else if ( !( m_Slots[SID-1].GetSlotStatus( ) == SLOTSTATUS_CLOSED )){
+-											SendChat( player->GetPID(), "Please do !df or !dfs command if you are about to kick fake player/s!");
++											SendChat( player->GetPID(), "Please do "+string( 1, m_GHost->m_CommandTrigger )+"df or "+string( 1, m_GHost->m_CommandTrigger )+"dfs command if you are about to kick fake player/s!");
+ 											return HideCommand;	// here to prevent kicking a fakeplayer which resulted as incorrect slots info and cause all players to be dropped when the game starts
+ 										}	
+ 							}
+@@ -5106,7 +5109,7 @@
+ 					else
+ 					{
+ 						if( GetTicks( ) - m_LastPlayerLeaveTicks >= 2000 )
+-							StartCountDown( false );
++							StartCountDown( true );
+ 						else
+ 							SendAllChat( m_GHost->m_Language->CountDownAbortedSomeoneLeftRecently( ) );
+ 					}
+@@ -5467,7 +5470,6 @@
+ 							SendChat( player->GetPID(), "Only the owner can start the game.");
+ 							return HideCommand;
+ 						}
+-
+ 					if( Payload.empty( ) || Payload == "off" )
+ 					{
+ 						SendAllChat( m_GHost->m_Language->AutoStartDisabled( ) );
+@@ -5476,8 +5478,11 @@
+ 					else
+ 					{
+ 						uint32_t AutoStartPlayers = UTIL_ToUInt32( Payload );
+-
+-						if( AutoStartPlayers != 0 )
++						if ( m_GHost->m_StartGameWhenAtLeastXPlayers != 0 && AutoStartPlayers < m_GHost->m_StartGameWhenAtLeastXPlayers ){
++							SendChat( player->GetPID(), "Autostart must take a higher value. Try again with "+string( 1, m_GHost->m_CommandTrigger )+"autostart " + UTIL_ToString(m_GHost->m_StartGameWhenAtLeastXPlayers) + " for example");
++							return HideCommand;
++						}
++						if( AutoStartPlayers != 0 && AutoStartPlayers > 1 )
+ 						{
+ 							SendAllChat( m_GHost->m_Language->AutoStartEnabled( UTIL_ToString( AutoStartPlayers ) ) );
+ 							m_AutoStartPlayers = AutoStartPlayers;
+@@ -5527,7 +5532,7 @@
+ 									} else if ( m_Slots[SID-1].GetSlotStatus( ) == SLOTSTATUS_CLOSED )
+ 										return HideCommand;
+ 										else if ( !( m_Slots[SID-1].GetSlotStatus( ) == SLOTSTATUS_OPEN ) ) {
+-											SendChat( player->GetPID(), "Please do !df or !dfs command if you are about to kick fake player/s!");
++											SendChat( player->GetPID(), "Please do "+string( 1, m_GHost->m_CommandTrigger )+"df or "+string( 1, m_GHost->m_CommandTrigger )+"dfs command if you are about to kick fake player/s!");
+ 											return HideCommand;	// here to prevent kicking a fakeplayer which resulted as incorrect slots info and cause all players to be dropped when the game starts
+ 										}
+ 							}
+@@ -5768,7 +5773,7 @@
+ 										} else if ( m_Slots[SID-1].GetSlotStatus( ) == SLOTSTATUS_OPEN )
+ 											return HideCommand;
+ 											else if ( !( m_Slots[SID-1].GetSlotStatus( ) == SLOTSTATUS_CLOSED ) ){
+-											SendChat( player->GetPID(), "Please do !df or !dfs command if you are about to kick fake player/s!");
++											SendChat( player->GetPID(), "Please do "+string( 1, m_GHost->m_CommandTrigger )+"df or "+string( 1, m_GHost->m_CommandTrigger )+"dfs command if you are about to kick fake player/s!");
+ 											return HideCommand;	// here to prevent kicking a fakeplayer which resulted as incorrect slots info and cause all players to be dropped when the game starts
+ 											}	
+ 							}
+@@ -5818,7 +5823,11 @@
+ 				{		
+ 					if(m_GHost->m_FakePlayersLobby && !m_FakePlayers.empty())					
+ 						DeleteFakePlayer();
+-					ReCalculateTeams();					
++					ReCalculateTeams();
++					if ( m_GHost->m_StartGameWhenAtLeastXPlayers != 0 && GetNumHumanPlayers( ) < m_GHost->m_StartGameWhenAtLeastXPlayers ){						
++						SendChat( player->GetPID(), "At least " + UTIL_ToString(m_GHost->m_StartGameWhenAtLeastXPlayers) + "human players needed to start game. Try again when enough players");
++						return HideCommand;
++					}
+ 					if (m_GetMapNumTeams==2 || m_Map->GetMapType( ).find("2teams") != string::npos ) {
+ 						if (GetSlotsOccupiedT1( )<1 || GetSlotsOccupiedT2( )<1)
+ 						{
+@@ -5827,7 +5836,7 @@
+ 						}
+ 						if ( GetNumSlotsT1( ) == GetNumSlotsT2( ) && GetSlotsOccupiedT1( )!=GetSlotsOccupiedT2( ) && m_Map->GetMapType( ).find("noteam") == string::npos )
+ 						{
+-							SendAllChat("Team unbalanced. Please !swap players to balance the game & !startn again");
++							SendAllChat("Team unbalanced. Please "+string( 1, m_GHost->m_CommandTrigger )+"swap players to balance the game & "+string( 1, m_GHost->m_CommandTrigger )+"startn again");
+ 							return HideCommand;
+ 						}
+ 					}
+@@ -5864,6 +5873,10 @@
+ 					if(m_GHost->m_FakePlayersLobby && !(m_FakePlayers.empty()))					
+ 						DeleteFakePlayer();
+ 					ReCalculateTeams();
++					if ( m_GHost->m_StartGameWhenAtLeastXPlayers != 0 && GetNumHumanPlayers( ) < m_GHost->m_StartGameWhenAtLeastXPlayers ){
++						SendChat( player->GetPID(), "At least " + UTIL_ToString(m_GHost->m_StartGameWhenAtLeastXPlayers) + " human players needed to start game. Try again when enough players");
++						return HideCommand;
++					}
+ 					if (m_GetMapNumTeams==2 || m_Map->GetMapType( ).find("2teams") != string::npos ) {
+ 						if (GetSlotsOccupiedT1( )<1 || GetSlotsOccupiedT2( )<1)
+ 						{
+@@ -5872,7 +5885,7 @@
+ 						}
+ 						if ( GetNumSlotsT1( ) == GetNumSlotsT2( ) && GetSlotsOccupiedT1( )!=GetSlotsOccupiedT2( ) && m_Map->GetMapType( ).find("noteam") == string::npos )
+ 						{
+-							SendAllChat("Team unbalanced. Please !swap players to balance the game & !startn again");
++							SendAllChat("Team unbalanced. Please "+string( 1, m_GHost->m_CommandTrigger )+"swap players to balance the game & "+string( 1, m_GHost->m_CommandTrigger )+"startn again");
+ 							return HideCommand;
+ 						}
+ 					}
+@@ -5892,8 +5905,10 @@
+ 					}
+ 					else
+ 					{
+-						if( GetTicks( ) - m_LastPlayerLeaveTicks >= 2000 )
+-							StartCountDown( false );
++						if( GetTicks( ) - m_LastPlayerLeaveTicks >= 2000 ){
++							m_CountDownStarted = true;
++							m_CountDownCounter = 10;
++						}
+ 						else
+ 							SendAllChat( m_GHost->m_Language->CountDownAbortedSomeoneLeftRecently( ) );
+ 					}
+@@ -5914,7 +5929,7 @@
+ 				if(!isDefaultOwner && IsOwner(User))
+ 				if(Command == "kick" && !m_CountDownStarted && !m_SaveGame )
+ 				{
+-					SendChat(player->GetPID(), "Unable to execute !kick <name>. Try !open <slot> or !close <slot>" );
++					SendChat(player->GetPID(), "Unable to execute "+string( 1, m_GHost->m_CommandTrigger )+"kick <name>. Try "+string( 1, m_GHost->m_CommandTrigger )+"open <slot> or "+string( 1, m_GHost->m_CommandTrigger )+"close <slot>" );
+ 					SendAllChat("You must become an admin to unlock this feature. Request at http://thegenmaps.tk");
+ 					return HideCommand;		
+ 				}
+@@ -6035,7 +6050,7 @@
+ 	// !OWNER (set game owner)
+ 	//
+ 		if( Command == "owner" || Command =="admin" )
+-		{				
++		{	
+ 			if( RootAdminCheck || IsOwner( User ) || (!GetPlayerFromName( m_OwnerName, false ) && m_OwnerJoined))
+ 			{					
+ 				if( !Payload.empty( ) )
+@@ -6057,7 +6072,11 @@
+ 				}
+ 			}
+ 			else{
+-				if ( m_GHost->m_NewOwner > 0 && m_GHost->m_NewOwner < 3 && !AdminCheck && !RootAdminCheck && !isDefaultOwner ){
++				if (m_GHost->m_NewOwner <= 0){
++					SendChat( player->GetPID(), "Owner command disabled by the bot owner. Game autostarts with current slots state.");
++					return HideCommand;
++				}
++				if ( m_GHost->m_NewOwner < 3 && !AdminCheck && !RootAdminCheck && !isDefaultOwner ){
+ 					if ( m_GHost->m_NewOwner == 1 )
+ 						m_GHost->m_NewOwner = 3;				
+ 					SendAllChat( m_GHost->m_Language->SettingGameOwnerTo( User ) );
+@@ -6065,8 +6084,23 @@
+ 					m_OwnerName = User;
+ 				}
+ 				else{
+-					SendAllChat( m_GHost->m_Language->UnableToSetGameOwner( m_OwnerName ) );
+-					CONSOLE_Print( "[GAME: " + m_GameName + "] Default Owner[" + m_DefaultOwner + "] Setting GameOwner to [" + User + "] Failed!" );
++					bool isOwnerInGame = false;
++					for( vector<CGamePlayer *> :: iterator i = m_Players.begin( ); i != m_Players.end( ); i++ )
++						if ((*i)->GetName() == m_OwnerName ){
++							isOwnerInGame = true;
++							SendAllChat( m_GHost->m_Language->UnableToSetGameOwner( m_OwnerName ) );
++							CONSOLE_Print( "[GAME: " + m_GameName + "] Default Owner[" + m_DefaultOwner + "] Setting GameOwner to [" + User + "] Failed!" + m_OwnerName + "'s still in lobby");
++							return HideCommand;
++						}
++					if ( !isOwnerInGame ) {
++						if ( m_GHost->m_NewOwner == 1 )
++							m_GHost->m_NewOwner = 3;
++						SendChat( player->GetPID(), "Previous owner name cleared as s/he isn't in lobby");
++						SendAllChat( m_GHost->m_Language->SettingGameOwnerTo( User ) );
++						CONSOLE_Print( "[GAME: " + m_GameName + "] Default Owner[" + m_DefaultOwner + "] set GameOwner to the Player[" + User + "]" );
++						if ( !(AdminCheck || RootAdminCheck || isDefaultOwner) )
++							m_OwnerName = User;
++					}					
+ 				}
+ 			}
+ 		}
+@@ -6249,7 +6283,7 @@
+ 		if(m_StartedVoteStartTime == 0) { //need >minplayers or admin to START a votestart
+ 		  if (GetNumHumanPlayers() < m_GHost->m_VoteStartMinPlayers && !votestartAuth) { //need at least eight players to votestart
+ 			uint32_t MinPlayers = m_GHost->m_VoteStartMinPlayers;					
+-		    SendChat( player, "You cannot use !votestart until there're " + UTIL_ToString(MinPlayers) +" or more players!" );
++		    SendChat( player, "You cannot use " +string( 1, m_GHost->m_CommandTrigger )+ "votestart until there're " + UTIL_ToString(MinPlayers) +" or more players!" );
+ 		    return false;
+ 		  }
+                   
+@@ -6509,7 +6543,7 @@
+ 			}
+ 			k++;
+ 		}
+-		CountRMK = CountRMK - 3;
++		CountRMK = CountRMK - 1;
+ 		if(player->GetHasRMKed()) 
+ 		{
+ 			if (!team_p) {
+@@ -6523,7 +6557,7 @@
+ 			} 
+ 		} 
+ 
+-		if((VotesRMK >= CountRMK) && (CountRMK!=0) ) // has at least a player
++		if((VotesRMK >= CountRMK - 1) && (CountRMK!=0) ) // has at least a player
+ 		{     
+ 		  //game_RMK=true;  //disable autoban //autosave
+ 			SendAllChat("The vote of RMK was completed with SUCCESS.");
+Index: game_base.cpp
+===================================================================
+--- game_base.cpp	(revision 49)
++++ game_base.cpp	(working copy)
+@@ -1005,6 +1005,7 @@
+ 				(*i)->SetDeleteMe( true );
+ 				(*i)->SetLeftReason( m_GHost->m_Language->WasKickedForNotSpoofChecking( ) );
+ 				(*i)->SetLeftCode( PLAYERLEAVE_LOBBY );
++				m_GHost->DenyIP( (*i)->GetExternalIPString( ), 20000, "kicked for spoof check" );
+ 				OpenSlot( GetSIDFromPID( (*i)->GetPID( ) ), false );
+ 			}
+ 		}
+@@ -1017,16 +1018,16 @@
+ 		StartCountDownAuto( m_GHost->m_RequireSpoofChecks );
+ 		m_LastAutoStartTime = GetTime( );
+ 	}
+-	// display player count info every 197 seconds, we prefer the prime numbers
++	// display player count info every 199 seconds, we prefer the prime numbers
+ 
+-	if ( !m_CountDownStarted && GetTime( ) - m_LastInfoShow >= 197 )
++	if ( !m_CountDownStarted && GetTime( ) - m_LastInfoShow >= 199 )
+ 	{		
+-		SendAllChat("If no admin & no owner in lobby, to start the game all should type !go. Tat ca cung bam !go de nhanh vao game.");
++		SendAllChat("If no admin & no owner in lobby, to start the game all should type "+string( 1, m_GHost->m_CommandTrigger )+"go. Tat ca cung bam "+string( 1, m_GHost->m_CommandTrigger )+"go de nhanh vao game.");
+ 		m_LastInfoShow = GetTime( );
+ 	}
+-	// display thegenmaps.tk forum every 263 seconds
++	// display thegenmaps.tk forum every 271 seconds
+ 	
+-	if ( !m_CountDownStarted && GetTime( ) - m_LastGenInfoShow >= 263 )
++	if ( !m_CountDownStarted && GetTime( ) - m_LastGenInfoShow >= 271 )
+ 	{
+ 		SendAllChat("View game list in TheGenMaps.tk for PRO gaming exp. Join our Garena+ GroupID 56934.");		
+ 		m_LastGenInfoShow = GetTime( );
+@@ -1035,7 +1036,7 @@
+ 	
+ 	if ( !m_CountDownStarted && GetTime( ) - m_LastOwnerInfoShow >= 317 )
+ 	{
+-		SendAllChat("Type !owner to gain control of lobby: !a, !as, !fp, !dfs, !close, !closeall, !swap, !open, !openall, !holds, !hold, !unhold, !startn");
++		SendAllChat("Type "+string( 1, m_GHost->m_CommandTrigger )+"owner to gain control of lobby: "+string( 1, m_GHost->m_CommandTrigger )+"a, "+string( 1, m_GHost->m_CommandTrigger )+"as, "+string( 1, m_GHost->m_CommandTrigger )+"fp, "+string( 1, m_GHost->m_CommandTrigger )+"dfs, "+string( 1, m_GHost->m_CommandTrigger )+"close, "+string( 1, m_GHost->m_CommandTrigger )+"closeall, "+string( 1, m_GHost->m_CommandTrigger )+"swap, "+string( 1, m_GHost->m_CommandTrigger )+"open, "+string( 1, m_GHost->m_CommandTrigger )+"openall, "+string( 1, m_GHost->m_CommandTrigger )+"holds, "+string( 1, m_GHost->m_CommandTrigger )+"hold, "+string( 1, m_GHost->m_CommandTrigger )+"unhold, "+string( 1, m_GHost->m_CommandTrigger )+"startn");
+ 		m_LastOwnerInfoShow = GetTime( );
+ 	}
+ 	// end game countdown every 1000 ms
+@@ -1186,6 +1187,9 @@
+ 
+ 	if( m_GameLoading )
+ 	{
++	// drop players who have not loaded if it's been a long time
++		
++		bool DropLoading = GetTicks( ) - m_StartedLoadingTicks > m_GHost->m_DenyMaxLoadTime;
+ 		bool FinishedLoading = true;
+ 
+ 		for( vector<CGamePlayer *> :: iterator i = m_Players.begin( ); i != m_Players.end( ); i++ )
+@@ -1193,7 +1197,17 @@
+ 			FinishedLoading = (*i)->GetFinishedLoading( );
+ 
+ 			if( !FinishedLoading )
+-				break;
++			{
++				if( DropLoading )
++				{
++					(*i)->SetDeleteMe( true );
++					(*i)->SetLeftCode( PLAYERLEAVE_LOBBY );
++					m_GHost->DenyIP( (*i)->GetExternalIPString( ), m_GHost->m_DenyLoadDuration, "player has not yet finished loading" );
++				}
++				
++				else
++					break;
++			}
+ 		}
+ 
+ 		if( FinishedLoading )
+@@ -1325,20 +1339,31 @@
+ 				}
+ 				if( Sync > m_SyncLimit )
+ 				{
+-					(*i)->SetLagging( true );
++				// drop them immediately if they have already exceeded their total lagging time (5 minutes)
++					if( (*i)->GetTotalLaggingTicks( ) > 300000 )
++					{
++						(*i)->SetDeleteMe( true );
++						(*i)->SetLeftReason( "exceeded permitted total lagging time" );
++						(*i)->SetLeftCode( PLAYERLEAVE_DISCONNECT );
++					}
++					
++					else
++					{
++						(*i)->SetLagging( true );
+ 		// calculate drop vote ticks
+-					uint32_t d = 5;
+-					if (m_GHost->m_DropVoteTime<45)
+-						d = (45 * 1000)-m_GHost->m_DropVoteTime*1000 ;
++						uint32_t d = 5;
++						if (m_GHost->m_DropVoteTime<45)
++							d = (45 * 1000)-m_GHost->m_DropVoteTime*1000 ;
+ 
+-					(*i)->SetStartedLaggingTicks( GetTicks( )-d );
+-					m_Lagging = true;
+-					m_StartedLaggingTime = GetTime( );
++						(*i)->SetStartedLaggingTicks( GetTicks( )-d );
++						m_Lagging = true;
++						m_StartedLaggingTime = GetTime( );
+ 
+-					if( LaggingString.empty( ) )
+-						LaggingString = (*i)->GetName( );
+-					else
+-						LaggingString += ", " + (*i)->GetName( );
++						if( LaggingString.empty( ) )
++							LaggingString = (*i)->GetName( );
++						else
++							LaggingString += ", " + (*i)->GetName( );
++					}
+ 				}
+ 			}
+ 
+@@ -1451,6 +1476,8 @@
+ 
+ 					CONSOLE_Print( "[GAME: " + m_GameName + "] stopped lagging on [" + (*i)->GetName( ) + "]" );
+ 					SendAll( m_Protocol->SEND_W3GS_STOP_LAG( *i ) );
++					// update their total lagging time
++					(*i)->SetTotalLaggingTicks( (*i)->GetTotalLaggingTicks( ) + GetTicks( ) - (*i)->GetStartedLaggingTicks( ) );
+ 					(*i)->SetLagging( false );
+ 					(*i)->SetStartedLaggingTicks( 0 );
+ 				}
+@@ -1628,7 +1655,7 @@
+ 		if (lessthanminpercent && m_GameOverTime == 0)
+ 		{
+ 			CONSOLE_Print( "[GAME: " + m_GameName + "] gameover timer started (less than "+UTIL_ToString(m_GHost->m_gameoverminpercent)+"% )"+" "+string(1,m_GHost->m_CommandTrigger)+"override to cancel" );
+-			SendAllChat("Game over in 60 seconds, "+ UTIL_ToString(remainingpercent)+"% remaining ( < "+UTIL_ToString(m_GHost->m_gameoverminpercent)+"% ) "+string(1,m_GHost->m_CommandTrigger)+"o (=!or=!override) to cancel");
++			SendAllChat("Game over in 60 seconds, "+ UTIL_ToString(remainingpercent)+"% remaining ( < "+UTIL_ToString(m_GHost->m_gameoverminpercent)+"% ) "+string(1,m_GHost->m_CommandTrigger)+"o (="+string(1,m_GHost->m_CommandTrigger)+"or="+string(1,m_GHost->m_CommandTrigger)+"override) to cancel");
+ 			m_GameOverTime = GetTime( );
+ 		}
+ 
+@@ -1640,7 +1667,7 @@
+ 		if (lessthanminplayers && m_GameOverTime == 0)
+ 		{
+ 			CONSOLE_Print( "[GAME: " + m_GameName + "] gameover timer started (one player left)"+" "+string(1, m_GHost->m_CommandTrigger)+"override to cancel" );
+-			SendAllChat("Game over in 12 seconds, "+ UTIL_ToString(m_Players.size())+" remaining ( < "+UTIL_ToString(m_GHost->m_gameoverminplayers)+" ) "+string(1, m_GHost->m_CommandTrigger)+"o (=!or=!override) to cancel");
++			SendAllChat("Game over in 12 seconds, "+ UTIL_ToString(m_Players.size())+" remaining ( < "+UTIL_ToString(m_GHost->m_gameoverminplayers)+" ) "+string(1, m_GHost->m_CommandTrigger)+"o (="+string(1,m_GHost->m_CommandTrigger)+"or="+string(1,m_GHost->m_CommandTrigger)+"override) to cancel");
+ 			m_GameOverTime = GetTime( );
+ 		}
+ 
+@@ -1872,10 +1899,18 @@
+ 
+ 			if( m_IPBlackList.find( NewSocket->GetIPString( ) ) == m_IPBlackList.end( ) )
+ 			{
+-				if( m_GHost->m_TCPNoDelay )
+-					NewSocket->SetNoDelay( true );
++				if ( !m_GHost->CheckDeny( NewSocket->GetIPString( ) ) ) {
++					if( m_GHost->m_TCPNoDelay )
++						NewSocket->SetNoDelay( true );
++					m_GHost->DenyIP( NewSocket->GetIPString( ), 1000, "user connected" );
+ 
+-				m_Potentials.push_back( new CPotentialPlayer( m_Protocol, this, NewSocket ) );
++					m_Potentials.push_back( new CPotentialPlayer( m_Protocol, this, NewSocket ) );
++				}
++				else
++				{
++					CONSOLE_Print( "[GAME: " + m_GameName + "] rejected connection from [" + NewSocket->GetIPString( ) + "] due to tempban" );
++					delete NewSocket;
++				}
+ 			}
+ 			else
+ 			{
+@@ -2506,8 +2541,8 @@
+ 	if(m_SquirrelText){
+ 	SendChat( player, "=                                                           " );	
+ 	SendChat( player, "= (\\_       No admins here? To FORCE START:                 " );
+-	SendChat( player, "= (_ \\ ( '>  Type !owner to gain control of lobby           " );
+-	SendChat( player, "=   ) \\/_)= OR all should write !go (4 votes to startgame)  " );
++	SendChat( player, "= (_ \\ ( '>  Type "+string( 1, m_GHost->m_CommandTrigger )+"owner to gain control of lobby           " );
++	SendChat( player, "=   ) \\/_)= OR all should write "+string( 1, m_GHost->m_CommandTrigger )+"go (4 votes to startgame)  " );
+ 	SendChat( player, "=   (_(_ )_                                                 " );
+ 	SendChat( player, "=============================================================" );}
+ 	SendChat( player, " " );
+@@ -2859,7 +2894,7 @@
+ 
+ 	// we use an ID value of 0 to denote joining via LAN
+ 
+-/*	if( HostCounterID == 0 )
++/*	if( HostCounterID == 0 ) // HostCounterID != 0 <=> JoinedRealm.empty( )
+ 	{
+ 		// the player is pretending to join via LAN, which they might or might not be (i.e. it could be spoofed)
+ 		// however, we've been broadcasting a random entry key to the LAN
+@@ -3880,8 +3915,9 @@
+ 	if( m_GHost->m_CheckMultipleIPUsage )
+ 	{
+ 		string Others;
++		uint32_t numOthers = 0;
+ 
+-		for( vector<CGamePlayer *> :: iterator i = m_Players.begin( ); i != m_Players.end( ); i++ )
++		for( vector<CGamePlayer *> :: iterator i = m_Players.begin( ); i != m_Players.end( ); ++i )
+ 		{
+ 			if( Player != *i && Player->GetExternalIPString( ) == (*i)->GetExternalIPString( ) )
+ 			{
+@@ -3889,11 +3925,35 @@
+ 					Others = (*i)->GetName( );
+ 				else
+ 					Others += ", " + (*i)->GetName( );
++				numOthers++;
++					
+ 			}
+ 		}
+ 
+ //		if( !Others.empty( ) )
+ //			SendAllChat( m_GHost->m_Language->MultipleIPAddressUsageDetected( joinPlayer->GetName( ), Others ) );
++		// kick all of the players if they have more than eight connections
++		// battle.net servers only allow eight connections for IP address (and nine is just too much!)
++				
++		if( numOthers >= m_GHost->m_DenyMaxIPUsage ) {
++			CONSOLE_Print( "[DENY] Kicking players because of high multiple IP address usage " );
++
++			for( vector<CGamePlayer *> :: iterator i = m_Players.begin( ); i != m_Players.end( ); ++i )
++			{
++				if( Player != *i && Player->GetExternalIPString( ) == (*i)->GetExternalIPString( ) )
++				{
++					(*i)->SetDeleteMe( true );
++					(*i)->SetLeftCode( PLAYERLEAVE_LOBBY );
++					OpenSlot( GetSIDFromPID( (*i)->GetPID( ) ), false );
++				}
++			}
++			
++			Player->SetDeleteMe( true );
++			Player->SetLeftCode( PLAYERLEAVE_LOBBY );
++			OpenSlot( GetSIDFromPID( Player->GetPID( ) ), false );
++			m_GHost->DenyIP( Player->GetExternalIPString( ), m_GHost->m_DenyIPUsageDuration, "high multiple IP usage" );
++			return;
++		}
+ 	}
+ 
+ 	// abort the countdown if there was one in progress
+@@ -4619,11 +4679,17 @@
+ 
+ 	if( m_AutoStartPlayers != 0 && GetNumHumanPlayers( ) == m_AutoStartPlayers )
+ 		BalanceSlots( );
++	Player->SetSpoofedRealm( JoinedRealm );
++	m_GHost->DenyIP( Player->GetExternalIPString( ), 1000, "user joined" );
+ }
+ 
+ void CBaseGame :: EventPlayerLeft( CGamePlayer *player, uint32_t reason )
+ {
+ 	// this function is only called when a player leave packet is received, not when there's a socket error, kick, etc...
++	if( !m_GameLoading && !m_GameLoaded )
++		m_GHost->DenyIP( player->GetExternalIPString( ), 10000, "user left lobby: " + UTIL_ToString( reason ) );
++	else
++		m_GHost->DenyIP( player->GetExternalIPString( ), 20000, "user left game: " + UTIL_ToString( reason ) );
+ 	uint32_t GameNr = GetGameNr();
+ 
+ 	bool show = true;
+@@ -4735,6 +4801,8 @@
+ }
+ void CBaseGame :: EventPlayerLoaded( CGamePlayer *player )
+ {
++	if( !m_GameLoading )
++		return;
+ 	CONSOLE_Print( "[GAME: " + m_GameName + "] player [" + player->GetName( ) + "] finished loading in " + UTIL_ToString( (float)( player->GetFinishedLoadingTicks( ) - m_StartedLoadingTicks ) / 1000, 2 ) + " seconds" );
+ 	player->SetTimeActive( GetTime( ) );
+ 	if( m_LoadInGame )
+@@ -5014,7 +5082,7 @@
+ 			BYTEARRAY Action;
+ 			Action.push_back( 2 );
+ 		//	SendAllChat( "[Anti-Pause] " + GetPlayerFromPID( Action->GetPID( ) )->GetName( ) + " tried to pause the game. Unpausing." );
+-			SendAllChat( "[Anti-Pause] " + ( player->GetName( ) )  + " tried to pause the game. Unpausing." );
++			SendAllChat( "[Anti-Pause] " + ( player->GetName( ) )  + " tried to pause the game." );
+ 		}
+ 	}	
+ 	if ( m_GetMapType == "dota" || m_GetMapType == "guard" || m_GetMapType == "nosave" )
+@@ -5997,6 +6065,7 @@
+ 		player->SetLeftReason( "was autokicked for excessive ping of " + UTIL_ToString( player->GetPing( m_GHost->m_LCPings ) ) );
+ 		player->SetLeftCode( PLAYERLEAVE_LOBBY );
+ 		OpenSlot( GetSIDFromPID( player->GetPID( ) ), false );
++		m_GHost->DenyIP( player->GetExternalIPString( ), 10000, "autokicked for excessive ping" );
+ 	}
+ }
+ 
+@@ -6718,6 +6787,9 @@
+ 
+ 	if( m_FakePlayers.size( ) )
+ 		return m_FakePlayers[0];
++	
++	if( m_WTVPlayerPID != 255 )
++		return m_WTVPlayerPID;
+ 
+ 	string OwnerLower = m_OwnerName;
+ 	transform( OwnerLower.begin( ), OwnerLower.end( ), OwnerLower.begin( ), (int(*)(int))tolower );
+@@ -8005,7 +8077,24 @@
+ 			(*i)->SetReserved( false );
+ 	}
+ }
+-
++/* bool CBaseGame :: IsOwner( string name )
++{
++	string OwnerLower = m_OwnerName;
++	transform( name.begin( ), name.end( ), name.begin( ), (int(*)(int))tolower );
++	transform( OwnerLower.begin( ), OwnerLower.end( ), OwnerLower.begin( ), (int(*)(int))tolower );
++	stringstream SS;
++	string s;
++	SS << OwnerLower;
++	while( !SS.eof( ) )
++	{
++		SS >> s;
++		if (name == s)
++		{
++			return true;
++		}
++	}
++	return false;
++} */
+ bool CBaseGame :: IsOwner( string name )
+ {
+ 	string OwnerLower = m_OwnerName;
+@@ -8477,11 +8566,11 @@
+ 				m_Slots[i] = CGameSlot( 0, 255, SLOTSTATUS_OPEN, 0, m_Slots[i].GetTeam( ), m_Slots[i].GetColour( ), m_Slots[i].GetRace( ) );
+ 				SendAll( m_Protocol->SEND_W3GS_PLAYERLEAVE_OTHERS( *j, PLAYERLEAVE_LOBBY ) );
+ 				m_FakePlayers.erase(j);
+-				break;
++				SendAllSlotInfo( );
++				return;
+ 			}
+ 		}
+ 	}
+-	SendAllSlotInfo( );
+ }
+ 
+ void CBaseGame :: DeleteFakePlayer( )
+Index: game_base.h
+===================================================================
+--- game_base.h	(revision 47)
++++ game_base.h	(working copy)
+@@ -304,6 +304,7 @@
+ 	virtual bool GetGameLoading( )					{ return m_GameLoading; }
+ 	virtual bool GetGameLoaded( )					{ return m_GameLoaded; }
+ 	virtual bool GetLagging( )						{ return m_Lagging; }
++	virtual uint32_t GetSyncCounter( )				{ return m_SyncCounter; }
+ 	virtual vector<CGamePlayer*> GetPlayers ( ) 	{ return m_Players; }
+ 
+ 	virtual void SetEnforceSlots( vector<CGameSlot> nEnforceSlots )		{ m_EnforceSlots = nEnforceSlots; }
+Index: gameplayer.cpp
+===================================================================
+--- gameplayer.cpp	(revision 48)
++++ gameplayer.cpp	(working copy)
+@@ -36,7 +36,7 @@
+ // CPotentialPlayer
+ //
+ 
+-CPotentialPlayer :: CPotentialPlayer( CGameProtocol *nProtocol, CBaseGame *nGame, CTCPSocket *nSocket ) : m_Protocol( nProtocol ), m_Game( nGame ), m_Socket( nSocket ), m_DeleteMe( false ), m_Error( false ), m_IncomingJoinPlayer( NULL ), m_IncomingGarenaUser( NULL )
++CPotentialPlayer :: CPotentialPlayer( CGameProtocol *nProtocol, CBaseGame *nGame, CTCPSocket *nSocket ) : m_Protocol( nProtocol ), m_Game( nGame ), m_Socket( nSocket ), m_DeleteMe( false ), m_Error( false ), m_IncomingJoinPlayer( NULL ), m_IncomingGarenaUser( NULL ), m_ConnectionState( 0 ), m_ConnectionTime( GetTicks( ) )
+ {
+ 	m_Protocol = nProtocol;
+ 	m_Game = nGame;
+@@ -165,6 +165,15 @@
+ 	m_Socket->DoRecv( (fd_set *)fd );
+ 	ExtractPackets( );
+ 	ProcessPackets( );
++	
++	// make sure we don't keep this socket open forever (disconnect after five seconds)
++	if( m_ConnectionState == 0 && GetTicks( ) - m_ConnectionTime > m_Game->m_GHost->m_DenyMaxReqjoinTime )
++	{
++		CONSOLE_Print( "[DENY] Kicking player: REQJOIN not received within a few seconds" );
++		m_DeleteMe = true;
++		m_Game->m_GHost->DenyIP( GetExternalIPString( ), m_Game->m_GHost->m_DenyReqjoinDuration, "REQJOIN not received within a few seconds" );
++		
++	}
+ 
+ 	// don't call DoSend here because some other players may not have updated yet and may generate a packet for this player
+ 	// also m_Socket may have been set to NULL during ProcessPackets but we're banking on the fact that m_DeleteMe has been set to true as well so it'll short circuit before dereferencing
+@@ -355,6 +364,7 @@
+ 	m_FinishedDownloadingTime = 0;
+ 	m_FinishedLoadingTicks = 0;
+ 	m_StartedLaggingTicks = 0;
++	m_TotalLaggingTicks = 0;
+ 	m_StatsSentTime = 0;
+ 	m_StatsDotASentTime = 0;
+ 	m_LastGProxyWaitNoticeSentTime = 0;
+@@ -396,6 +406,7 @@
+ 	m_Switching = false;
+ 	m_Switchok = false;
+ 	m_WarnChecked = false;
++	m_ConnectionState = 1;
+ }
+ 
+ CGamePlayer :: CGamePlayer( CPotentialPlayer *potential, unsigned char nPID, string nJoinedRealm, string nName, BYTEARRAY nInternalIP, bool nReserved ) : CPotentialPlayer( potential->m_Protocol, potential->m_Game, potential->GetSocket( ) )
+@@ -414,6 +425,7 @@
+ 	// to fix this we could move the packet counters to CPotentialPlayer and copy them here
+ 	// note: we must make sure we never send a packet to a CPotentialPlayer otherwise the send counter will be incorrect too! what a mess this is...
+ 	// that said, the packet counters are only used for managing GProxy++ reconnections
++	m_ConnectionState = 1;
+ 
+ 	m_TotalPacketsReceived = 1;
+ 	m_LeftCode = PLAYERLEAVE_LOBBY;
+@@ -426,6 +438,7 @@
+ 	m_FinishedDownloadingTime = 0;
+ 	m_FinishedLoadingTicks = 0;
+ 	m_StartedLaggingTicks = 0;
++	m_TotalLaggingTicks = 0;
+ 	m_StatsSentTime = 0;
+ 	m_StatsDotASentTime = 0;
+ 	m_LastGProxyWaitNoticeSentTime = 0;
+@@ -579,6 +592,34 @@
+ 
+ 	if( m_Socket && GetTime( ) - m_Socket->GetLastRecv( ) >= 30 )
+ 		m_Game->EventPlayerDisconnectTimedOut( this );
++	// make sure we're not waiting too long for the first MAPSIZE packet
++	
++	if( m_ConnectionState == 1 && GetTicks( ) - m_ConnectionTime > m_Game->m_GHost->m_DenyMaxMapsizeTime && !m_Game->GetGameLoaded() && !m_Game->GetGameLoading() )
++	{
++		CONSOLE_Print( "[DENY] Kicking player: MAPSIZE not received within a few seconds" );
++		m_DeleteMe = true;
++		SetLeftReason( "MAPSIZE not received within a few seconds" );
++		SetLeftCode( PLAYERLEAVE_LOBBY );
++		m_Game->OpenSlot( m_Game->GetSIDFromPID( GetPID( ) ), false );
++		m_Game->m_GHost->DenyIP( GetExternalIPString( ), m_Game->m_GHost->m_DenyMapsizeDuration, "MAPSIZE not received within a few seconds" );
++	}
++	
++	// disconnect if the player is downloading too slowly
++	
++	if( m_DownloadStarted && !m_DownloadFinished && !m_Game->GetGameLoaded() && !m_Game->GetGameLoading() )
++	{
++		uint32_t downloadingTime = GetTicks( ) - m_StartedDownloadingTicks;
++		
++		if( downloadingTime > m_Game->m_GHost->m_DenyMaxDownloadTime )
++		{
++			CONSOLE_Print( "[DENY] Kicking player: download time too long" );
++			m_DeleteMe = true;
++			SetLeftReason( "download time too long" );
++			SetLeftCode( PLAYERLEAVE_LOBBY );
++			m_Game->OpenSlot( m_Game->GetSIDFromPID( GetPID( ) ), false );
++			m_Game->m_GHost->DenyIP( GetExternalIPString( ), m_Game->m_GHost->m_DenyDownloadDuration, "download time too long" );
++		}
++	}
+ 
+ 	// GProxy++ acks
+ 
+@@ -603,16 +644,23 @@
+ 	// try to find out why we're requesting deletion
+ 	// in cases other than the ones covered here m_LeftReason should have been set when m_DeleteMe was set
+ 
+-	if( m_Error )
++	if( m_Error ){
++		m_Game->m_GHost->DenyIP( GetExternalIPString( ), 180000, "player error" );
+ 		m_Game->EventPlayerDisconnectPlayerError( this );
+-
++		m_Socket->Reset( );
++		return Deleting;
++	}
+ 	if( m_Socket )
+ 	{
+-		if( m_Socket->HasError( ) )
++		if( m_Socket->HasError( ) ){
+ 			m_Game->EventPlayerDisconnectSocketError( this );
+-
+-		if( !m_Socket->GetConnected( ) )
++			if( !m_GProxy )
++				m_Game->m_GHost->DenyIP( GetExternalIPString( ), 20000, "socket error" );
++		}
++		else if( !m_Socket->GetConnected( ) ){
+ 			m_Game->EventPlayerDisconnectConnectionClosed( this );
++			m_Game->m_GHost->DenyIP( GetExternalIPString( ), 30000, "connection closed" );
++		}
+ 	}
+ 
+ 	return Deleting;
+@@ -699,7 +747,7 @@
+ 			case CGameProtocol :: W3GS_GAMELOADED_SELF:
+ 				if( m_Protocol->RECEIVE_W3GS_GAMELOADED_SELF( Packet->GetData( ) ) )
+ 				{
+-					if( !m_FinishedLoading )
++					if( !m_FinishedLoading && m_Game->GetGameLoading( ) )
+ 					{
+ 						m_FinishedLoading = true;
+ 						m_FinishedLoadingTicks = GetTicks( );
+@@ -752,6 +800,8 @@
+ 				break;
+ 
+ 			case CGameProtocol :: W3GS_MAPSIZE:
++				m_ConnectionState = 2;
++				m_ConnectionTime = GetTicks( );
+ 				MapSize = m_Protocol->RECEIVE_W3GS_MAPSIZE( Packet->GetData( ), m_Game->m_GHost->m_Map->GetMapSize( ) );
+ 
+ 				if( MapSize )
+Index: ghost.cpp
+===================================================================
+--- ghost.cpp	(revision 41)
++++ ghost.cpp	(working copy)
+@@ -2266,6 +2266,7 @@
+ 	m_AppleIcon = CFG->GetInt( "bot_appleicon", 0 ) == 1 ? true : false; //Gen
+ 	m_PrefixName = CFG->GetInt( "bot_realmprefixname", 0 ) == 1 ? true : false; //Gen
+ 	m_SquirrelTxt = CFG->GetInt( "bot_squirreltxt", 0 ) == 0 ? false : true; //Gen
++	m_StartGameWhenAtLeastXPlayers = CFG->GetInt( "bot_startgamewhenatleastXplayers", 3 ); //Gen
+ 	m_LobbyTimeLimit = CFG->GetInt( "bot_lobbytimelimit", 111 );	
+ 	m_Latency = CFG->GetInt( "bot_latency", 100 );
+ 	m_SyncLimit = CFG->GetInt( "bot_synclimit", 50 );
+@@ -2290,7 +2291,18 @@
+ 	m_dropifdesync = CFG->GetInt( "bot_dropifdesync", 1 ) == 0 ? false : true; //Metal_Koola
+ 	m_MatchMakingMethod = CFG->GetInt( "bot_matchmakingmethod", 1 );
+ 	m_MapGameType = CFG->GetUInt( "bot_mapgametype", 0 );
++	// deny patch variables
++	m_DenyMaxDownloadTime = CFG->GetInt( "deny_maxdownloadtime", 90000 );
++	m_DenyMaxMapsizeTime = CFG->GetInt( "deny_maxmapsizetime", 5000 );
++	m_DenyMaxReqjoinTime = CFG->GetInt( "deny_maxreqjointime", 5000 );
++	m_DenyMaxIPUsage = CFG->GetInt( "deny_maxipusage", 8 );
++	m_DenyMaxLoadTime = CFG->GetInt( "deny_maxloadtime", 240000 );
+ 	
++	m_DenyDownloadDuration = CFG->GetInt( "deny_downloadtimeduration", 20000 );
++	m_DenyMapsizeDuration = CFG->GetInt( "deny_mapsizeduration", 60000 );
++	m_DenyReqjoinDuration = CFG->GetInt( "deny_reqjoinduration", 60000 );
++	m_DenyIPUsageDuration = CFG->GetInt( "deny_ipusageduration", 10000 );
++	m_DenyLoadDuration = CFG->GetInt( "deny_loadduration", 180000 );
+ 	m_ActualRehostPrintingDelay = 0;		
+ }
+ 
+@@ -2801,7 +2813,69 @@
+ 	}
+ #endif
+ }
++// denyPatch Void CGhost
++void CGHost :: DenyIP( string ip, uint32_t duration, string reason )
++{
++	CONSOLE_Print( "[DENY] Denying connections from " + ip + " for " + UTIL_ToString( duration ) + " milliseconds: " + reason );
++	
++	// check to see if already in table
++	
++	if( m_DenyIP.count( ip ) == 0 )
++	{
++		DenyInfo Info;
++		Info.Time = GetTicks( );
++		Info.Duration = duration;
++		Info.Count = 0;
++		
++		m_DenyIP[ip] = Info;
++	}
++	
++	else
++	{
++		// only add if new ending time is greater than last ending time
++		if( duration >= m_DenyIP[ip].Duration || GetTicks( ) - m_DenyIP[ip].Time > m_DenyIP[ip].Duration - duration ) {
++			// increment deny count if necessary
++			if( GetTicks( ) - m_DenyIP[ip].Time < 60000 )
++			{
++				m_DenyIP[ip].Count++;
++				
++				if( m_DenyIP[ip].Count > 20 )
++				{
++					duration = 1200000;
++					CONSOLE_Print( "[DENY] Extending deny due to high deny count " );
++					m_DenyIP[ip].Count = 0;
++				}
++			}
++			
++			else
++				m_DenyIP[ip].Count = 0;
++			
++			m_DenyIP[ip].Time = GetTicks( );
++			m_DenyIP[ip].Duration = duration;
++		}
++	}
++}
+ 
++bool CGHost :: CheckDeny( string ip ) {
++	if( m_DenyIP.count( ip ) == 0 )
++		return false;
++	else
++	{
++		if( GetTicks( ) - m_DenyIP[ip].Time < m_DenyIP[ip].Duration )
++			return true;
++		else
++		{
++			// delete stale entries only, so that we can use DenyCount properly
++			if( GetTicks( ) - m_DenyIP[ip].Time > 60000 + m_DenyIP[ip].Duration )
++			{
++				m_DenyIP.erase( ip );
++			}
++			
++			return false;
++		}
++	}
++}
++
+ void CGHost :: AdminGameMessage(string name, string message)
+ {
+ 	if (m_AdminGame)
+@@ -3931,11 +4005,26 @@
+ 	m_AppleIcon = CFG->GetInt( "bot_appleicon", 0 ) == 1 ? true : false; //Gen
+ 	m_PrefixName = CFG->GetInt( "bot_realmprefixname", 0 ) == 1 ? true : false; //Gen
+ 	m_SquirrelTxt = CFG->GetInt( "bot_squirreltxt", 0 ) == 0 ? false : true; // Gen
++	m_StartGameWhenAtLeastXPlayers = CFG->GetInt( "bot_startgamewhenatleastXplayers", 3 ); //Gen
+ 	m_LobbyTimeLimit = CFG->GetInt( "bot_lobbytimelimit", 111 );	
+ 	m_LobbyTimeLimitMax = CFG->GetInt( "bot_lobbytimelimitmax", 150 );
+ 	m_LANWar3Version = CFG->GetInt( "lan_war3version", 24 );
+ 	m_ReplayBuildNumber = CFG->GetInt( "replay_buildnumber", 6059 );
+ 	m_ReplayWar3Version = CFG->GetInt( "replay_war3version", 26);
++	
++	// deny patch variables
++	m_DenyMaxDownloadTime = CFG->GetInt( "deny_maxdownloadtime", 90000 );
++	m_DenyMaxMapsizeTime = CFG->GetInt( "deny_maxmapsizetime", 5000 );
++	m_DenyMaxReqjoinTime = CFG->GetInt( "deny_maxreqjointime", 5000 );
++	m_DenyMaxIPUsage = CFG->GetInt( "deny_maxipusage", 8 );
++	m_DenyMaxLoadTime = CFG->GetInt( "deny_maxloadtime", 240000 );
++	
++	m_DenyDownloadDuration = CFG->GetInt( "deny_downloadtimeduration", 20000 );
++	m_DenyMapsizeDuration = CFG->GetInt( "deny_mapsizeduration", 60000 );
++	m_DenyReqjoinDuration = CFG->GetInt( "deny_reqjoinduration", 60000 );
++	m_DenyIPUsageDuration = CFG->GetInt( "deny_ipusageduration", 10000 );
++	m_DenyLoadDuration = CFG->GetInt( "deny_loadduration", 180000 );
++
+ 	m_AutoStartDotaGames = CFG->GetInt( "bot_autostartdotagames", 0 ) == 0 ? false : true;
+ 	m_AllowedScores = CFG->GetInt( "bot_allowedscores", 0 );
+ 	m_AutoHostAllowedScores = CFG->GetInt( "bot_autohostallowedscores", 0 );
+@@ -4680,7 +4769,6 @@
+ 	uint32_t idx = 0;
+ 	uint32_t id;
+ 	uint32_t Nr = 0;
+-
+ 	idx = GameName.length()-1;
+ 	for (id = 7; id >=1; id-- )
+ 	{
+@@ -4694,7 +4782,6 @@
+ 	}
+ 	if (!found)
+ 		idx = 0;
+-
+ 	// idx = 0, no Game Nr found in gamename
+ 	if (idx == 0)
+ 	{
+@@ -4714,7 +4801,9 @@
+ 	if (Nr>m_MaxHostCounter)
+ 		Nr = 1;
+ 	GameNr = UTIL_ToString(Nr);
+-	GameName = GameName + GameNr;
++	if ( m_CurrentGame->GetSlotsOpen() < 4 && m_CurrentGame->GetSlotsOpen() != 0 )
++		GameName += " +" + UTIL_ToString(m_CurrentGame->GetSlotsOpen());
++	else GameName = GameName + GameNr;
+ 	return GameName;
+ }
+ 
+Index: ghost.h
+===================================================================
+--- ghost.h	(revision 41)
++++ ghost.h	(working copy)
+@@ -237,6 +237,7 @@
+ 	
+ 	uint32_t m_ActualRehostPrintingDelay;  // Counts the number of checks before printing again
+ 	uint32_t m_NumPlayersforAutoStart;  	// store value of the number of players required for an autostart
++	uint32_t m_StartGameWhenAtLeastXPlayers;
+ 	bool m_UDPConsole;						// config value: console output redirected to UDP
+ 	bool m_Verbose;							// config value: show all info or just some
+ 	bool m_RelayChatCommands;				// config value: show/hide issued commands
+@@ -246,7 +247,7 @@
+ 	bool m_AppleIcon;
+ 	bool m_FakePlayersLobby;
+ 	bool m_PrefixName;
+-	bool m_SquirrelTxt;
++	bool m_SquirrelTxt;	
+ 	bool m_QueueGameRefresh;
+ 	bool m_ReplaceBanWithWarn;
+ 	bool m_forceautohclindota;

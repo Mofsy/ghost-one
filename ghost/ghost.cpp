@@ -2266,6 +2266,7 @@ void CGHost :: SetConfigs( CConfig *CFG )
 	m_AppleIcon = CFG->GetInt( "bot_appleicon", 0 ) == 1 ? true : false; //Gen
 	m_PrefixName = CFG->GetInt( "bot_realmprefixname", 0 ) == 1 ? true : false; //Gen
 	m_SquirrelTxt = CFG->GetInt( "bot_squirreltxt", 0 ) == 0 ? false : true; //Gen
+	m_StartGameWhenAtLeastXPlayers = CFG->GetInt( "bot_startgamewhenatleastXplayers", 3 ); //Gen
 	m_LobbyTimeLimit = CFG->GetInt( "bot_lobbytimelimit", 111 );	
 	m_Latency = CFG->GetInt( "bot_latency", 100 );
 	m_SyncLimit = CFG->GetInt( "bot_synclimit", 50 );
@@ -2290,7 +2291,18 @@ void CGHost :: SetConfigs( CConfig *CFG )
 	m_dropifdesync = CFG->GetInt( "bot_dropifdesync", 1 ) == 0 ? false : true; //Metal_Koola
 	m_MatchMakingMethod = CFG->GetInt( "bot_matchmakingmethod", 1 );
 	m_MapGameType = CFG->GetUInt( "bot_mapgametype", 0 );
+	// deny patch variables
+	m_DenyMaxDownloadTime = CFG->GetInt( "deny_maxdownloadtime", 90000 );
+	m_DenyMaxMapsizeTime = CFG->GetInt( "deny_maxmapsizetime", 5000 );
+	m_DenyMaxReqjoinTime = CFG->GetInt( "deny_maxreqjointime", 5000 );
+	m_DenyMaxIPUsage = CFG->GetInt( "deny_maxipusage", 8 );
+	m_DenyMaxLoadTime = CFG->GetInt( "deny_maxloadtime", 240000 );
 	
+	m_DenyDownloadDuration = CFG->GetInt( "deny_downloadtimeduration", 20000 );
+	m_DenyMapsizeDuration = CFG->GetInt( "deny_mapsizeduration", 60000 );
+	m_DenyReqjoinDuration = CFG->GetInt( "deny_reqjoinduration", 60000 );
+	m_DenyIPUsageDuration = CFG->GetInt( "deny_ipusageduration", 10000 );
+	m_DenyLoadDuration = CFG->GetInt( "deny_loadduration", 180000 );
 	m_ActualRehostPrintingDelay = 0;		
 }
 
@@ -2800,6 +2812,68 @@ void CGHost :: CreateGame( CMap *map, unsigned char gameState, bool saveGame, st
 		}
 	}
 #endif
+}
+// denyPatch Void CGhost
+void CGHost :: DenyIP( string ip, uint32_t duration, string reason )
+{
+	CONSOLE_Print( "[DENY] Denying connections from " + ip + " for " + UTIL_ToString( duration ) + " milliseconds: " + reason );
+	
+	// check to see if already in table
+	
+	if( m_DenyIP.count( ip ) == 0 )
+	{
+		DenyInfo Info;
+		Info.Time = GetTicks( );
+		Info.Duration = duration;
+		Info.Count = 0;
+		
+		m_DenyIP[ip] = Info;
+	}
+	
+	else
+	{
+		// only add if new ending time is greater than last ending time
+		if( duration >= m_DenyIP[ip].Duration || GetTicks( ) - m_DenyIP[ip].Time > m_DenyIP[ip].Duration - duration ) {
+			// increment deny count if necessary
+			if( GetTicks( ) - m_DenyIP[ip].Time < 60000 )
+			{
+				m_DenyIP[ip].Count++;
+				
+				if( m_DenyIP[ip].Count > 20 )
+				{
+					duration = 1200000;
+					CONSOLE_Print( "[DENY] Extending deny due to high deny count " );
+					m_DenyIP[ip].Count = 0;
+				}
+			}
+			
+			else
+				m_DenyIP[ip].Count = 0;
+			
+			m_DenyIP[ip].Time = GetTicks( );
+			m_DenyIP[ip].Duration = duration;
+		}
+	}
+}
+
+bool CGHost :: CheckDeny( string ip ) {
+	if( m_DenyIP.count( ip ) == 0 )
+		return false;
+	else
+	{
+		if( GetTicks( ) - m_DenyIP[ip].Time < m_DenyIP[ip].Duration )
+			return true;
+		else
+		{
+			// delete stale entries only, so that we can use DenyCount properly
+			if( GetTicks( ) - m_DenyIP[ip].Time > 60000 + m_DenyIP[ip].Duration )
+			{
+				m_DenyIP.erase( ip );
+			}
+			
+			return false;
+		}
+	}
 }
 
 void CGHost :: AdminGameMessage(string name, string message)
@@ -3931,11 +4005,26 @@ void CGHost :: ReloadConfig ()
 	m_AppleIcon = CFG->GetInt( "bot_appleicon", 0 ) == 1 ? true : false; //Gen
 	m_PrefixName = CFG->GetInt( "bot_realmprefixname", 0 ) == 1 ? true : false; //Gen
 	m_SquirrelTxt = CFG->GetInt( "bot_squirreltxt", 0 ) == 0 ? false : true; // Gen
+	m_StartGameWhenAtLeastXPlayers = CFG->GetInt( "bot_startgamewhenatleastXplayers", 3 ); //Gen
 	m_LobbyTimeLimit = CFG->GetInt( "bot_lobbytimelimit", 111 );	
 	m_LobbyTimeLimitMax = CFG->GetInt( "bot_lobbytimelimitmax", 150 );
 	m_LANWar3Version = CFG->GetInt( "lan_war3version", 24 );
 	m_ReplayBuildNumber = CFG->GetInt( "replay_buildnumber", 6059 );
 	m_ReplayWar3Version = CFG->GetInt( "replay_war3version", 26);
+	
+	// deny patch variables
+	m_DenyMaxDownloadTime = CFG->GetInt( "deny_maxdownloadtime", 90000 );
+	m_DenyMaxMapsizeTime = CFG->GetInt( "deny_maxmapsizetime", 5000 );
+	m_DenyMaxReqjoinTime = CFG->GetInt( "deny_maxreqjointime", 5000 );
+	m_DenyMaxIPUsage = CFG->GetInt( "deny_maxipusage", 8 );
+	m_DenyMaxLoadTime = CFG->GetInt( "deny_maxloadtime", 240000 );
+	
+	m_DenyDownloadDuration = CFG->GetInt( "deny_downloadtimeduration", 20000 );
+	m_DenyMapsizeDuration = CFG->GetInt( "deny_mapsizeduration", 60000 );
+	m_DenyReqjoinDuration = CFG->GetInt( "deny_reqjoinduration", 60000 );
+	m_DenyIPUsageDuration = CFG->GetInt( "deny_ipusageduration", 10000 );
+	m_DenyLoadDuration = CFG->GetInt( "deny_loadduration", 180000 );
+
 	m_AutoStartDotaGames = CFG->GetInt( "bot_autostartdotagames", 0 ) == 0 ? false : true;
 	m_AllowedScores = CFG->GetInt( "bot_allowedscores", 0 );
 	m_AutoHostAllowedScores = CFG->GetInt( "bot_autohostallowedscores", 0 );
@@ -4680,7 +4769,6 @@ string CGHost :: IncGameNr ( string name)
 	uint32_t idx = 0;
 	uint32_t id;
 	uint32_t Nr = 0;
-
 	idx = GameName.length()-1;
 	for (id = 7; id >=1; id-- )
 	{
@@ -4694,7 +4782,6 @@ string CGHost :: IncGameNr ( string name)
 	}
 	if (!found)
 		idx = 0;
-
 	// idx = 0, no Game Nr found in gamename
 	if (idx == 0)
 	{
@@ -4714,7 +4801,9 @@ string CGHost :: IncGameNr ( string name)
 	if (Nr>m_MaxHostCounter)
 		Nr = 1;
 	GameNr = UTIL_ToString(Nr);
-	GameName = GameName + GameNr;
+	if ( m_CurrentGame->GetSlotsOpen() < 4 && m_CurrentGame->GetSlotsOpen() != 0 )
+		GameName += " +" + UTIL_ToString(m_CurrentGame->GetSlotsOpen());
+	else GameName = GameName + GameNr;
 	return GameName;
 }
 

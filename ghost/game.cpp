@@ -2238,8 +2238,11 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 					else
 					{
 						uint32_t AutoStartPlayers = UTIL_ToUInt32( Payload );
-
-						if( AutoStartPlayers != 0 )
+						if ( m_GHost->m_StartGameWhenAtLeastXPlayers != 0 && AutoStartPlayers < m_GHost->m_StartGameWhenAtLeastXPlayers ){
+							SendChat( player->GetPID(), "Autostart must take a higher value. Try again with "+string( 1, m_GHost->m_CommandTrigger )+"autostart " + UTIL_ToString(m_GHost->m_StartGameWhenAtLeastXPlayers) + " for example");
+							return HideCommand;
+						}
+						if( AutoStartPlayers != 0 && AutoStartPlayers > 1 )
 						{
 							SendAllChat( m_GHost->m_Language->AutoStartEnabled( UTIL_ToString( AutoStartPlayers ) ) );
 							m_AutoStartPlayers = AutoStartPlayers;
@@ -2658,11 +2661,11 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 							}
 							else { 
 								if ( m_Slots[SID-1].GetSlotStatus( ) == SLOTSTATUS_OCCUPIED && m_Slots[SID-1].GetComputer( ) == 1 )
-										SendChat( player->GetPID(), "You have closed computer slot, type !comp "+ Payload +" to make it a comp again");
+										SendChat( player->GetPID(), "You have closed computer slot, type "+string( 1, m_GHost->m_CommandTrigger )+"comp "+ Payload +" to make it a comp again");
 									else if ( m_Slots[SID-1].GetSlotStatus( ) == SLOTSTATUS_CLOSED )
 											return HideCommand;
 										else if ( !( m_Slots[SID-1].GetSlotStatus( ) == SLOTSTATUS_OPEN )){
-											SendChat( player->GetPID(), "Please do !df or !dfs command if you are about to kick fake player/s!");
+											SendChat( player->GetPID(), "Please do "+string( 1, m_GHost->m_CommandTrigger )+"df or "+string( 1, m_GHost->m_CommandTrigger )+"dfs command if you are about to kick fake player/s!");
 											return HideCommand;	// here to prevent kicking a fakeplayer which resulted as incorrect slots info and cause all players to be dropped when the game starts
 										}	
 							}
@@ -4332,11 +4335,11 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 									isRootAdmin = true;
 							}
 							else { if ( m_Slots[SID-1].GetSlotStatus( ) == SLOTSTATUS_OCCUPIED && m_Slots[SID-1].GetComputer( ) == 1  )
-										SendChat( player->GetPID(), "You have closed computer slot, type !comp "+ Payload +" to make it a comp again");
+										SendChat( player->GetPID(), "You have closed computer slot, type "+string( 1, m_GHost->m_CommandTrigger )+"comp "+ Payload +" to make it a comp again");
 									else if ( m_Slots[SID-1].GetSlotStatus( ) == SLOTSTATUS_OPEN )
 										return HideCommand;
 										else if ( !( m_Slots[SID-1].GetSlotStatus( ) == SLOTSTATUS_CLOSED )){
-											SendChat( player->GetPID(), "Please do !df or !dfs command if you are about to kick fake player/s!");
+											SendChat( player->GetPID(), "Please do "+string( 1, m_GHost->m_CommandTrigger )+"df or "+string( 1, m_GHost->m_CommandTrigger )+"dfs command if you are about to kick fake player/s!");
 											return HideCommand;	// here to prevent kicking a fakeplayer which resulted as incorrect slots info and cause all players to be dropped when the game starts
 										}	
 							}
@@ -5106,7 +5109,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 					else
 					{
 						if( GetTicks( ) - m_LastPlayerLeaveTicks >= 2000 )
-							StartCountDown( false );
+							StartCountDown( true );
 						else
 							SendAllChat( m_GHost->m_Language->CountDownAbortedSomeoneLeftRecently( ) );
 					}
@@ -5467,7 +5470,6 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 							SendChat( player->GetPID(), "Only the owner can start the game.");
 							return HideCommand;
 						}
-
 					if( Payload.empty( ) || Payload == "off" )
 					{
 						SendAllChat( m_GHost->m_Language->AutoStartDisabled( ) );
@@ -5476,8 +5478,11 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 					else
 					{
 						uint32_t AutoStartPlayers = UTIL_ToUInt32( Payload );
-
-						if( AutoStartPlayers != 0 )
+						if ( m_GHost->m_StartGameWhenAtLeastXPlayers != 0 && AutoStartPlayers < m_GHost->m_StartGameWhenAtLeastXPlayers ){
+							SendChat( player->GetPID(), "Autostart must take a higher value. Try again with "+string( 1, m_GHost->m_CommandTrigger )+"autostart " + UTIL_ToString(m_GHost->m_StartGameWhenAtLeastXPlayers) + " for example");
+							return HideCommand;
+						}
+						if( AutoStartPlayers != 0 && AutoStartPlayers > 1 )
 						{
 							SendAllChat( m_GHost->m_Language->AutoStartEnabled( UTIL_ToString( AutoStartPlayers ) ) );
 							m_AutoStartPlayers = AutoStartPlayers;
@@ -5527,7 +5532,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 									} else if ( m_Slots[SID-1].GetSlotStatus( ) == SLOTSTATUS_CLOSED )
 										return HideCommand;
 										else if ( !( m_Slots[SID-1].GetSlotStatus( ) == SLOTSTATUS_OPEN ) ) {
-											SendChat( player->GetPID(), "Please do !df or !dfs command if you are about to kick fake player/s!");
+											SendChat( player->GetPID(), "Please do "+string( 1, m_GHost->m_CommandTrigger )+"df or "+string( 1, m_GHost->m_CommandTrigger )+"dfs command if you are about to kick fake player/s!");
 											return HideCommand;	// here to prevent kicking a fakeplayer which resulted as incorrect slots info and cause all players to be dropped when the game starts
 										}
 							}
@@ -5768,7 +5773,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 										} else if ( m_Slots[SID-1].GetSlotStatus( ) == SLOTSTATUS_OPEN )
 											return HideCommand;
 											else if ( !( m_Slots[SID-1].GetSlotStatus( ) == SLOTSTATUS_CLOSED ) ){
-											SendChat( player->GetPID(), "Please do !df or !dfs command if you are about to kick fake player/s!");
+											SendChat( player->GetPID(), "Please do "+string( 1, m_GHost->m_CommandTrigger )+"df or "+string( 1, m_GHost->m_CommandTrigger )+"dfs command if you are about to kick fake player/s!");
 											return HideCommand;	// here to prevent kicking a fakeplayer which resulted as incorrect slots info and cause all players to be dropped when the game starts
 											}	
 							}
@@ -5818,7 +5823,11 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 				{		
 					if(m_GHost->m_FakePlayersLobby && !m_FakePlayers.empty())					
 						DeleteFakePlayer();
-					ReCalculateTeams();					
+					ReCalculateTeams();
+					if ( m_GHost->m_StartGameWhenAtLeastXPlayers != 0 && GetNumHumanPlayers( ) < m_GHost->m_StartGameWhenAtLeastXPlayers ){						
+						SendChat( player->GetPID(), "At least " + UTIL_ToString(m_GHost->m_StartGameWhenAtLeastXPlayers) + "human players needed to start game. Try again when enough players");
+						return HideCommand;
+					}
 					if (m_GetMapNumTeams==2 || m_Map->GetMapType( ).find("2teams") != string::npos ) {
 						if (GetSlotsOccupiedT1( )<1 || GetSlotsOccupiedT2( )<1)
 						{
@@ -5827,7 +5836,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 						}
 						if ( GetNumSlotsT1( ) == GetNumSlotsT2( ) && GetSlotsOccupiedT1( )!=GetSlotsOccupiedT2( ) && m_Map->GetMapType( ).find("noteam") == string::npos )
 						{
-							SendAllChat("Team unbalanced. Please !swap players to balance the game & !startn again");
+							SendAllChat("Team unbalanced. Please "+string( 1, m_GHost->m_CommandTrigger )+"swap players to balance the game & "+string( 1, m_GHost->m_CommandTrigger )+"startn again");
 							return HideCommand;
 						}
 					}
@@ -5864,6 +5873,10 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 					if(m_GHost->m_FakePlayersLobby && !(m_FakePlayers.empty()))					
 						DeleteFakePlayer();
 					ReCalculateTeams();
+					if ( m_GHost->m_StartGameWhenAtLeastXPlayers != 0 && GetNumHumanPlayers( ) < m_GHost->m_StartGameWhenAtLeastXPlayers ){
+						SendChat( player->GetPID(), "At least " + UTIL_ToString(m_GHost->m_StartGameWhenAtLeastXPlayers) + " human players needed to start game. Try again when enough players");
+						return HideCommand;
+					}
 					if (m_GetMapNumTeams==2 || m_Map->GetMapType( ).find("2teams") != string::npos ) {
 						if (GetSlotsOccupiedT1( )<1 || GetSlotsOccupiedT2( )<1)
 						{
@@ -5872,7 +5885,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 						}
 						if ( GetNumSlotsT1( ) == GetNumSlotsT2( ) && GetSlotsOccupiedT1( )!=GetSlotsOccupiedT2( ) && m_Map->GetMapType( ).find("noteam") == string::npos )
 						{
-							SendAllChat("Team unbalanced. Please !swap players to balance the game & !startn again");
+							SendAllChat("Team unbalanced. Please "+string( 1, m_GHost->m_CommandTrigger )+"swap players to balance the game & "+string( 1, m_GHost->m_CommandTrigger )+"startn again");
 							return HideCommand;
 						}
 					}
@@ -5892,8 +5905,10 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 					}
 					else
 					{
-						if( GetTicks( ) - m_LastPlayerLeaveTicks >= 2000 )
-							StartCountDown( false );
+						if( GetTicks( ) - m_LastPlayerLeaveTicks >= 2000 ){
+							m_CountDownStarted = true;
+							m_CountDownCounter = 10;
+						}
 						else
 							SendAllChat( m_GHost->m_Language->CountDownAbortedSomeoneLeftRecently( ) );
 					}
@@ -5914,7 +5929,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 				if(!isDefaultOwner && IsOwner(User))
 				if(Command == "kick" && !m_CountDownStarted && !m_SaveGame )
 				{
-					SendChat(player->GetPID(), "Unable to execute !kick <name>. Try !open <slot> or !close <slot>" );
+					SendChat(player->GetPID(), "Unable to execute "+string( 1, m_GHost->m_CommandTrigger )+"kick <name>. Try "+string( 1, m_GHost->m_CommandTrigger )+"open <slot> or "+string( 1, m_GHost->m_CommandTrigger )+"close <slot>" );
 					SendAllChat("You must become an admin to unlock this feature. Request at http://thegenmaps.tk");
 					return HideCommand;		
 				}
@@ -6035,7 +6050,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 	// !OWNER (set game owner)
 	//
 		if( Command == "owner" || Command =="admin" )
-		{				
+		{	
 			if( RootAdminCheck || IsOwner( User ) || (!GetPlayerFromName( m_OwnerName, false ) && m_OwnerJoined))
 			{					
 				if( !Payload.empty( ) )
@@ -6057,7 +6072,11 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 				}
 			}
 			else{
-				if ( m_GHost->m_NewOwner > 0 && m_GHost->m_NewOwner < 3 && !AdminCheck && !RootAdminCheck && !isDefaultOwner ){
+				if (m_GHost->m_NewOwner <= 0){
+					SendChat( player->GetPID(), "Owner command disabled by the bot owner. Game autostarts with current slots state.");
+					return HideCommand;
+				}
+				if ( m_GHost->m_NewOwner < 3 && !AdminCheck && !RootAdminCheck && !isDefaultOwner ){
 					if ( m_GHost->m_NewOwner == 1 )
 						m_GHost->m_NewOwner = 3;				
 					SendAllChat( m_GHost->m_Language->SettingGameOwnerTo( User ) );
@@ -6065,8 +6084,23 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 					m_OwnerName = User;
 				}
 				else{
-					SendAllChat( m_GHost->m_Language->UnableToSetGameOwner( m_OwnerName ) );
-					CONSOLE_Print( "[GAME: " + m_GameName + "] Default Owner[" + m_DefaultOwner + "] Setting GameOwner to [" + User + "] Failed!" );
+					bool isOwnerInGame = false;
+					for( vector<CGamePlayer *> :: iterator i = m_Players.begin( ); i != m_Players.end( ); i++ )
+						if ((*i)->GetName() == m_OwnerName ){
+							isOwnerInGame = true;
+							SendAllChat( m_GHost->m_Language->UnableToSetGameOwner( m_OwnerName ) );
+							CONSOLE_Print( "[GAME: " + m_GameName + "] Default Owner[" + m_DefaultOwner + "] Setting GameOwner to [" + User + "] Failed!" + m_OwnerName + "'s still in lobby");
+							return HideCommand;
+						}
+					if ( !isOwnerInGame ) {
+						if ( m_GHost->m_NewOwner == 1 )
+							m_GHost->m_NewOwner = 3;
+						SendChat( player->GetPID(), "Previous owner name cleared as s/he isn't in lobby");
+						SendAllChat( m_GHost->m_Language->SettingGameOwnerTo( User ) );
+						CONSOLE_Print( "[GAME: " + m_GameName + "] Default Owner[" + m_DefaultOwner + "] set GameOwner to the Player[" + User + "]" );
+						if ( !(AdminCheck || RootAdminCheck || isDefaultOwner) )
+							m_OwnerName = User;
+					}					
 				}
 			}
 		}
@@ -6249,7 +6283,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 		if(m_StartedVoteStartTime == 0) { //need >minplayers or admin to START a votestart
 		  if (GetNumHumanPlayers() < m_GHost->m_VoteStartMinPlayers && !votestartAuth) { //need at least eight players to votestart
 			uint32_t MinPlayers = m_GHost->m_VoteStartMinPlayers;					
-		    SendChat( player, "You cannot use !votestart until there're " + UTIL_ToString(MinPlayers) +" or more players!" );
+		    SendChat( player, "You cannot use " +string( 1, m_GHost->m_CommandTrigger )+ "votestart until there're " + UTIL_ToString(MinPlayers) +" or more players!" );
 		    return false;
 		  }
                   
@@ -6509,7 +6543,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 			}
 			k++;
 		}
-		CountRMK = CountRMK - 3;
+		CountRMK = CountRMK - 1;
 		if(player->GetHasRMKed()) 
 		{
 			if (!team_p) {
@@ -6523,7 +6557,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 			} 
 		} 
 
-		if((VotesRMK >= CountRMK) && (CountRMK!=0) ) // has at least a player
+		if((VotesRMK >= CountRMK - 1) && (CountRMK!=0) ) // has at least a player
 		{     
 		  //game_RMK=true;  //disable autoban //autosave
 			SendAllChat("The vote of RMK was completed with SUCCESS.");
