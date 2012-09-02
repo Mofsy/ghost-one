@@ -659,7 +659,8 @@ bool CGamePlayer :: Update( void *fd )
 		}
 		else if( !m_Socket->GetConnected( ) ){
 			m_Game->EventPlayerDisconnectConnectionClosed( this );
-			m_Game->m_GHost->DenyIP( GetExternalIPString( ), 30000, "connection closed" );
+			if( !m_GProxy )
+				m_Game->m_GHost->DenyIP( GetExternalIPString( ), 30000, "connection closed" );
 		}
 	}
 
