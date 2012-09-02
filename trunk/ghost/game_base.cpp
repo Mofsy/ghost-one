@@ -338,7 +338,7 @@ CBaseGame :: CBaseGame( CGHost *nGHost, CMap *nMap, CSaveGame *nSaveGame, uint16
 	m_GetMapNumTeams = m_Map->GetMapNumTeams();
 	m_GetMapOnlyAutoWarnIfMoreThanXPlayers = m_Map->GetMapOnlyAutoWarnIfMoreThanXPlayers();
 
-	if (m_GetMapType == "dota" && m_GHost->m_AutoStartDotaGames)
+	if (m_GetMapType.find("dota") != string::npos && m_GHost->m_AutoStartDotaGames)
 		m_AutoStartPlayers = 10;
 }
 
@@ -964,7 +964,7 @@ bool CBaseGame :: Update( void *fd, void *send_fd )
       {        
         string s;
 		(*i)->SetTimeActive( 0 );
-		if ( m_GetMapType == "noafk" || m_GetMapType == "dota" || m_GetMapType == "guard" ) {
+		if ( m_GetMapType.find("noafk") != string::npos || m_GetMapType.find("dota") != string::npos || m_GetMapType.find("guard") != string::npos ) {
 			s = ". KICKING if dota or anti-afk map!";
 	        (*i)->SetDeleteMe( true );
 	        (*i)->SetLeftReason( "was kicked by host" );
@@ -2445,7 +2445,7 @@ void CBaseGame :: SendAllActions( )
 
 
 /* for	uakf.b	 when autohosting prevent players from saving the game m_Slots[GetSIDFromPID(Action->GetPID())].GetTeam()
-			if ( !m_GHost->m_AutoHostGameName.empty() && m_Slots[GetSIDFromPID(Action->GetPID())].GetTeam()!=12 && (m_GetMapType == "dota" || m_GetMapType == "guard" || m_GetMapType == "nosave")) {
+			if ( !m_GHost->m_AutoHostGameName.empty() && m_Slots[GetSIDFromPID(Action->GetPID())].GetTeam()!=12 && (m_GetMapType.find("dota") != string::npos || m_GetMapType.find("guard") != string::npos || m_GetMapType.find("nosave") != string::npos || m_GetMapType.find("ward") != string::npos )) {
 				if ((*Action->GetAction())[0] == 0x6) {
 					SendAllChat("[Anti-Save] " + GetPlayerFromPID(Action->GetPID())->GetName() + " tried to save the game. Justice has served.");
 					continue;
@@ -3530,7 +3530,7 @@ void CBaseGame :: EventPlayerJoined( CPotentialPlayer *potential, CIncomingJoinP
 	if (IsReserved (joinPlayer->GetName()))
 		isAdmin=true;
 
-	bool dontplacehigher = m_GHost->m_PlaceAdminsHigherOnlyInDota && (m_GetMapType != "dota");
+	bool dontplacehigher = m_GHost->m_PlaceAdminsHigherOnlyInDota && ( m_GetMapType.find("dota") != string::npos );
 
 	if ( isAdmin && (!dontplacehigher))
 	{
@@ -4974,7 +4974,7 @@ void CBaseGame :: EventPlayerAction( CGamePlayer *player, CIncomingAction *actio
 				  n += 10;					    
 							CONSOLE_Print( "[GAME: " + m_GameName + "] ResourceTrade detected by [" + player->GetName( ) + "]" );
 							playername = player->GetName( );
-							if ( m_GetMapType == "dota" || m_GetMapType == "guard" || m_GetMapType == "notrade" )
+							if ( m_GetMapType.find("dota") != string::npos || m_GetMapType.find("guard") != string::npos || m_GetMapType.find("notrade") != string::npos || m_GetMapType.find("ward") != string::npos )
 							{
 								s = ". Kicked as it's DotA or non-trade map!";
 								m_GHost->m_Callables.push_back( m_GHost->m_DB->ThreadedBanAdd( player->GetJoinedRealm( ), player->GetName( ), player->GetExternalIPString(), m_GameName, "AUTOBAN", "Tradehack detected", 20, 0 ));				
@@ -5075,7 +5075,7 @@ void CBaseGame :: EventPlayerAction( CGamePlayer *player, CIncomingAction *actio
 	}
 	m_Actions.push( action );
 	BYTEARRAY *ActionData = action->GetAction( );
-	if ( m_GetMapType == "nopause" || m_GetMapType == "dota" || m_GetMapType == "guard" ){				
+	if ( m_GetMapType.find("nopause") != string::npos || m_GetMapType.find("dota") != string::npos || m_GetMapType.find("guard") != string::npos ){				
 		if( !ActionData->empty( ) && (*ActionData)[0] == 1 )
 		{
 			BYTEARRAY CRC;
@@ -5085,7 +5085,7 @@ void CBaseGame :: EventPlayerAction( CGamePlayer *player, CIncomingAction *actio
 			SendAllChat( "[Anti-Pause] " + ( player->GetName( ) )  + " tried to pause the game." );
 		}
 	}	
-	if ( m_GetMapType == "dota" || m_GetMapType == "guard" || m_GetMapType == "nosave" )
+	if ( m_GetMapType.find("dota") != string::npos || m_GetMapType.find("guard") != string::npos || m_GetMapType.find("nosave") != string::npos || m_GetMapType.find("ward") != string::npos )
 	{	 
 		CIncomingAction *Action = m_Actions.front( );
 		if (m_Slots[GetSIDFromPID(Action->GetPID())].GetTeam()!=12)
@@ -5432,7 +5432,7 @@ void CBaseGame :: EventPlayerChatToHost( CGamePlayer *player, CIncomingChatPlaye
 
 					string m = chatPlayer->GetMessage();
 					transform( m.begin( ), m.end( ), m.begin( ), (int(*)(int))tolower );
-					if (m_GetMapType == "dota")
+					if ( m_GetMapType.find("dota") != string::npos )
 					{
 						bool blueplayer = false;
 						if (m.substr(0,1) == "-" && m.length()>1)
@@ -8817,7 +8817,7 @@ string CBaseGame :: CustomReason ( uint32_t ctime, string reason, string name)
 
 	// time in minutes since game loaded
 	float iTime = (float)(ctime - m_GameLoadedTime)/60;
-	if (m_GetMapType == "dota")
+	if ( m_GetMapType.find("dota") != string::npos )
 		if (iTime>2)
 			iTime -=2;
 		else
@@ -8931,7 +8931,7 @@ string CBaseGame :: GetGameInfo()
 		float iTime = (float)(GetTime() - m_GameLoadedTime)/60;
 		if (!m_GameLoaded)
 			iTime = 0;
-		if (m_GetMapType == "dota")
+		if ( m_GetMapType.find("dota") != string::npos )
 			if (iTime>2)
 				iTime -=2;
 			else
@@ -8955,7 +8955,7 @@ string CBaseGame :: GetGameInfo()
 			sTeam = st1+"v"+st2+" : ";
 		}
 
-		if (m_GetMapType == "dota")
+		if ( m_GetMapType.find("dota") != string::npos )
 		{
 			uint32_t ssteam1 = 0;
 			uint32_t ssteam2 = 0;

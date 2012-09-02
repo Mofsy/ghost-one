@@ -3675,7 +3675,7 @@ void CGHost :: UDPCommands( string Message )
 		{
 			c = m_CurrentGame->m_Players.size();
 			t = m_CurrentGame->m_Slots.size();
-			bool dota = m_Map->GetMapType() == "dota";
+			bool dota = m_Map->GetMapType().find("dota") != string::npos;
 
 			Froms = "L "+UTIL_ToString(dota) +" "+UTIL_ToString(c)+" "+UTIL_ToString(t)+" ";
 			if (t>0)
