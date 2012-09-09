@@ -1752,7 +1752,7 @@ bool CBaseGame :: Update( void *fd, void *send_fd )
 			}
 		}
 	//check if we have hit the timelimit
-		if ( GetTime( ) > m_LastReservedSeen + m_GHost->m_LobbyTimeLimit*60 )
+		if ( GetTime( ) > m_LastReservedSeen + m_GHost->m_LobbyTimeLimit*60 && m_Players.size() < 3 )
 		{
 			CONSOLE_Print( "[GAME: " + m_GameName + "] is over (lobby timelimit hit)" );
 			for( vector<CBNET *> :: iterator i = m_GHost->m_BNETs.begin( ); i != m_GHost->m_BNETs.end( ); i++ )
