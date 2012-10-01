@@ -899,9 +899,11 @@ void CGamePlayer :: Send( BYTEARRAY data )
 
 	m_TotalPacketsSent++;
 
-	if( m_GProxy && m_Game->GetGameLoaded( ) )
-		m_GProxyBuffer.push( data );
-
+	if( m_GProxy && m_Game->GetGameLoaded( ) ){
+		if( m_GProxyBuffer.size( ) <= 2000 )
+			m_GProxyBuffer.push( data );
+		else CONSOLE_Print( "[DENY] Warning: discarding GProxy++ packet from player [" + m_Name + "] due to large queue size (> 2000)" );
+	}
 	CPotentialPlayer :: Send( data );
 }
 

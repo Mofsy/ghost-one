@@ -5721,7 +5721,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 						}
 						else
 						{
-							SendAllChat( "Removed " + HoldName + " from hold list" );
+							SendAllChat( "Remove " + HoldName + " from hold list" );
 							DelFromReserved( HoldName);
 						}
 					}
@@ -5920,7 +5920,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 				if(Command == "pub" && !m_CountDownStarted && !m_SaveGame )
 				{
 					SendChat(player->GetPID(), m_GHost->m_Language->YouDontHaveAccessToThatCommand( ));
-					SendAllChat("You must become an admin to unlock this feature. Request at http://thegenmaps.tk");
+					SendAllChat( m_GHost->m_Language->FeatureBlocked( ) );
 					return HideCommand;		
 				}
 				//
@@ -5930,7 +5930,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 				if(Command == "kick" && !m_CountDownStarted && !m_SaveGame )
 				{
 					SendChat(player->GetPID(), "Unable to execute "+string( 1, m_GHost->m_CommandTrigger )+"kick <name>. Try "+string( 1, m_GHost->m_CommandTrigger )+"open <slot> or "+string( 1, m_GHost->m_CommandTrigger )+"close <slot>" );
-					SendAllChat("You must become an admin to unlock this feature. Request at http://thegenmaps.tk");
+					SendAllChat( m_GHost->m_Language->FeatureBlocked( ) );
 					return HideCommand;		
 				}
 				//
@@ -6423,7 +6423,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 		if(!wiim.empty())
 			SendAllChat( "Players that need to ready: "+ wiim );
 		else 
-			SendAllChat( "Everybody is !ready. Waiting to PING " + UTIL_ToString( GetNumHumanPlayers( ) ) + " player(s)." );
+			SendAllChat( "Everybody is !ready. Waiting to PING " + UTIL_ToString( GetNumHumanPlayers( ) ) + " player/s." );
 	}
 
 	//

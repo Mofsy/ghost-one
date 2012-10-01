@@ -1933,3 +1933,8 @@ string CLanguage :: RemovedPlayerFromNoteList(string user)
 	Replace( Out, "$USER$", user );
 	return Out;
 }
+string CLanguage :: FeatureBlocked( )
+{
+	string Out = m_CFG->GetString( "lang_1024", "lang_1024" );
+	return Out;
+}
