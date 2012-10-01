@@ -296,7 +296,7 @@ public:
 	string AddedPlayerToNoteList( string user);
 	string ChangedPlayerNote( string user);
 	string RemovedPlayerFromNoteList( string user);
-
+	string FeatureBlocked( );
 };
 
 #endif

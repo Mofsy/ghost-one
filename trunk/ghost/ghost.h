@@ -238,6 +238,7 @@ public:
 	uint32_t m_ActualRehostPrintingDelay;  // Counts the number of checks before printing again
 	uint32_t m_NumPlayersforAutoStart;  	// store value of the number of players required for an autostart
 	uint32_t m_StartGameWhenAtLeastXPlayers;
+	uint32_t m_RefreshDuration;	
 	bool m_UDPConsole;						// config value: console output redirected to UDP
 	bool m_Verbose;							// config value: show all info or just some
 	bool m_RelayChatCommands;				// config value: show/hide issued commands

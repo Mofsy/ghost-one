@@ -2267,6 +2267,7 @@ void CGHost :: SetConfigs( CConfig *CFG )
 	m_PrefixName = CFG->GetInt( "bot_realmprefixname", 0 ) == 1 ? true : false; //Gen
 	m_SquirrelTxt = CFG->GetInt( "bot_squirreltxt", 0 ) == 0 ? false : true; //Gen
 	m_StartGameWhenAtLeastXPlayers = CFG->GetInt( "bot_startgamewhenatleastXplayers", 3 ); //Gen
+	m_RefreshDuration = CFG->GetInt( "bot_refreshduration", 0 ); //Gen
 	m_LobbyTimeLimit = CFG->GetInt( "bot_lobbytimelimit", 111 );	
 	m_Latency = CFG->GetInt( "bot_latency", 100 );
 	m_SyncLimit = CFG->GetInt( "bot_synclimit", 50 );
@@ -4006,6 +4007,7 @@ void CGHost :: ReloadConfig ()
 	m_PrefixName = CFG->GetInt( "bot_realmprefixname", 0 ) == 1 ? true : false; //Gen
 	m_SquirrelTxt = CFG->GetInt( "bot_squirreltxt", 0 ) == 0 ? false : true; // Gen
 	m_StartGameWhenAtLeastXPlayers = CFG->GetInt( "bot_startgamewhenatleastXplayers", 3 ); //Gen
+	m_RefreshDuration = CFG->GetInt( "bot_refreshduration", 0 ); //Gen
 	m_LobbyTimeLimit = CFG->GetInt( "bot_lobbytimelimit", 111 );	
 	m_LobbyTimeLimitMax = CFG->GetInt( "bot_lobbytimelimitmax", 150 );
 	m_LANWar3Version = CFG->GetInt( "lan_war3version", 24 );
