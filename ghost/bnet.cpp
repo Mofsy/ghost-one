@@ -5692,6 +5692,56 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				}
 				
 				//
+				// !CGAMES
+				//
+				if( Command == "cgames" || Command == "currentgames" || Command == "cg" )
+				{
+					string user = User;
+					int itr = 0;
+					if( m_GHost->m_Games.size( ) == 0 )
+					{
+						QueueChatCommand( "No games in a progress.", User, Whisper );
+						return;
+					} else {
+						QueueChatCommand( "There are "+UTIL_ToString(m_GHost->m_Games.size( )) +" games in a progress:" , User, Whisper );
+						if( m_GHost->m_CurrentGame )
+						{
+							string Names;
+							for( vector<CGamePlayer *> :: iterator i = m_GHost->m_CurrentGame->m_Players.begin( ); i != m_GHost->m_CurrentGame->m_Players.end( ); i++ )
+							{
+								if(itr == 0)
+									Names = (*i)->GetName( );
+								else
+									Names = (*i)->GetName( )+", "+Names;
+									itr++;
+							}
+							itr = 0;
+							QueueChatCommand( "Lobby: "+m_GHost->m_CurrentGame->GetOwnerName()+" - "+m_GHost->m_CurrentGame->GetGameName()+" - "+Names, User, Whisper );
+						}				  
+						string Names2;
+						for ( uint32_t i=0; i<m_GHost->m_Games.size( ); i++ )
+						{				 
+							if( m_GHost->m_Games[i] )
+							{				   
+								for( vector<CGamePlayer *> :: iterator q = m_GHost->m_Games[i]->m_Players.begin( ); q != m_GHost->m_Games[i]->m_Players.end( ); q++ )
+								{
+									if( itr == 0 )
+										Names2 = (*q)->GetName( );
+									else
+										Names2 = (*q)->GetName( )+", "+Names2;
+									itr++;
+								}
+								uint32_t  glt = m_GHost->m_Games[i]->GetGameLoadedTime();
+								if( m_GHost->m_Games[i]->GetGameLoadedTime() == 0 )
+									glt = GetTime( );
+								QueueChatCommand( UTIL_ToString(i+1)+": "+m_GHost->m_Games[i]->GetOwnerName()+" - "+m_GHost->m_Games[i]->GetGameName()+" - "+UTIL_ToString((GetTime() - glt)/60)+" min - "+Names2, User, Whisper );				  
+							}
+							Names2.clear();				  
+						}				  
+					}
+				}
+				
+				//
 				// !STATS
 				//
 

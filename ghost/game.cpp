@@ -5355,6 +5355,82 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 					SendAllChat( "Current game name is \""+m_GameName+"\"");
 					return HideCommand;
 				}
+				
+				//
+				// !realm
+				//
+
+				if( Command == "realm" )
+				{
+				   string servermsg;
+				   string serveralias;
+
+				   if( !Payload.empty( ) )
+				   {
+					  CGamePlayer *LastMatch = NULL;
+
+					  uint32_t Matches = GetPlayerFromNamePartial( Payload , &LastMatch );
+					  if (Matches == 1)
+					  {
+						 servermsg = LastMatch->GetName( );
+						 servermsg += " - ";
+						 serveralias = LastMatch->GetJoinedRealm( ).empty( ) ? "Garena" : LastMatch->GetJoinedRealm( );
+
+						 if ( serveralias != "N/A" )
+						 {
+							for( vector<CBNET *> :: iterator j = m_GHost->m_BNETs.begin( ); j != m_GHost->m_BNETs.end( ); j++ )
+							{
+							   if( (*j)->GetServer( ) == serveralias )
+							   {
+								  serveralias = (*j)->GetServerAlias( );
+								  break;
+							   }
+							}                  
+						 }
+
+						 servermsg += serveralias;
+					  }
+					  else
+					  {
+						 servermsg = "Error. Player not found.";
+					  }
+				   }
+				   else
+				   {
+					  for( vector<CGamePlayer *> :: iterator i = m_Players.begin( ); i != m_Players.end( ); i++ )
+					  {
+						 if ( i == m_Players.begin( ) )
+							servermsg = (*i)->GetName( );
+						 else
+							servermsg += (*i)->GetName( );
+
+						 servermsg += " - ";
+						 serveralias = (*i)->GetJoinedRealm( ).empty( ) ? "Garena" : (*i)->GetJoinedRealm( );
+
+						 if ( serveralias != "N/A" )
+						 {
+							for( vector<CBNET *> :: iterator j = m_GHost->m_BNETs.begin( ); j != m_GHost->m_BNETs.end( ); j++ )
+							{
+							   if( (*j)->GetServer( ) == serveralias )
+							   {
+								  serveralias = (*j)->GetServerAlias( );
+								  break;
+							   }
+							}                  
+						 }
+
+						 servermsg += serveralias;
+
+						 if( i != m_Players.end( ) - 1 )
+							servermsg += ", ";
+					  }
+
+				   }
+
+				   SendAllChat( servermsg );
+
+				   return HideCommand;
+				}
 
 				//
 				// !VIRTUALHOST
