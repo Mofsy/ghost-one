@@ -709,32 +709,82 @@ Flags:
 	UTIL_AppendByteArrayFast( StatString, mapSHA1 );
 	StatString = UTIL_EncodeStatString( StatString );
 
-	if( mapGameType.size( ) == 4 && mapFlags.size( ) == 4 && mapWidth.size( ) == 2 && mapHeight.size( ) == 2 && !gameName.empty( ) && !hostName.empty( ) && !mapPath.empty( ) && mapCRC.size( ) == 4 && mapSHA1.size( ) == 20 && StatString.size( ) < 128 && HostCounterString.size( ) == 8 )
+	if( mapGameType.size( ) == 4 )
 	{
-		// make the rest of the packet
+		if( mapFlags.size( ) == 4 )
+		{
+			if( mapWidth.size( ) == 2 )
+			{
+				if( mapHeight.size( ) == 2 )
+				{
+					if( !gameName.empty( ) )
+					{
+						if( !hostName.empty( ) )
+						{
+							if( !mapPath.empty( ) )
+							{
+								if( mapCRC.size( ) == 4 )
+								{
+									if( mapSHA1.size( ) == 20 )
+									{
+										if( StatString.size( ) < 128 )
+										{
+											if( HostCounterString.size( ) == 8 )
+											{
+												// make the rest of the packet
 
-		packet.push_back( BNET_HEADER_CONSTANT );						// BNET header constant
-		packet.push_back( SID_STARTADVEX3 );							// SID_STARTADVEX3
-		packet.push_back( 0 );											// packet length will be assigned later
-		packet.push_back( 0 );											// packet length will be assigned later
-		packet.push_back( state );										// State (16 = public, 17 = private, 18 = close)
-		packet.push_back( 0 );											// State continued...
-		packet.push_back( 0 );											// State continued...
-		packet.push_back( 0 );											// State continued...
-		UTIL_AppendByteArray( packet, upTime, false );					// time since creation
-		UTIL_AppendByteArrayFast( packet, mapGameType );				// Game Type, Parameter
-		UTIL_AppendByteArray( packet, Unknown, 4 );						// ???
-		UTIL_AppendByteArray( packet, CustomGame, 4 );					// Custom Game
-		UTIL_AppendByteArrayFast( packet, gameName );					// Game Name
-		packet.push_back( 0 );											// Game Password is NULL
-		packet.push_back( 98 );											// Slots Free (ascii 98 = char 'b' = 11 slots free) - note: do not reduce this as this is the # of PID's Warcraft III will allocate
-		UTIL_AppendByteArrayFast( packet, HostCounterString, false );	// Host Counter
-		UTIL_AppendByteArrayFast( packet, StatString );					// Stat String
-		packet.push_back( 0 );											// Stat String null terminator (the stat string is encoded to remove all even numbers i.e. zeros)
-		AssignLength( packet );
+												packet.push_back( BNET_HEADER_CONSTANT );						// BNET header constant
+												packet.push_back( SID_STARTADVEX3 );							// SID_STARTADVEX3
+												packet.push_back( 0 );											// packet length will be assigned later
+												packet.push_back( 0 );											// packet length will be assigned later
+												packet.push_back( state );										// State (16 = public, 17 = private, 18 = close)
+												packet.push_back( 0 );											// State continued...
+												packet.push_back( 0 );											// State continued...
+												packet.push_back( 0 );											// State continued...
+												UTIL_AppendByteArray( packet, upTime, false );					// time since creation
+												UTIL_AppendByteArrayFast( packet, mapGameType );				// Game Type, Parameter
+												UTIL_AppendByteArray( packet, Unknown, 4 );						// ???
+												UTIL_AppendByteArray( packet, CustomGame, 4 );					// Custom Game
+												UTIL_AppendByteArrayFast( packet, gameName );					// Game Name
+												packet.push_back( 0 );											// Game Password is NULL
+												packet.push_back( 98 );											// Slots Free (ascii 98 = char 'b' = 11 slots free) - note: do not reduce this as this is the # of PID's Warcraft III will allocate
+												UTIL_AppendByteArrayFast( packet, HostCounterString, false );	// Host Counter
+												UTIL_AppendByteArrayFast( packet, StatString );					// Stat String
+												packet.push_back( 0 );											// Stat String null terminator (the stat string is encoded to remove all even numbers i.e. zeros)
+												AssignLength( packet );
+											}
+											else
+												CONSOLE_Print( "[DEBUG] SEND_SID_STARTADVEX3 - HostCounterString" );
+										}
+										else
+											CONSOLE_Print( "[DEBUG] SEND_SID_STARTADVEX3 - StatString" );
+									}
+									else
+										CONSOLE_Print( "[DEBUG] SEND_SID_STARTADVEX3 - mapSHA1" );
+								}
+								else
+									CONSOLE_Print( "[DEBUG] SEND_SID_STARTADVEX3 - mapCRC" );
+							}
+							else
+								CONSOLE_Print( "[DEBUG] SEND_SID_STARTADVEX3 - mapPath" );
+						}
+						else
+							CONSOLE_Print( "[DEBUG] SEND_SID_STARTADVEX3 - hostName" );
+					}
+					else
+						CONSOLE_Print( "[DEBUG] SEND_SID_STARTADVEX3 - gameName" );
+				}
+				else
+					CONSOLE_Print( "[DEBUG] SEND_SID_STARTADVEX3 - mapHeight" );
+			}
+			else
+				CONSOLE_Print( "[DEBUG] SEND_SID_STARTADVEX3 - mapWidth" );
+		}
+		else
+			CONSOLE_Print( "[DEBUG] SEND_SID_STARTADVEX3 - mapFlags" );
 	}
 	else
-		CONSOLE_Print( "[BNETPROTO] invalid parameters passed to SEND_SID_STARTADVEX3" );
+		CONSOLE_Print( "[DEBUG] SEND_SID_STARTADVEX3 - mapGameType" );
 
 	// DEBUG_Print( "SENT SID_STARTADVEX3" );
 	// DEBUG_Print( packet );

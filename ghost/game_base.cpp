@@ -872,10 +872,11 @@ bool CBaseGame :: Update( void *fd, void *send_fd )
 			// don't queue a game refresh message if the queue contains more than 1 packet because they're very low priority
 
 			if( (*i)->GetOutPacketsQueued( ) <= 1 )
-			{
+			{				
+				uint32_t refreshdelay = ( m_GHost->m_RefreshDuration < 180 ) ? m_GHost->m_RefreshDuration : ( GetTime( ) - m_CreationTime );
 //				(*i)->QueueGameRefresh( m_GameState, m_GameName, string( ), m_Map, m_SaveGame, GetTime( ) - m_CreationTime, m_HostCounter, slotstotal, slotsopen );
 //				(*i)->QueueGameRefresh( m_GameState, m_GameName, string( ), m_Map, m_SaveGame, 0, m_HostCounter, slotstotal, slotsopen );
-				(*i)->QueueGameRefresh( m_GameState, m_GameName, string( ), m_Map, m_SaveGame, m_GHost->m_RefreshDuration, m_HostCounter, slotstotal, slotsopen );
+				(*i)->QueueGameRefresh( m_GameState, m_GameName, string( ), m_Map, m_SaveGame, refreshdelay, m_HostCounter, slotstotal, slotsopen );
 				Refreshed = true;
 			}
 		}
