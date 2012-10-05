@@ -641,7 +641,27 @@ bool CGame :: Update( void *fd, void *send_fd )
 		else
 			i++;
 	}
+	// update ff score
+	for( vector<CGamePlayer *> :: iterator i = m_Players.begin( ); i != m_Players.end( ); i++ )
+	{
+		if( (*i)->GetHasFFed() ) {  // remove ff on endtime
+			if(  GetTime()-(*i)->GetTimeOfFF() >= 180) 	(*i)->SetHadFFed(false);
+		};
+		if( (*i)->CanFF()==false ) {  //1 minute timer
+			if(  GetTime()-(*i)->GetTimeOfFF() >= 60) (*i)->SetCanFF(true);  
+		};
+	}
 
+	// update RMK score
+	for( vector<CGamePlayer *> :: iterator i = m_Players.begin( ); i != m_Players.end( ); i++ )
+	{
+		if( (*i)->GetHasRMKed() ) {  // remove RMK on endtime
+			if(  GetTime()-(*i)->GetTimeOfRMK() >= 180) 	(*i)->SetHadRMKed(false);
+		};
+		if( (*i)->CanRMK()==false ) {  //1 minute timer
+			if(  GetTime()-(*i)->GetTimeOfRMK() >= 60) (*i)->SetCanRMK(true);  
+		};
+	}
 	return CBaseGame :: Update( fd, send_fd );
 }
 
@@ -3038,7 +3058,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 				//
 
 				if( Command == "drop" && m_GameLoaded )
-					StopLaggers( "lagged out (dropped by admin)" );
+					StopLagger( "lagged out (dropped by admin)" );
 
 				//
 				// !ENDN
@@ -4500,10 +4520,10 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 
 						idx = GameName.length()-1;
 						if (idx>=2)
-						if (GameName.at(idx-2)=='#')
+						if (GameName.at(idx-2)=='$')
 							idx = idx-1;
 						else
-							if (GameName.at(idx-1)=='#')
+							if (GameName.at(idx-1)=='$')
 								idx = idx;
 							else
 								idx = 0;
@@ -4512,7 +4532,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 						if (idx == 0)
 						{
 							GameNr = "0";
-							GameName = m_GameName + " #";
+							GameName = m_GameName + " $";
 						}
 						else
 						{
@@ -4605,10 +4625,10 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 						
 						idx = GameName.length()-1;
 						if (idx>=2)
-						if (GameName.at(idx-2)=='#')
+						if (GameName.at(idx-2)=='$')
 							idx = idx-1;
 						else
-						if (GameName.at(idx-1)=='#')
+						if (GameName.at(idx-1)=='$')
 							idx = idx;
 						else
 							idx = 0;
@@ -4617,7 +4637,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 						if (idx == 0)
 						{
 							GameNr = "0";
-							GameName = m_GameName + " #";
+							GameName = m_GameName + " $";
 						}
 						else
 						{
@@ -4704,10 +4724,10 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 
 						idx = GameName.length()-1;
 						if (idx>=2)
-						if (GameName.at(idx-2)=='#')
+						if (GameName.at(idx-2)=='$')
 							idx = idx-1;
 						else
-							if (GameName.at(idx-1)=='#')
+							if (GameName.at(idx-1)=='$')
 								idx = idx;
 							else
 								idx = 0;
@@ -4716,7 +4736,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 						if (idx == 0)
 						{
 							GameNr = "0";
-							GameName = m_GameName + " #";
+							GameName = m_GameName + " $";
 						}
 						else
 						{
@@ -6499,7 +6519,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 		if(!wiim.empty())
 			SendAllChat( "Players that need to ready: "+ wiim );
 		else 
-			SendAllChat( "Everybody is !ready. Waiting to PING " + UTIL_ToString( GetNumHumanPlayers( ) ) + " player/s." );
+			SendAllChat( "Everybody is "+string( 1, m_GHost->m_CommandTrigger )+"ready. Waiting to PING " + UTIL_ToString( GetNumHumanPlayers( ) ) + " player/s." );
 	}
 
 	//
@@ -6515,7 +6535,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 			(*i)->SetStartVote( false );
 		}
 		player->SetStartVote( true );
-		SendAllChat( User + " is !ready to start the game." );		
+		SendAllChat( User + " is "+string( 1, m_GHost->m_CommandTrigger )+"ready to start the game." );		
 	}
 
 	else if( ( Command == "ready" || Command == "rdy" || Command == "go" ) && !m_CountDownStarted && !m_GameLoaded && !m_GameLoading && m_StartVoteStarted && !player->GetStartVote( ) )
@@ -6524,7 +6544,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 		uint32_t sVotesNeeded = 4;
 		uint32_t sVotes = 0;
 		player->SetStartVote( true );
-		SendAllChat( User + " is !ready to start the game." );		
+		SendAllChat( User + " is "+string( 1, m_GHost->m_CommandTrigger )+"ready to start the game." );		
 
 		for( vector<CGamePlayer *> :: iterator i = m_Players.begin( ); i != m_Players.end( ); i++ )
 		{
@@ -6539,12 +6559,12 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 		if( sVotes >= sVotesNeeded )
 		{
 			CONSOLE_Print ( "[GAME: " + m_GameName + "] Everybody is ready to start the game!" );
-			SendAllChat( "Everybody is !ready to start the game. Enjoy it." );			
+			SendAllChat( "Everybody is "+string( 1, m_GHost->m_CommandTrigger )+"ready to start the game. Enjoy it." );			
 			StartCountDown( true );
 		}
 	}
 	else if( ( Command == "ready" || Command == "rdy" || Command == "go" ) && !m_CountDownStarted && !m_GameLoaded && !m_GameLoading && m_StartVoteStarted && player->GetStartVote( ) )
-		SendChat( player, "You are already !ready. Type !wim to see who needs to !ready yet.");
+		SendChat( player, "You are already "+string( 1, m_GHost->m_CommandTrigger )+"ready. Type "+string( 1, m_GHost->m_CommandTrigger )+"wim to see who needs to "+string( 1, m_GHost->m_CommandTrigger )+"ready yet.");
 	//
 	// !RMK
 	//
@@ -6653,10 +6673,10 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 	// !FF
 	//
 
-    if( Command == "ffcounter" && m_GameLoaded ) 
+    if( Command == "ffcounter" && m_GameLoaded && m_Map->GetMapType( ).find("dota") != string::npos ) 
 	{
       //count ff's
-    uint32_t VotesSentinel1 = 0;
+		uint32_t VotesSentinel1 = 0;
 		uint32_t VotesScourge1 = 0;
 		uint32_t CountSentinel1 = 0;
 		uint32_t CountScourge1 = 0;
@@ -6690,16 +6710,16 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 			k++;
 		}
 
-        SendChat(player,"Counter for scores of !FF Sentinel: " + UTIL_ToString( VotesSentinel1 ) + "/" + UTIL_ToString( CountSentinel1) + ", Counter for scores of !FF Scourge: " + UTIL_ToString( VotesScourge1 ) + "/" + UTIL_ToString( CountScourge1 ));
+        SendChat(player,"Counter for scores of "+string( 1, m_GHost->m_CommandTrigger )+"FF Sentinel: " + UTIL_ToString( VotesSentinel1 ) + "/" + UTIL_ToString( CountSentinel1) + ", Counter for scores of "+string( 1, m_GHost->m_CommandTrigger )+"FF Scourge: " + UTIL_ToString( VotesScourge1 ) + "/" + UTIL_ToString( CountScourge1 ));
 	
 	};
 
-	if( (Command == "ff" || Command == "forfeit") && m_GameLoaded && player->CanFF()) 
+	if( (Command == "ff" || Command == "forfeit") && m_GameLoaded && player->CanFF() && m_Map->GetMapType( ).find("dota") != string::npos) 
 	{
 		if(player->GetHasFFed())  
 		{
 			player->SetHadFFed( false );
-      player->SetCanFF(false);      // w8 1 min
+			player->SetCanFF(false);      // w8 1 min
 		}
 		else
 		{
@@ -6753,8 +6773,8 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 				SendAllChat( "Player [" + User + "] gave FF command. Counter for scores of Sentinel: " + UTIL_ToString( VotesSentinel ) + "/" + UTIL_ToString( CountSentinel));
 			} else {
 			//scourge
-				SendAllChat( "Player [" + User + "] deu FF (desistencia). Counter for scores of Scourge: " + UTIL_ToString( VotesScourge ) + "/" + UTIL_ToString( CountScourge ));
-		}			
+				SendAllChat( "Player [" + User + "] gave FF command. Counter for scores of Scourge: " + UTIL_ToString( VotesScourge ) + "/" + UTIL_ToString( CountScourge ));
+			}			
 		} else
 		{
             if (!team_p) {
@@ -6766,7 +6786,8 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 
 		if((VotesSentinel == CountSentinel) && (CountSentinel!=0) ) // has at least a player
 		{
-			m_Stats->SetWinner(2);      
+			if (m_Stats != NULL)
+				m_Stats->SetWinner(2);      
 		  //game_ff=true;  //disable autoban //autosave
 			SendAllChat("The team FF Sentinel resigned. The Scourge wins this game.");
 			if (!m_GameEndCountDownStarted)
@@ -6780,7 +6801,8 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 		}
 		else if((VotesScourge == CountScourge) && (CountScourge!=0)) // has at least a player
 		{
-			m_Stats->SetWinner(1);    
+			if (m_Stats != NULL)
+				m_Stats->SetWinner(1);    
 			//game_ff=true;     //disable autoban  //autosave
 			SendAllChat("The team FF Scourge resigned. The Sentinel wins this game.");
 			if (!m_GameEndCountDownStarted)
@@ -6794,27 +6816,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 		}
 //		player->SetFFSentTime( GetTime( ) );
 	}
-//update ff score
-for( vector<CGamePlayer *> :: iterator i = m_Players.begin( ); i != m_Players.end( ); i++ )
-		{
-			if( (*i)->GetHasFFed() ) {  // remove ff on endtime
-				if(  GetTime()-(*i)->GetTimeOfFF() >= 180) 	(*i)->SetHadFFed(false);
-			};
-	        if( (*i)->CanFF()==false ) {  //1 minute timer
-		        if(  GetTime()-(*i)->GetTimeOfFF() >= 60) (*i)->SetCanFF(true);  
-			};
-}
 
-//update RMK score
-for( vector<CGamePlayer *> :: iterator i = m_Players.begin( ); i != m_Players.end( ); i++ )
-		{
-			if( (*i)->GetHasRMKed() ) {  // remove RMK on endtime
-				if(  GetTime()-(*i)->GetTimeOfRMK() >= 180) 	(*i)->SetHadRMKed(false);
-			};
-	        if( (*i)->CanRMK()==false ) {  //1 minute timer
-		        if(  GetTime()-(*i)->GetTimeOfRMK() >= 60) (*i)->SetCanRMK(true);  
-			};
-}
 	//
 	// !SD
 	// !SDI

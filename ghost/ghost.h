@@ -238,7 +238,8 @@ public:
 	uint32_t m_ActualRehostPrintingDelay;  // Counts the number of checks before printing again
 	uint32_t m_NumPlayersforAutoStart;  	// store value of the number of players required for an autostart
 	uint32_t m_StartGameWhenAtLeastXPlayers;
-	uint32_t m_RefreshDuration;	
+	uint32_t m_RefreshDuration;
+	uint32_t m_MoreFPsLobby;
 	bool m_UDPConsole;						// config value: console output redirected to UDP
 	bool m_Verbose;							// config value: show all info or just some
 	bool m_RelayChatCommands;				// config value: show/hide issued commands
@@ -248,8 +249,10 @@ public:
 	bool m_AppleIcon;
 	bool m_FakePlayersLobby;
 	bool m_PrefixName;
-	bool m_SquirrelTxt;	
+	bool m_SquirrelTxt;
+	string m_InvalidTriggers;
 	bool m_QueueGameRefresh;
+	bool m_VietTxt;
 	bool m_ReplaceBanWithWarn;
 	bool m_forceautohclindota;
 	bool m_PlaceAdminsHigherOnlyInDota;
@@ -392,6 +395,7 @@ public:
 	unsigned char newGameGameState;
 	string newGameName;
 	bool newGameGArena;
+	uint32_t m_LobbyDLLeaverBanTime;
 	uint32_t m_LobbyTimeLimit;
 	uint32_t m_LobbyTimeLimitMax;
 //	bool m_dbopen;

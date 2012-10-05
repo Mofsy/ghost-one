@@ -1887,14 +1887,14 @@ bool CGHost :: Update( unsigned long usecBlock )
 				AutoHostMapStr = AutoHostMapStr.substr(DPos+8);
 				DPos = AutoHostMapStr.find(")") ;
 				if (DPos!= string ::npos)				
-				AutoHostMapStr = AutoHostMapStr.substr(DPos+1);
+				AutoHostMapStr = AutoHostMapStr.substr(DPos+2);
 				string GameName;
 				if( m_CustomName )				
-					GameName = " " + AutoHostMapStr + " #" + UTIL_ToString( m_HostCounter );					
+					GameName = " " + AutoHostMapStr + " $" + UTIL_ToString( m_HostCounter );					
 				else
-					GameName = " " + m_AutoHostGameName + " #" + UTIL_ToString( m_HostCounter );				
+					GameName = " " + m_AutoHostGameName + " $" + UTIL_ToString( m_HostCounter );				
 				
-				if( GameName.size( ) > 31 || !m_AppleIcon )
+				if( GameName.size( ) > 28 || !m_AppleIcon )
 					GameName = GameName.substr(4);
 				if( GameName.size( ) <= 31 ) //don't name it  too long, only 29 characters + " #10" (4 plus caract�res)
 				{					
@@ -2237,13 +2237,13 @@ void CGHost :: SetConfigs( CConfig *CFG )
 	m_MapPath = UTIL_AddPathSeperator( CFG->GetString( "bot_mappath", string( ) ) );
 	m_SaveReplays = CFG->GetInt( "bot_savereplays", 0 ) == 0 ? false : true;
 	m_ReplayPath = UTIL_AddPathSeperator( CFG->GetString( "bot_replaypath", string( ) ) );
-	m_VirtualHostName = CFG->GetString( "bot_virtualhostname", "|cFF4080C0GHost" );
+	m_VirtualHostName = CFG->GetString( "bot_virtualhostname", "|cFF0080C0GHost" );
 	m_HideIPAddresses = CFG->GetInt( "bot_hideipaddresses", 0 ) == 0 ? false : true;
 	m_CheckMultipleIPUsage = CFG->GetInt( "bot_checkmultipleipusage", 1 ) == 0 ? false : true;
 
 	if( m_VirtualHostName.size( ) > 15 )
 	{
-		m_VirtualHostName = "|cFF4080C0GHost";
+		m_VirtualHostName = "|cFF0080C0GHost";
 		CONSOLE_Print( "[GHOST] warning - bot_virtualhostname is longer than 15 characters, using default virtual host name" );
 	}
 
@@ -2263,11 +2263,15 @@ void CGHost :: SetConfigs( CConfig *CFG )
 	m_BotAutoStartPlayers = CFG->GetInt( "bot_autohostautostartplayers", 8 );
 	m_CustomName = CFG->GetInt( "bot_cfgname", 0 ) == 0 ? false : true; //Gen
 	m_FakePlayersLobby = CFG->GetInt( "bot_fakeplayersinlobby", 0 ) == 1 ? true : false; //Gen
+	m_MoreFPsLobby = CFG->GetInt( "bot_morefakeplayersinlobby", 3 ); //Gen
 	m_AppleIcon = CFG->GetInt( "bot_appleicon", 0 ) == 1 ? true : false; //Gen
 	m_PrefixName = CFG->GetInt( "bot_realmprefixname", 0 ) == 1 ? true : false; //Gen
 	m_SquirrelTxt = CFG->GetInt( "bot_squirreltxt", 0 ) == 0 ? false : true; //Gen
+	m_InvalidTriggers = CFG->GetString( "bot_invalidtriggers", "$#" ); //Gen
 	m_StartGameWhenAtLeastXPlayers = CFG->GetInt( "bot_startgamewhenatleastXplayers", 3 ); //Gen
 	m_RefreshDuration = CFG->GetInt( "bot_refreshduration", 0 ); //Gen
+	m_VietTxt = CFG->GetInt( "bot_viettxt", 0 ) == 0 ? false : true; //Gen
+	m_LobbyDLLeaverBanTime = CFG->GetInt( "bot_lobbyleaverbantime", 45 );	//Gen
 	m_LobbyTimeLimit = CFG->GetInt( "bot_lobbytimelimit", 111 );	
 	m_Latency = CFG->GetInt( "bot_latency", 100 );
 	m_SyncLimit = CFG->GetInt( "bot_synclimit", 50 );
@@ -4003,11 +4007,15 @@ void CGHost :: ReloadConfig ()
 	m_RehostPrintingDelay = CFG->GetInt( "bot_rehostprintingdelay", 5 );
 	m_CustomName = CFG->GetInt( "bot_cfgname", 0 ) == 0 ? false : true; //Gen
 	m_FakePlayersLobby = CFG->GetInt( "bot_fakeplayersinlobby", 0 ) == 1 ? true : false; //Gen
+	m_MoreFPsLobby = CFG->GetInt( "bot_morefakeplayersinlobby", 3 ); //Gen
 	m_AppleIcon = CFG->GetInt( "bot_appleicon", 0 ) == 1 ? true : false; //Gen
 	m_PrefixName = CFG->GetInt( "bot_realmprefixname", 0 ) == 1 ? true : false; //Gen
-	m_SquirrelTxt = CFG->GetInt( "bot_squirreltxt", 0 ) == 0 ? false : true; // Gen
+	m_SquirrelTxt = CFG->GetInt( "bot_squirreltxt", 0 ) == 0 ? false : true; //Gen
+	m_InvalidTriggers = CFG->GetString( "bot_invalidtriggers", "$#" ); //Gen
 	m_StartGameWhenAtLeastXPlayers = CFG->GetInt( "bot_startgamewhenatleastXplayers", 3 ); //Gen
 	m_RefreshDuration = CFG->GetInt( "bot_refreshduration", 0 ); //Gen
+	m_VietTxt = CFG->GetInt( "bot_viettxt", 0 ) == 0 ? false : true; //Gen
+	m_LobbyDLLeaverBanTime = CFG->GetInt( "bot_lobbyleaverbantime", 30 );	//Gen
 	m_LobbyTimeLimit = CFG->GetInt( "bot_lobbytimelimit", 111 );	
 	m_LobbyTimeLimitMax = CFG->GetInt( "bot_lobbytimelimitmax", 150 );
 	m_LANWar3Version = CFG->GetInt( "lan_war3version", 24 );
@@ -4775,7 +4783,7 @@ string CGHost :: IncGameNr ( string name)
 	for (id = 7; id >=1; id-- )
 	{
 		if (idx>=id)
-			if (GameName.at(idx-id)=='#')
+			if (GameName.at(idx-id)=='$')
 			{
 				idx = idx-id+1;
 				found = true;
@@ -4788,7 +4796,7 @@ string CGHost :: IncGameNr ( string name)
 	if (idx == 0)
 	{
 		GameNr = "0";
-		GameName = name + " #";
+		GameName = name + " $";
 	}
 	else
 	{
@@ -4803,7 +4811,7 @@ string CGHost :: IncGameNr ( string name)
 	if (Nr>m_MaxHostCounter)
 		Nr = 1;
 	GameNr = UTIL_ToString(Nr);
-	if ( m_CurrentGame->GetSlotsOpen() < 4 && m_CurrentGame->GetSlotsOpen() != 0 )
+	if ( m_CurrentGame->GetSlotsOpen() < 4 && m_CurrentGame->GetSlotsOpen() != 0 && GameName.size( ) < 29 )
 		GameName += " +" + UTIL_ToString(m_CurrentGame->GetSlotsOpen());
 	else GameName = GameName + GameNr;
 	return GameName;

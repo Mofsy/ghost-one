@@ -175,6 +175,7 @@ protected:
 	bool m_LocalAdminMessages;						// if local admin messages should be relayed or not
 	bool m_FPEnable;
 	bool m_SquirrelText;
+	uint32_t m_MoreFPs;
 	uint32_t m_LastInfoShow;
 	uint32_t m_LastGenInfoShow;
 	uint32_t m_LastOwnerInfoShow;
@@ -452,6 +453,7 @@ public:
 	virtual void StartCountDownAuto( bool requireSpoofChecks );
 	virtual void StopPlayers( string reason );
 	virtual void StopLaggers( string reason );
+	virtual void StopLagger( string reason );
 	virtual void CreateVirtualHost( );
 	virtual void DeleteVirtualHost( );
 	virtual void CreateFakePlayer( );
