@@ -242,6 +242,7 @@ CBaseGame :: CBaseGame( CGHost *nGHost, CMap *nMap, CSaveGame *nSaveGame, uint16
 	m_LastOwnerInfoShow = GetTime( );
 	m_LocalAdminMessages = m_GHost->m_LocalAdminMessages;
 	m_FPEnable = m_GHost->m_FakePlayersLobby;
+	m_MoreFPs = m_GHost->m_MoreFPsLobby;
 	m_SquirrelText = m_GHost->m_SquirrelTxt;
 
 			uint32_t slotstotal = m_Slots.size( );
@@ -740,11 +741,11 @@ bool CBaseGame :: Update( void *fd, void *send_fd )
 		m_Locked = false;
 	}
 
-	// ping every 5 seconds
+	// ping every 4 seconds
 	// changed this to ping during game loading as well to hopefully fix some problems with people disconnecting during loading
 	// changed this to ping during the game as well
 
-	if( GetTime( ) - m_LastPingTime >= 5 )
+	if( GetTime( ) - m_LastPingTime >= 4 )
 	{
 		// note: we must send pings to players who are downloading the map because Warcraft III disconnects from the lobby if it doesn't receive a ping every ~90 seconds
 		// so if the player takes longer than 90 seconds to download the map they would be disconnected unless we keep sending pings
@@ -835,7 +836,7 @@ bool CBaseGame :: Update( void *fd, void *send_fd )
 		// however, if autohosting is enabled and this game is public and this game is set to autostart, it's probably autohosted
 		// so rehost it using the current autohost game name
 
-		string GameName = m_GHost->m_AutoHostGameName + " #" + UTIL_ToString( m_GHost->m_HostCounter );
+		string GameName = m_GHost->m_AutoHostGameName + " $" + UTIL_ToString( m_GHost->m_HostCounter );
 		CONSOLE_Print( "[GAME: " + m_GameName + "] automatically trying to rehost as public game [" + GameName + "] due to refresh failure" );
 		m_LastGameName = m_GameName;
 		m_GameName = GameName;
@@ -2361,6 +2362,8 @@ void CBaseGame :: SendFakePlayerInfo( CGamePlayer *player )
 			s = "Wizard[";
 			t = "]";
 		}
+		if (s.size()>14)
+			s = s.substr(0,14);
 		Send( player, m_Protocol->SEND_W3GS_PLAYERINFO( *i, s + UTIL_ToString( *i ) + t, IP, IP ) );
 	}
 }
@@ -3597,8 +3600,12 @@ void CBaseGame :: EventPlayerJoined( CPotentialPlayer *potential, CIncomingJoinP
 	if (m_FPEnable){
 	if ( ( GetSlotsOpen( ) < 2 || GetNumHumanPlayers( ) > 3 ) && !m_FakePlayers.empty() )
 		DeleteAFakePlayer( );	// we delete a fp when the lobby has < 2 open slots or > 3 human players
-		else if ( GetSlotsOpen( ) > 3 && GetNumHumanPlayers( ) < 4 && m_FakePlayers.size() < 3 )
-			CreateFakePlayer( );	// we only allow a maximum of 3 fps to be added, no fp added once there're >=4 human ppls in lobby, the number of them declines gradually
+		else {
+			if ( m_MoreFPs != 0 )
+			if ( GetSlotsOpen( ) > 3 )
+				if ( (m_GetMapType.find("morefps1") != string::npos && GetNumHumanPlayers( ) < 4) || (m_GetMapType.find("morefps2") != string::npos) || (m_MoreFPs == 2) || (m_MoreFPs == 1 && GetNumHumanPlayers( ) < 4) || (GetNumHumanPlayers( ) < 4 && m_FakePlayers.size() < 3) )
+					CreateFakePlayer( );	// we only allow a maximum of 3 fps to be added, no fp added once there're >=4 human ppls in lobby, the number of them declines gradually
+		}
 	}
 	// we have a slot for the new player
 	// make room for them by deleting the virtual host player if we have to
@@ -4728,50 +4735,59 @@ void CBaseGame :: EventPlayerLeft( CGamePlayer *player, uint32_t reason )
 			CreateFakePlayer( );
 	} */
 
-	//ban leaver who left the game in 45 secs after finishing map downloading.
-	if( !m_DownloadOnlyMode && player->GetDownloadFinished( ) && GetTime( ) - player->GetFinishedDownloadingTime( ) < 45 )
-	{
-		SendAllChat(player->GetName( ) + " BANNED for dl & early leaving in lobby" );
-		SendChat(player->GetPID(), ", left the lobby in 45 secs after downloaded gets banned for 2 days. DL xong, trong 45s ma out la bi ban nick 2 ngay" );
-		string Reason = "Leaver in 45 secs after downloaded gets banned for 2 days";
-		Reason = "Autobanned "+Reason;
-		CONSOLE_Print( "[AUTOBAN2days: " + m_GameName + "] Autobanning " + player->GetName( ) + " (" + Reason +")" );
-			string sk = player->GetJoinedRealm( );
-			if (sk.size()<3)
-				sk = "LAN(Garena)";
-				else if ( sk.find("eurobattle") != string::npos )
-					sk = "EB";
-					else if ( sk.find("warcraft3.eu") != string::npos )
-						sk = "EU";
-						else if ( sk.find("uswest") != string::npos )
-							sk = "Lordaeron (U.S. West)";
-							else if ( sk.find("useast") != string::npos )
-								sk = "Azeroth (U.S. East)";
-								else if ( sk.find("asia.battle.net") != string::npos )
-									sk = "Kalimdor (Asia)";
-									else if ( sk.find("europe.battle.net") != string::npos )
-										sk = "Northrend (Europe)";
-										else if ( sk.find("battle.lp.ro") != string::npos )
-											sk = "BattleRo";
-											else if ( sk.find("ombu") != string::npos || sk.find(".203.231") != string::npos )
-												sk = "OMBU";
-	/*	for( vector<CBNET *> :: iterator j = m_GHost->m_BNETs.begin( ); j != m_GHost->m_BNETs.end( ); j++ )
-            { 
-					if( sk == "LAN(Garena)" ){
-						garena=true;
-						// (*j)->ImmediateChatCommand( "/w " +player->GetName( )+ " you're banned 2 days for leaving the lobby too early (" + s + ")s after downloading map" + viet );
-					}
-					else{
-						if( (*j)->GetServer( ) == GetCreatorServer( ) )
-						(*j)->QueueChatCommand( player->GetName( ) + " is banned 2 days for leaving the lobby too early (" + s + ")s after downloading map" + viet, player->GetName( ), true );
-					}
-            }	*/
- 
-			if (sk == "LAN(Garena)")
-				m_GHost->m_DB->ThreadedBanAdd(" ", player->GetName( ), player->GetExternalIPString( ), "in LAN lobby", "LANautoBot","Download map & left so early",2,0);	 
-			else m_GHost->m_Callables.push_back( m_GHost->m_DB->ThreadedBanAdd( player->GetSpoofedRealm(), player->GetName( ), player->GetExternalIPString(), "lobby in " + sk, "Bnet-autobanBot", "DL & left so early", 2, 0 ));
+	//ban leaver who left the game in N secs after finishing map downloading.
+	uint32_t N = m_GHost->m_LobbyDLLeaverBanTime;
+	if ( N !=0 ) {
+		if ( N>120 || N<30 || N == NULL)
+			N=30;
+		string s = UTIL_ToString(N);
+		string viet;
+		if( !m_DownloadOnlyMode && player->GetDownloadFinished( ) && GetTime( ) - player->GetFinishedDownloadingTime( ) < N )
+		{
+			if ( m_GHost->m_VietTxt )
+				viet =  ". DL xong, trong " + s + "s ma out la bi BAN nick 2 ngay";
+			SendAllChat(player->GetName( ) + " BANNED for dl & early leaving in lobby" );
+			SendChat(player->GetPID(), ", left the lobby in "+s+" secs after downloaded gets banned for 2 days" + viet );
+			string Reason = "Leaver in "+s+" secs after downloaded gets banned for 2 days";
+			Reason = "Autobanned "+Reason;
+			CONSOLE_Print( "[AUTOBAN2days: " + m_GameName + "] Autobanning " + player->GetName( ) + " (" + Reason +")" );
+				string sk = player->GetJoinedRealm( );
+				if (sk.size()<3)
+					sk = "LAN(Garena)";
+					else if ( sk.find("eurobattle") != string::npos )
+						sk = "EB";
+						else if ( sk.find("warcraft3.eu") != string::npos )
+							sk = "EU";
+							else if ( sk.find("uswest") != string::npos )
+								sk = "Lordaeron (U.S. West)";
+								else if ( sk.find("useast") != string::npos )
+									sk = "Azeroth (U.S. East)";
+									else if ( sk.find("asia.battle.net") != string::npos )
+										sk = "Kalimdor (Asia)";
+										else if ( sk.find("europe.battle.net") != string::npos )
+											sk = "Northrend (Europe)";
+											else if ( sk.find("battle.lp.ro") != string::npos )
+												sk = "BattleRo";
+												else if ( sk.find("ombu") != string::npos || sk.find(".203.231") != string::npos )
+													sk = "OMBU";
+		/*	for( vector<CBNET *> :: iterator j = m_GHost->m_BNETs.begin( ); j != m_GHost->m_BNETs.end( ); j++ )
+				{ 
+						if( sk == "LAN(Garena)" ){
+							garena=true;
+							// (*j)->ImmediateChatCommand( "/w " +player->GetName( )+ " you're banned 2 days for leaving the lobby too early (" + s + ")s after downloading map" + viet );
+						}
+						else{
+							if( (*j)->GetServer( ) == GetCreatorServer( ) )
+							(*j)->QueueChatCommand( player->GetName( ) + " is banned 2 days for leaving the lobby too early (" + s + ")s after downloading map" + viet, player->GetName( ), true );
+						}
+				}	*/
+	 
+				if (sk == "LAN(Garena)")
+					m_GHost->m_DB->ThreadedBanAdd(" ", player->GetName( ), player->GetExternalIPString( ), "in LAN lobby", "LANautobanBot","Download map & left so early",2,0);	 
+				else m_GHost->m_Callables.push_back( m_GHost->m_DB->ThreadedBanAdd( player->GetSpoofedRealm(), player->GetName( ), player->GetExternalIPString(), "lobby in " + sk, "Bnet-autobanBot", "DL & left so early", 2, 0 ));
 
-			// m_GHost->m_Callables.push_back( m_GHost->m_DB->ThreadedBanAdd( player->GetSpoofedRealm(), player->GetName( ), player->GetExternalIPString(), "in lobby", "AUTOBAN", "DL & left so early", 2, 0 ));
+				// m_GHost->m_Callables.push_back( m_GHost->m_DB->ThreadedBanAdd( player->GetSpoofedRealm(), player->GetName( ), player->GetExternalIPString(), "in lobby", "AUTOBAN", "DL & left so early", 2, 0 ));
+		}
 	}
 			/*uint32_t b;
 			if (!m_GHost->m_FakePlayersLobby)
@@ -5608,7 +5624,17 @@ void CBaseGame :: EventPlayerChatToHost( CGamePlayer *player, CIncomingChatPlaye
 
 				if( EventPlayerBotCommand( player, Command, Payload ) )
 					Relay = false;
-			}
+			} else if ( !Message.empty( ) && Message[0] != m_GHost->m_CommandTrigger ){
+					bool wrongtrigger = false;
+					string str = m_GHost->m_InvalidTriggers;
+					for( uint32_t i = 0; i < str.length( ); i++ )
+						if ( Message[0] == str[i]){
+							wrongtrigger = true;
+							break;
+						}
+					if ( wrongtrigger )
+						SendChat( player, "Wrong command trigger. Command starts with " + string(1, m_GHost->m_CommandTrigger) + " example: "+string(1, m_GHost->m_CommandTrigger)+"owner, "+string(1, m_GHost->m_CommandTrigger)+"startn");
+				}
 				if( Relay)
 				{
 //					msg = m_GHost->CensorRemoveDots(msg);
@@ -7702,7 +7728,7 @@ void CBaseGame :: SwitchDeny ( unsigned char PID)
 
 void CBaseGame :: SwitchAccept ( unsigned char PID)
 {
-	//reset timers and players ff
+// reset timers and players ff
         	for( vector<CGamePlayer *> :: iterator i = m_Players.begin( ); i != m_Players.end( ); i++ )
 		        {
 				(*i)->SetHadFFed(false);
@@ -7710,7 +7736,7 @@ void CBaseGame :: SwitchAccept ( unsigned char PID)
 				(*i)->SetCanFF(true);            
 		         }
 
-//reset timers and players RMK
+// reset timers and players RMK
         	for( vector<CGamePlayer *> :: iterator i = m_Players.begin( ); i != m_Players.end( ); i++ )
 		        {
 				(*i)->SetHadRMKed(false);
@@ -8483,6 +8509,20 @@ void CBaseGame :: StopLaggers( string reason )
 	}
 }
 
+void CBaseGame :: StopLagger( string reason )
+{
+	for( vector<CGamePlayer *> :: iterator i = m_Players.begin( ); i != m_Players.end( ); i++ )
+	{
+		if( (*i)->GetLagging( ) && !( IsAdmin( (*i)->GetName( ) ) || IsRootAdmin( (*i)->GetName( ) ) ) )
+		{
+			(*i)->SetDeleteMe( true );
+			(*i)->SetLeftReason( reason );
+			(*i)->SetLeftCode( PLAYERLEAVE_DISCONNECT );
+		} else
+            SendAllChat( "Admins & RootAdmins can't be dropped!" );
+	}
+}
+
 void CBaseGame :: CreateVirtualHost( )
 {
 	if( m_VirtualHostPID != 255 )
@@ -8508,7 +8548,7 @@ void CBaseGame :: DeleteVirtualHost( )
 
 void CBaseGame :: CreateFakePlayer( )
 {
-	if( m_FakePlayers.size( ) > 10 )
+	if( m_FakePlayers.size( ) > 9 )
 			return;
 	unsigned char SID;
 	do	{
@@ -8532,6 +8572,8 @@ void CBaseGame :: CreateFakePlayer( )
 			s = "Wizard[";
 			t = "]";
 		}
+		if (s.size()>14)
+			s = s.substr(0,14);
 		SendAll( m_Protocol->SEND_W3GS_PLAYERINFO( FakePlayerPID, s + UTIL_ToString( FakePlayerPID ) + t, IP, IP ) );
 		m_Slots[SID] = CGameSlot( FakePlayerPID, 100, SLOTSTATUS_OCCUPIED, 0, m_Slots[SID].GetTeam( ), m_Slots[SID].GetColour( ), m_Slots[SID].GetRace( ) );
 		m_FakePlayers.push_back( FakePlayerPID );
@@ -8982,7 +9024,7 @@ string CBaseGame :: GetGameInfo()
 			sScore = UTIL_ToString(ssteam1)+"-"+UTIL_ToString(ssteam2)+" : ";
 		}
 		string sAdmin = m_OwnerName+" : ";
-		string sGameNr = "#" + UTIL_ToString(GameNr)+": [ ";
+		string sGameNr = "$" + UTIL_ToString(GameNr)+": [ ";
 		string sGameN = GetGameName();
 		sMsg = sGameNr+sTime+sTeam+sScore+sAdmin+sGameN+" ]";
 	}

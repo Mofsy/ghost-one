@@ -383,37 +383,46 @@ BYTEARRAY CGameProtocol :: SEND_W3GS_PLAYERINFO( unsigned char PID, string name,
 	unsigned char Zeros[]				= { 0, 0, 0, 0 };
 
 	BYTEARRAY packet;
-
-	if( !name.empty( ) && name.size( ) <= 15 && externalIP.size( ) == 4 && internalIP.size( ) == 4 )
+	if ( !name.empty( ) )
 	{
-		packet.push_back( W3GS_HEADER_CONSTANT );							// W3GS header constant
-		packet.push_back( W3GS_PLAYERINFO );								// W3GS_PLAYERINFO
-		packet.push_back( 0 );												// packet length will be assigned later
-		packet.push_back( 0 );												// packet length will be assigned later
-		UTIL_AppendByteArray( packet, PlayerJoinCounter, 4 );				// player join counter
-		packet.push_back( PID );											// PID
-		UTIL_AppendByteArrayFast( packet, name );							// player name
-		packet.push_back( 1 );												// ???
-		packet.push_back( 0 );												// ???
-		packet.push_back( 2 );												// AF_INET
-		packet.push_back( 0 );												// AF_INET continued...
-		packet.push_back( 0 );												// port
-		packet.push_back( 0 );												// port continued...
-		UTIL_AppendByteArrayFast( packet, externalIP );						// external IP
-		UTIL_AppendByteArray( packet, Zeros, 4 );							// ???
-		UTIL_AppendByteArray( packet, Zeros, 4 );							// ???
-		packet.push_back( 2 );												// AF_INET
-		packet.push_back( 0 );												// AF_INET continued...
-		packet.push_back( 0 );												// port
-		packet.push_back( 0 );												// port continued...
-		UTIL_AppendByteArrayFast( packet, internalIP );						// internal IP
-		UTIL_AppendByteArray( packet, Zeros, 4 );							// ???
-		UTIL_AppendByteArray( packet, Zeros, 4 );							// ???
-		AssignLength( packet );
-	}
-	else
-		CONSOLE_Print( "[GAMEPROTO] invalid parameters passed to SEND_W3GS_PLAYERINFO" );
-
+		if ( name.size( ) <= 15 )
+		{
+			if ( externalIP.size( ) == 4 )
+			{
+				if ( internalIP.size( ) == 4 )
+				{
+					packet.push_back( W3GS_HEADER_CONSTANT );							// W3GS header constant
+					packet.push_back( W3GS_PLAYERINFO );								// W3GS_PLAYERINFO
+					packet.push_back( 0 );												// packet length will be assigned later
+					packet.push_back( 0 );												// packet length will be assigned later
+					UTIL_AppendByteArray( packet, PlayerJoinCounter, 4 );				// player join counter
+					packet.push_back( PID );											// PID
+					UTIL_AppendByteArrayFast( packet, name );							// player name
+					packet.push_back( 1 );												// ???
+					packet.push_back( 0 );												// ???
+					packet.push_back( 2 );												// AF_INET
+					packet.push_back( 0 );												// AF_INET continued...
+					packet.push_back( 0 );												// port
+					packet.push_back( 0 );												// port continued...
+					UTIL_AppendByteArrayFast( packet, externalIP );						// external IP
+					UTIL_AppendByteArray( packet, Zeros, 4 );							// ???
+					UTIL_AppendByteArray( packet, Zeros, 4 );							// ???
+					packet.push_back( 2 );												// AF_INET
+					packet.push_back( 0 );												// AF_INET continued...
+					packet.push_back( 0 );												// port
+					packet.push_back( 0 );												// port continued...
+					UTIL_AppendByteArrayFast( packet, internalIP );						// internal IP
+					UTIL_AppendByteArray( packet, Zeros, 4 );							// ???
+					UTIL_AppendByteArray( packet, Zeros, 4 );							// ???
+					AssignLength( packet );
+				} else
+					CONSOLE_Print( "[DEBUG] GAMEPROTO SEND_W3GS_PLAYERINFO invalid internalIP size" );
+			} else
+				CONSOLE_Print( "[DEBUG] GAMEPROTO SEND_W3GS_PLAYERINFO invalid externalIP size" );
+		} else
+			CONSOLE_Print( "[DEBUG] GAMEPROTO SEND_W3GS_PLAYERINFO invalid name size" );
+	} else
+		CONSOLE_Print( "[DEBUG] GAMEPROTO SEND_W3GS_PLAYERINFO invalid name" );
 	// DEBUG_Print( "SENT W3GS_PLAYERINFO" );
 	// DEBUG_Print( packet );
 	return packet;

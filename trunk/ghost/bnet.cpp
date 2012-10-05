@@ -3801,10 +3801,10 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					{
 						idx = GameName.length()-1;
 						if (idx>=2)
-						if (GameName.at(idx-2)=='#')
+						if (GameName.at(idx-2)=='$')
 							idx = idx-1;
 						else
-							if (GameName.at(idx-1)=='#')
+							if (GameName.at(idx-1)=='$')
 								idx = idx;
 							else
 								idx = 0;
@@ -3813,7 +3813,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 						if (idx == 0)
 						{
 							GameNr = "0";
-							GameName = GameName + " #";
+							GameName = GameName + " $";
 						}
 						else
 						{
@@ -3904,10 +3904,10 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					{
 						idx = GameName.length()-1;
 						if (idx>=2)
-						if (GameName.at(idx-2)=='#')
+						if (GameName.at(idx-2)=='$')
 							idx = idx-1;
 						else
-							if (GameName.at(idx-1)=='#')
+							if (GameName.at(idx-1)=='$')
 								idx = idx;
 							else
 								idx = 0;
@@ -3916,7 +3916,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 						if (idx == 0)
 						{
 							GameNr = "0";
-							GameName = GameName + " #";
+							GameName = GameName + " $";
 						}
 						else
 						{
@@ -4009,10 +4009,10 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					{
 						idx = GameName.length()-1;
 						if (idx>=2)
-						if (GameName.at(idx-2)=='#')
+						if (GameName.at(idx-2)=='$')
 							idx = idx-1;
 						else
-							if (GameName.at(idx-1)=='#')
+							if (GameName.at(idx-1)=='$')
 								idx = idx;
 							else
 								idx = 0;
@@ -4021,7 +4021,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 						if (idx == 0)
 						{
 							GameNr = "0";
-							GameName = GameName + " #";
+							GameName = GameName + " $";
 						}
 						else
 						{
@@ -4089,10 +4089,10 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					{
 						idx = GameName.length()-1;
 						if (idx>=2)
-						if (GameName.at(idx-2)=='#')
+						if (GameName.at(idx-2)=='$')
 							idx = idx-1;
 						else
-							if (GameName.at(idx-1)=='#')
+							if (GameName.at(idx-1)=='$')
 								idx = idx;
 							else
 								idx = 0;
@@ -4101,7 +4101,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 						if (idx == 0)
 						{
 							GameNr = "0";
-							GameName = GameName + " #";
+							GameName = GameName + " $";
 						}
 						else
 						{
@@ -5700,10 +5700,10 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					int itr = 0;
 					if( m_GHost->m_Games.size( ) == 0 )
 					{
-						QueueChatCommand( "No games in a progress.", User, Whisper );
+						QueueChatCommand( "No games in progress.", User, Whisper );
 						return;
 					} else {
-						QueueChatCommand( "There are "+UTIL_ToString(m_GHost->m_Games.size( )) +" games in a progress:" , User, Whisper );
+						string s = UTIL_ToString(m_GHost->m_Games.size( )) + " games atm:" ;
 						if( m_GHost->m_CurrentGame )
 						{
 							string Names;
@@ -5716,7 +5716,8 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 									itr++;
 							}
 							itr = 0;
-							QueueChatCommand( "Lobby: "+m_GHost->m_CurrentGame->GetOwnerName()+" - "+m_GHost->m_CurrentGame->GetGameName()+" - "+Names, User, Whisper );
+							s += "Lobby["+m_GHost->m_CurrentGame->GetOwnerName()+"]["+m_GHost->m_CurrentGame->GetGameName()+"] "+Names+";";
+							QueueChatCommand( s, User, Whisper );
 						}				  
 						string Names2;
 						for ( uint32_t i=0; i<m_GHost->m_Games.size( ); i++ )
@@ -5734,7 +5735,9 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 								uint32_t  glt = m_GHost->m_Games[i]->GetGameLoadedTime();
 								if( m_GHost->m_Games[i]->GetGameLoadedTime() == 0 )
 									glt = GetTime( );
-								QueueChatCommand( UTIL_ToString(i+1)+": "+m_GHost->m_Games[i]->GetOwnerName()+" - "+m_GHost->m_Games[i]->GetGameName()+" - "+UTIL_ToString((GetTime() - glt)/60)+" min - "+Names2, User, Whisper );				  
+								s.empty();
+								s += UTIL_ToString(i+1)+": ["+m_GHost->m_Games[i]->GetOwnerName()+"]["+m_GHost->m_Games[i]->GetGameName()+"] ("+UTIL_ToString((GetTime() - glt)/60)+" mins) "+Names2;
+								QueueChatCommand( s, User, Whisper );				  
 							}
 							Names2.clear();				  
 						}				  
@@ -5875,7 +5878,17 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 						QueueChatCommand( m_GHost->m_Language->VersionNotAdmin( m_GHost->m_Version ), User, Whisper );
 				}
 			}
-		}
+		} 	else if ( !Message.empty( ) && Message[0] != m_CommandTrigger){
+				bool wrongtrigger = false;
+				string str = m_GHost->m_InvalidTriggers;
+				for( uint32_t i = 0; i < str.length( ); i++ )
+					if ( Message[0] == str[i]){
+						wrongtrigger = true;
+						break;
+					}
+				if ( wrongtrigger )
+					QueueChatCommand( "Wrong command trigger. Command starts with " + string( 1, m_CommandTrigger ) + " example: " + string( 1, m_CommandTrigger ) + "owner, " + string( 1, m_CommandTrigger ) + "startn", User, Whisper );
+			}
 	}
 	else if( Event == CBNETProtocol :: EID_CHANNEL )
 	{
