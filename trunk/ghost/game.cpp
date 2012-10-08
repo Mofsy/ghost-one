@@ -6266,6 +6266,14 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 			else
 				SendAllChat( Froms );
 		}
+		
+	//
+	// !HELP
+	//
+	
+	if( Command == "help" || Command == "helps" || Command == "idk" )
+		SendChat( player,"write "+string( 1, m_GHost->m_CommandTrigger )+"owner to gain control of lobby,"+string( 1, m_GHost->m_CommandTrigger )+"swap players if needed & "+string( 1, m_GHost->m_CommandTrigger )+"startn to start game");
+		
 	//
 	// !PING
 	//
@@ -6673,7 +6681,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 	// !FF
 	//
 
-    if( Command == "ffcounter" && m_GameLoaded && m_Map->GetMapType( ).find("dota") != string::npos ) 
+    if( Command == "ffcounter" && m_Stats && m_GameLoaded && m_Map->GetMapType( ).find("dota") != string::npos ) 
 	{
       //count ff's
 		uint32_t VotesSentinel1 = 0;
@@ -6714,7 +6722,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 	
 	};
 
-	if( (Command == "ff" || Command == "forfeit") && m_GameLoaded && player->CanFF() && m_Map->GetMapType( ).find("dota") != string::npos) 
+	if( (Command == "ff" || Command == "forfeit") && m_Stats && m_GameLoaded && player->CanFF() && m_Map->GetMapType( ).find("dota") != string::npos) 
 	{
 		if(player->GetHasFFed())  
 		{

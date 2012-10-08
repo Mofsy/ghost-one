@@ -974,8 +974,8 @@ bool CBaseGame :: Update( void *fd, void *send_fd )
       {        
         string s;
 		(*i)->SetTimeActive( 0 );
-		if ( m_GetMapType.find("noafk") != string::npos || m_GetMapType.find("dota") != string::npos || m_GetMapType.find("guard") != string::npos ) {
-			s = ". KICKING if dota or anti-afk map!";
+		if ( m_GetMapType.find("noafk") != string::npos || m_GetMapType.find("guard") != string::npos ) {
+			s = ". KICKING by [anti-afk BOT] as AFK isn't allowed!";
 	        (*i)->SetDeleteMe( true );
 	        (*i)->SetLeftReason( "was kicked by host" );
 	        (*i)->SetLeftCode( PLAYERLEAVE_LOST );
@@ -1689,7 +1689,7 @@ bool CBaseGame :: Update( void *fd, void *send_fd )
 			m_GameOverDiffCanceled = true;
 
 		// start the gameover timer if there's only one player left
-
+		if ( !m_GameEnded && m_GHost->m_gameoveroneplayer && ( m_GHost->m_gameoverminplayers == 0 || m_GHost->m_gameoverminplayers > 2 ))
 		if( m_Players.size( ) == 1 && m_GameOverTime == 0 && ( m_GameLoading || m_GameLoaded ) )
 		{
 			CONSOLE_Print( "[GAME: " + m_GameName + "] gameover timer started (one player left)" );
@@ -2457,7 +2457,7 @@ void CBaseGame :: SendAllActions( )
 
 
 /* for	uakf.b	 when autohosting prevent players from saving the game m_Slots[GetSIDFromPID(Action->GetPID())].GetTeam()
-			if ( !m_GHost->m_AutoHostGameName.empty() && m_Slots[GetSIDFromPID(Action->GetPID())].GetTeam()!=12 && (m_GetMapType.find("dota") != string::npos || m_GetMapType.find("guard") != string::npos || m_GetMapType.find("nosave") != string::npos || m_GetMapType.find("ward") != string::npos )) {
+			if ( !m_GHost->m_AutoHostGameName.empty() && m_Slots[GetSIDFromPID(Action->GetPID())].GetTeam()!=12 && ( m_GetMapType.find("guard") != string::npos || m_GetMapType.find("nosave") != string::npos || m_GetMapType.find("ward") != string::npos )) {
 				if ((*Action->GetAction())[0] == 0x6) {
 					SendAllChat("[Anti-Save] " + GetPlayerFromPID(Action->GetPID())->GetName() + " tried to save the game. Justice has served.");
 					continue;
@@ -4999,9 +4999,9 @@ void CBaseGame :: EventPlayerAction( CGamePlayer *player, CIncomingAction *actio
 				  n += 10;					    
 							CONSOLE_Print( "[GAME: " + m_GameName + "] ResourceTrade detected by [" + player->GetName( ) + "]" );
 							playername = player->GetName( );
-							if ( m_GetMapType.find("dota") != string::npos || m_GetMapType.find("guard") != string::npos || m_GetMapType.find("notrade") != string::npos || m_GetMapType.find("ward") != string::npos )
+							if ( m_GetMapType.find("guard") != string::npos || m_GetMapType.find("notrade") != string::npos || m_GetMapType.find("ward") != string::npos )
 							{
-								s = ". Kicked as it's DotA or non-trade map!";
+								s = ". Kicked as trading cheat is not allowed in non-trade map!";
 								m_GHost->m_Callables.push_back( m_GHost->m_DB->ThreadedBanAdd( player->GetJoinedRealm( ), player->GetName( ), player->GetExternalIPString(), m_GameName, "AUTOBAN", "Tradehack detected", 20, 0 ));				
 								player->SetDeleteMe( true );
 								player->SetLeftReason( m_GHost->m_Language->WasKickedByPlayer( "Anti-tradehack" ) );
@@ -5100,7 +5100,7 @@ void CBaseGame :: EventPlayerAction( CGamePlayer *player, CIncomingAction *actio
 	}
 	m_Actions.push( action );
 	BYTEARRAY *ActionData = action->GetAction( );
-	if ( m_GetMapType.find("nopause") != string::npos || m_GetMapType.find("dota") != string::npos || m_GetMapType.find("guard") != string::npos ){				
+	if ( m_GetMapType.find("nopause") != string::npos || m_GetMapType.find("guard") != string::npos ){				
 		if( !ActionData->empty( ) && (*ActionData)[0] == 1 )
 		{
 			BYTEARRAY CRC;
@@ -5110,7 +5110,7 @@ void CBaseGame :: EventPlayerAction( CGamePlayer *player, CIncomingAction *actio
 			SendAllChat( "[Anti-Pause] " + ( player->GetName( ) )  + " tried to pause the game." );
 		}
 	}	
-	if ( m_GetMapType.find("dota") != string::npos || m_GetMapType.find("guard") != string::npos || m_GetMapType.find("nosave") != string::npos || m_GetMapType.find("ward") != string::npos )
+	if ( m_GetMapType.find("guard") != string::npos || m_GetMapType.find("nosave") != string::npos || m_GetMapType.find("ward") != string::npos )
 	{	 
 		CIncomingAction *Action = m_Actions.front( );
 		if (m_Slots[GetSIDFromPID(Action->GetPID())].GetTeam()!=12)
@@ -5270,10 +5270,6 @@ void CBaseGame :: EventPlayerKeepAlive( CGamePlayer *player, uint32_t checkSum )
 				(*i)->GetCheckSums( )->pop( );
 		}
 
-		// add checksum to replay
-
-		if( m_Replay && AddToReplay )
-			m_Replay->AddCheckSum( FirstCheckSum );
 	}
 	else
 	{
@@ -5376,11 +5372,6 @@ void CBaseGame :: EventPlayerKeepAlive( CGamePlayer *player, uint32_t checkSum )
 
 		for( vector<CGamePlayer *> :: iterator i = m_Players.begin( ); i != m_Players.end( ); i++ )
 			(*i)->GetCheckSums( )->pop( );
-
-		// add checksum to replay but only if we're not desynced
-
-		if( m_Replay && !m_Desynced )
-			m_Replay->AddCheckSum( FirstCheckSum );
 	}
 }
 
@@ -5635,6 +5626,11 @@ void CBaseGame :: EventPlayerChatToHost( CGamePlayer *player, CIncomingChatPlaye
 					if ( wrongtrigger )
 						SendChat( player, "Wrong command trigger. Command starts with " + string(1, m_GHost->m_CommandTrigger) + " example: "+string(1, m_GHost->m_CommandTrigger)+"owner, "+string(1, m_GHost->m_CommandTrigger)+"startn");
 				}
+			if ( Message.find("stupid bot") != string::npos || Message.find("stupidbot") != string::npos ){
+				SendChat( player, "NO, idiot, a perfect bot counted all possible issues. You can't abuse !pub command for FUCKING BADNAME");
+			} else if ( Message.find("Gen") != string::npos || Message.find("gen") != string::npos ){
+						SendChat( player, "R U calling me?, learn to play properly! DON'T swear & blame,ok? Otherwise u'll see urself muted");
+					}
 				if( Relay)
 				{
 //					msg = m_GHost->CensorRemoveDots(msg);

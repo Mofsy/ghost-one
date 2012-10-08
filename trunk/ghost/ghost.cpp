@@ -1053,7 +1053,7 @@ CGHost :: CGHost( CConfig *CFG )
 		string BNLSServer = CFG->GetString( Prefix + "bnlsserver", string( ) );
 		int BNLSPort = CFG->GetInt( Prefix + "bnlsport", 9367 );
 		int BNLSWardenCookie = i + m_CookieOffset;
-		unsigned char War3Version = CFG->GetInt( Prefix + "custom_war3version", 24 );
+		unsigned char War3Version = CFG->GetInt( Prefix + "custom_war3version", 26 );
 		BYTEARRAY EXEVersion = UTIL_ExtractNumbers( CFG->GetString( Prefix + "custom_exeversion", string( ) ), 4 );
 		BYTEARRAY EXEVersionHash = UTIL_ExtractNumbers( CFG->GetString( Prefix + "custom_exeversionhash", string( ) ), 4 );
 		string PasswordHashType = CFG->GetString( Prefix + "custom_passwordhashtype", string( ) );
@@ -2264,6 +2264,7 @@ void CGHost :: SetConfigs( CConfig *CFG )
 	m_CustomName = CFG->GetInt( "bot_cfgname", 0 ) == 0 ? false : true; //Gen
 	m_FakePlayersLobby = CFG->GetInt( "bot_fakeplayersinlobby", 0 ) == 1 ? true : false; //Gen
 	m_MoreFPsLobby = CFG->GetInt( "bot_morefakeplayersinlobby", 3 ); //Gen
+	m_DenyPatchEnable = CFG->GetInt( "bot_denypatchonjoin", 1 ) == 1 ? true : false;
 	m_AppleIcon = CFG->GetInt( "bot_appleicon", 0 ) == 1 ? true : false; //Gen
 	m_PrefixName = CFG->GetInt( "bot_realmprefixname", 0 ) == 1 ? true : false; //Gen
 	m_SquirrelTxt = CFG->GetInt( "bot_squirreltxt", 0 ) == 0 ? false : true; //Gen
@@ -2862,6 +2863,8 @@ void CGHost :: DenyIP( string ip, uint32_t duration, string reason )
 }
 
 bool CGHost :: CheckDeny( string ip ) {
+	if( !m_DenyPatchEnable )
+		return false;
 	if( m_DenyIP.count( ip ) == 0 )
 		return false;
 	else
@@ -4008,6 +4011,7 @@ void CGHost :: ReloadConfig ()
 	m_CustomName = CFG->GetInt( "bot_cfgname", 0 ) == 0 ? false : true; //Gen
 	m_FakePlayersLobby = CFG->GetInt( "bot_fakeplayersinlobby", 0 ) == 1 ? true : false; //Gen
 	m_MoreFPsLobby = CFG->GetInt( "bot_morefakeplayersinlobby", 3 ); //Gen
+	m_DenyPatchEnable = CFG->GetInt( "bot_denypatchonjoin", 1 ) == 1 ? true : false; //Gen
 	m_AppleIcon = CFG->GetInt( "bot_appleicon", 0 ) == 1 ? true : false; //Gen
 	m_PrefixName = CFG->GetInt( "bot_realmprefixname", 0 ) == 1 ? true : false; //Gen
 	m_SquirrelTxt = CFG->GetInt( "bot_squirreltxt", 0 ) == 0 ? false : true; //Gen
@@ -4018,7 +4022,7 @@ void CGHost :: ReloadConfig ()
 	m_LobbyDLLeaverBanTime = CFG->GetInt( "bot_lobbyleaverbantime", 30 );	//Gen
 	m_LobbyTimeLimit = CFG->GetInt( "bot_lobbytimelimit", 111 );	
 	m_LobbyTimeLimitMax = CFG->GetInt( "bot_lobbytimelimitmax", 150 );
-	m_LANWar3Version = CFG->GetInt( "lan_war3version", 24 );
+	m_LANWar3Version = CFG->GetInt( "lan_war3version", 26 );
 	m_ReplayBuildNumber = CFG->GetInt( "replay_buildnumber", 6059 );
 	m_ReplayWar3Version = CFG->GetInt( "replay_war3version", 26);
 	
@@ -4088,6 +4092,7 @@ void CGHost :: ReloadConfig ()
 	m_gameoverbasefallen = CFG->GetInt( "bot_gameoverbasefallen", 20 );
 	m_gameoverminpercent = CFG->GetInt( "bot_gameoverminpercent", 0 );
 	m_gameoverminplayers = CFG->GetInt( "bot_gameoverminplayers", 2 );
+	m_gameoveroneplayer = CFG->GetInt( "bot_gameoverwhenoneplayer", 1 ) == 1 ? true : false;
 	m_gameovermaxteamdifference = CFG->GetInt( "bot_gameovermaxteamdifference", 0 );
 	m_totaldownloadspeed = CFG->GetInt( "bot_totaldownloadspeed", 1536 );
 	m_clientdownloadspeed = CFG->GetInt( "bot_clientdownloadspeed", 1024 );

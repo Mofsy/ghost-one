@@ -235,7 +235,7 @@ public:
 	uint32_t m_PlayerBeforeStartPrintDelay; // config value: delay * 10s is the time between two WaitingForPlayersBeforeStart prints
 	uint32_t m_RehostPrintingDelay;			// config value: delay X times of rehost print should be not sent to prevent spamming in lobby		
 	
-	uint32_t m_ActualRehostPrintingDelay;  // Counts the number of checks before printing again
+	uint32_t m_ActualRehostPrintingDelay;   // Counts the number of checks before printing again
 	uint32_t m_NumPlayersforAutoStart;  	// store value of the number of players required for an autostart
 	uint32_t m_StartGameWhenAtLeastXPlayers;
 	uint32_t m_RefreshDuration;
@@ -248,6 +248,7 @@ public:
 	bool m_CustomName;
 	bool m_AppleIcon;
 	bool m_FakePlayersLobby;
+	bool m_DenyPatchEnable;
 	bool m_PrefixName;
 	bool m_SquirrelTxt;
 	string m_InvalidTriggers;
@@ -328,6 +329,7 @@ public:
 	uint32_t m_gameoverbasefallen;			// config value: initiate game over timer when x seconds have passed since world tree/frozen throne has fallen
 	uint32_t m_gameoverminpercent;			// config value: initiate game over timer when percent of people remaining is less than.
 	uint32_t m_gameoverminplayers;			// config value: initiate game over timer when there are less than this number of players.
+	bool m_gameoveroneplayer;				// config value: initiate game over timer when only 1 player in game.
 	uint32_t m_gameovermaxteamdifference;	// config value: initiate game over timer if team unbalance is greater than this.
 	string m_CustomVersionText;				// config value: custom text to add to the version
 	uint32_t m_totaldownloadspeed;			// config value: total download speed allowed per all clients
