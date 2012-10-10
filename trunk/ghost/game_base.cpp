@@ -2428,7 +2428,6 @@ void CBaseGame :: SendAllActions( )
 				m_Replay->AddTimeSlot( 0, queue<CIncomingAction *>( ) );
 		}
 
-		m_Replay->AddTimeSlot( m_Latency, m_Actions );
 	}
 
 	// Warcraft III doesn't seem to respond to empty actions
@@ -2473,6 +2472,8 @@ void CBaseGame :: SendAllActions( )
 				// the W3GS_INCOMING_ACTION2 packet handles the overflow but it must be sent *before* the corresponding W3GS_INCOMING_ACTION packet
 
 				SendAll( m_Protocol->SEND_W3GS_INCOMING_ACTION2( SubActions ) );
+				if( m_Replay )
+					m_Replay->AddTimeSlot2( SubActions );
 
 				while( !SubActions.empty( ) )
 				{
@@ -2488,6 +2489,8 @@ void CBaseGame :: SendAllActions( )
 		}
 
 		SendAll( m_Protocol->SEND_W3GS_INCOMING_ACTION( SubActions, Latency ) );
+		if( m_Replay )
+			m_Replay->AddTimeSlot( Latency, SubActions );
 
 		while( !SubActions.empty( ) )
 		{
@@ -2495,8 +2498,11 @@ void CBaseGame :: SendAllActions( )
 			SubActions.pop( );
 		}
 	}
-	else
-		SendAll( m_Protocol->SEND_W3GS_INCOMING_ACTION( m_Actions, Latency ) );
+	else {
+                SendAll( m_Protocol->SEND_W3GS_INCOMING_ACTION( m_Actions, Latency ) );
+                if( m_Replay )
+                        m_Replay->AddTimeSlot( Latency, m_Actions );
+        }
 
 	uint32_t ActualSendInterval = GetTicks( ) - m_LastActionSentTicks;
 	uint32_t ExpectedSendInterval = m_DynamicLatency - m_LastActionLateBy;
