@@ -401,13 +401,13 @@ static void elo_compute_expectations(int num, float *ratings, float *probs)
 	}
 
 	for (i = 0; i < num; i++) {
-		probs[i] = elo_integrate_all(num, i, myratings);
+		probs[i] = (float)(elo_integrate_all(num, i, myratings));
 		sum += probs[i];
 	}
 
 	/* dbg_msg(GGZ_DBG_STATS, "Probabilities sum to %f; normalizing.", sum); */
 	for (i = 0; i < num; i++)
-		probs[i] /= sum;
+		probs[i] /= (float)sum;
 
 	delete [] myratings;
 }
@@ -442,7 +442,7 @@ void elo_recalculate_ratings(int num_players, float *player_ratings,
 		else if (player_ratings[i] > 2400)
 			K = 10.0;
 		else
-			K = 130.0 - player_ratings[i] / 20.0;
+			K = (float)(130.0 - player_ratings[i] / 20.0);
 
 		diff = K * (team_winners[team] - team_probs[team]);
 		player_ratings[i] += diff;
