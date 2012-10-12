@@ -368,7 +368,7 @@ CBaseGame :: ~CBaseGame( )
 		if ( l > 5 ){          
         	int DPos = m_GameName.find_last_of("$");
             if( DPos != string::npos ){
-            	if( m_GameName.find_first_of("") != string::npos || m_GameName.find_first_of(") ") != string::npos )
+            	if( m_GameName.find_first_of("") != string::npos || m_GameName.find(") ") != string::npos )
                 	m_GameName = m_GameName.substr(4,DPos-5);
             	else m_GameName = m_GameName.substr(0,DPos-1);
         	}
