@@ -1880,14 +1880,18 @@ bool CGHost :: Update( unsigned long usecBlock )
 			if( AutoHostMap->GetValid( ) )
 			{				
 				string AutoHostMapCFGStr = AutoHostMap->GetCFGFile( );
-				string AutoHostMapStr = AutoHostMapCFGStr.substr(AutoHostMapCFGStr.size( ) - 35);
-				AutoHostMapStr = AutoHostMapStr.substr(0,31);
+				string AutoHostMapStr = AutoHostMapCFGStr.substr(AutoHostMapCFGStr.size( ) - 35,31);
 				int DPos = AutoHostMapStr.find("mapcfgs") ;
 				if (DPos!= string ::npos)				
 				AutoHostMapStr = AutoHostMapStr.substr(DPos+8);
-				DPos = AutoHostMapStr.find(")") ;
+				DPos = AutoHostMapStr.find_first_of(") ") ;
 				if (DPos!= string ::npos)				
-				AutoHostMapStr = AutoHostMapStr.substr(DPos+2);
+					AutoHostMapStr = AutoHostMapStr.substr(DPos+2);
+				else {
+					DPos = AutoHostMapStr.find_first_of(")");
+					if (DPos!= string ::npos)				
+						AutoHostMapStr = AutoHostMapStr.substr(DPos+1);
+				}
 				string GameName;
 				if( m_CustomName )				
 					GameName = "ï€€ " + AutoHostMapStr + " $" + UTIL_ToString( m_HostCounter );					
@@ -1896,7 +1900,7 @@ bool CGHost :: Update( unsigned long usecBlock )
 				
 				if( GameName.size( ) > 28 || !m_AppleIcon )
 					GameName = GameName.substr(4);
-				if( GameName.size( ) <= 31 ) //don't name it  too long, only 29 characters + " #10" (4 plus caractères)
+				if( GameName.size( ) <= 31 ) //don't name it  too long, only 28 characters + " $11" (4 plus caractères)
 				{					
 					m_AutoHosted = true;
 					if ( m_NewOwner > 2 )
@@ -2248,7 +2252,7 @@ void CGHost :: SetConfigs( CConfig *CFG )
 	}
 
 	m_SpoofChecks = CFG->GetInt( "bot_spoofchecks", 2 );
-	m_NewOwner = CFG->GetInt( "bot_newownerinagame", 0 );
+	m_NewOwner = CFG->GetInt( "bot_tempownerinlobby", 0 );
 	m_RequireSpoofChecks = CFG->GetInt( "bot_requirespoofchecks", 0 ) == 0 ? false : true;
 	m_RefreshMessages = CFG->GetInt( "bot_refreshmessages", 0 ) == 0 ? false : true;
 	m_AutoLock = CFG->GetInt( "bot_autolock", 0 ) == 0 ? false : true;
@@ -2264,13 +2268,15 @@ void CGHost :: SetConfigs( CConfig *CFG )
 	m_CustomName = CFG->GetInt( "bot_cfgname", 0 ) == 0 ? false : true; //Gen
 	m_FakePlayersLobby = CFG->GetInt( "bot_fakeplayersinlobby", 0 ) == 1 ? true : false; //Gen
 	m_MoreFPsLobby = CFG->GetInt( "bot_morefakeplayersinlobby", 3 ); //Gen
-	m_DenyPatchEnable = CFG->GetInt( "bot_denypatchonjoin", 1 ) == 1 ? true : false;
+	m_DenyPatchEnable = CFG->GetInt( "bot_denypatchonjoin", 1 ) == 1 ? true : false; //Gen
 	m_AppleIcon = CFG->GetInt( "bot_appleicon", 0 ) == 1 ? true : false; //Gen
 	m_PrefixName = CFG->GetInt( "bot_realmprefixname", 0 ) == 1 ? true : false; //Gen
 	m_SquirrelTxt = CFG->GetInt( "bot_squirreltxt", 0 ) == 0 ? false : true; //Gen
-	m_InvalidTriggers = CFG->GetString( "bot_invalidtriggers", "$#" ); //Gen
-	m_StartGameWhenAtLeastXPlayers = CFG->GetInt( "bot_startgamewhenatleastXplayers", 3 ); //Gen
-	m_RefreshDuration = CFG->GetInt( "bot_refreshduration", 0 ); //Gen
+	m_InvalidTriggers = CFG->GetString( "bot_invalidtriggers", string( ) ); //Gen
+	m_InvalidReplayChars = CFG->GetString( "bot_invalidreplaychars", string( ) ); //Gen
+	m_StartGameWhenAtLeastXPlayers = CFG->GetInt( "bot_gamenotstartuntilXplayers", 4 ); //Gen
+	m_BnetNonAdminCommands = CFG->GetInt( "bot_bnetnonadmincommands", 1 ); //Gen
+	m_RefreshDuration = CFG->GetInt( "bot_refresh", 0 ); //Gen
 	m_VietTxt = CFG->GetInt( "bot_viettxt", 0 ) == 0 ? false : true; //Gen
 	m_LobbyDLLeaverBanTime = CFG->GetInt( "bot_lobbyleaverbantime", 45 );	//Gen
 	m_LobbyTimeLimit = CFG->GetInt( "bot_lobbytimelimit", 111 );	
@@ -3887,7 +3893,7 @@ void CGHost :: ReloadConfig ()
 	m_SyncLimit = CFG->GetInt( "bot_synclimit", 50 );
 	m_VoteKickAllowed = CFG->GetInt( "bot_votekickallowed", 1 ) == 0 ? false : true;	
 	m_VoteKickPercentage = CFG->GetInt( "bot_votekickpercentage", 100 );
-	m_NewOwner = CFG->GetInt( "bot_newownerinagame", 0 );
+	m_NewOwner = CFG->GetInt( "bot_tempownerinlobby", 0 );
 
 	m_VoteStartAllowed = CFG->GetInt( "bot_votestartallowed", 1 ) == 0 ? false : true;
 	m_VoteStartAutohostOnly = CFG->GetInt( "bot_votestartautohostonly", 1 ) == 0 ? false : true;
@@ -4015,11 +4021,13 @@ void CGHost :: ReloadConfig ()
 	m_AppleIcon = CFG->GetInt( "bot_appleicon", 0 ) == 1 ? true : false; //Gen
 	m_PrefixName = CFG->GetInt( "bot_realmprefixname", 0 ) == 1 ? true : false; //Gen
 	m_SquirrelTxt = CFG->GetInt( "bot_squirreltxt", 0 ) == 0 ? false : true; //Gen
-	m_InvalidTriggers = CFG->GetString( "bot_invalidtriggers", "$#" ); //Gen
-	m_StartGameWhenAtLeastXPlayers = CFG->GetInt( "bot_startgamewhenatleastXplayers", 3 ); //Gen
-	m_RefreshDuration = CFG->GetInt( "bot_refreshduration", 0 ); //Gen
+	m_InvalidTriggers = CFG->GetString( "bot_invalidtriggers", string( ) ); //Gen
+	m_InvalidReplayChars = CFG->GetString( "bot_invalidreplaychars", string( ) ); //Gen
+	m_StartGameWhenAtLeastXPlayers = CFG->GetInt( "bot_gamenotstartuntilXplayers", 4 ); //Gen
+	m_BnetNonAdminCommands = CFG->GetInt( "bot_bnetnonadmincommands", 1 ); //Gen
+	m_RefreshDuration = CFG->GetInt( "bot_refresh", 0 ); //Gen
 	m_VietTxt = CFG->GetInt( "bot_viettxt", 0 ) == 0 ? false : true; //Gen
-	m_LobbyDLLeaverBanTime = CFG->GetInt( "bot_lobbyleaverbantime", 30 );	//Gen
+	m_LobbyDLLeaverBanTime = CFG->GetInt( "bot_lobbyleaverbantime", 45 );	//Gen
 	m_LobbyTimeLimit = CFG->GetInt( "bot_lobbytimelimit", 111 );	
 	m_LobbyTimeLimitMax = CFG->GetInt( "bot_lobbytimelimitmax", 150 );
 	m_LANWar3Version = CFG->GetInt( "lan_war3version", 26 );

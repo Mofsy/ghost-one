@@ -1477,7 +1477,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 
 		// handle bot commands
 
-		if( Message == "?trigger" && ( IsAdmin( User ) || IsRootAdmin( User ) || ( m_PublicCommands && m_OutPackets.size( ) <= 3 ) ) )
+		if( Message == "?trigger" && ( IsAdmin( User ) || IsRootAdmin( User ) || ( m_PublicCommands && m_OutPackets.size( ) < 3 ) ) )
 			QueueChatCommand( m_GHost->m_Language->CommandTrigger( string( 1, m_CommandTrigger ) ), User, Whisper );
 		else if( !Message.empty( ) && Message[0] == m_CommandTrigger )
 		{
@@ -1516,7 +1516,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 
 				//
 				//
-				//!dl
+				// !dl
 				//
 
 				if(Command == "dl" && !Payload.empty()) 
@@ -1555,7 +1555,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				}
 
 				//
-				//!dlmap
+				// !dlmap
 				//
 
 				if(Command == "dlmap" && !Payload.empty()) 
@@ -1578,7 +1578,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				}
 
 				//
-				//!dlmapcfg
+				// !dlmapcfg
 				//
 
 				if(Command == "dlmapcfg" && !Payload.empty() ) 
@@ -5668,7 +5668,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 			* NON ADMIN COMMANDS *
 			*********************/
 
-			// don't respond to non admins if there are more than 3 messages already in the queue
+			// don't respond to non admins if there are more than 2 messages already in the queue
 			// this prevents malicious users from filling up the bot's chat queue and crippling the bot
 			// in some cases the queue may be full of legitimate messages but we don't really care if the bot ignores one of these commands once in awhile
 			// e.g. when several users join a game at the same time and cause multiple /whois messages to be queued at once
@@ -5679,9 +5679,8 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				if (!m_GHost->m_NonAdminCommands && !IsRootAdmin(User) && !IsAdmin( User ) )
 					return;
 
-
-//			if( IsAdmin( User ) || IsRootAdmin( User ) || m_OutPackets.size( ) <= 3 )
-			if( m_OutPackets.size( ) <= 3 )
+//			if( IsAdmin( User ) || IsRootAdmin( User ) || m_OutPackets.size( ) < 3 )
+			if( m_OutPackets.size( ) < 3 )
 			{
 				//
 				// !GAMES
@@ -5693,9 +5692,11 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				
 				//
 				// !CGAMES
-				//
+				//				
 				if( Command == "cgames" || Command == "currentgames" || Command == "cg" )
 				{
+					if ( ( m_GHost->m_BnetNonAdminCommands == 0 || m_GHost->m_BnetNonAdminCommands == 2 ) && !IsRootAdmin(User) && !IsAdmin( User ) )
+						return;
 					string user = User;
 					int itr = 0;
 					if( m_GHost->m_Games.size( ) == 0 )
@@ -5741,6 +5742,54 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 							}
 							Names2.clear();				  
 						}				  
+					}
+				}
+				
+				//
+				// !FRIEND added by Gen
+				// payload must be [add|remove|list] or [a|r|l]
+				if( ( Command == "friend" || Command == "f" ) && !Payload.empty( ) )
+				{
+					string Type;
+					string Target;
+					stringstream SS;
+					SS << Payload;
+					SS >> Type;
+					
+					if( SS.fail( ) )
+						CONSOLE_Print( "[BNET: " + m_ServerAlias + "] bad input #1 in friend command" );
+					else 
+					{
+						if( Type == "list" || Type == "l" )
+						{
+							if ( ( m_GHost->m_BnetNonAdminCommands == 0 || m_GHost->m_BnetNonAdminCommands == 5 ) && !IsRootAdmin(User) && !IsAdmin( User ) )
+								return;
+							QueueChatCommand( "/f l");
+							string s = UTIL_ToString(m_Friends.size( )) + " friends: ";
+							for( vector<CIncomingFriendList *> :: iterator i = m_Friends.begin( ); i != m_Friends.end( ); i++ )
+								s += (*i)->GetAccount( ) + ", ";
+							QueueChatCommand( s, User, Whisper );
+						}
+						else if( SS.eof( ) )
+								CONSOLE_Print( "[BNET: " + m_ServerAlias + "] missing input #2 in friend command" );
+						else
+						{
+							getline( SS, Target );
+							string :: size_type Start = Target.find_first_not_of( " " );
+							
+							if( Type == "add" || Type == "a" )
+							{
+								QueueChatCommand( "/f a " + Target );
+								// spit out some words to show we are done, as they wont see the above
+								QueueChatCommand( Target + " was added to the friends list", User, Whisper );
+							}
+							else if ( Type == "remove" || Type == "r" )
+							{
+								QueueChatCommand( "/f r " + Target );
+								// spit out some words to show we are done, as they wont see the above
+								QueueChatCommand( Target + " was removed from the friends list", User, Whisper );
+							}
+						}
 					}
 				}
 				
@@ -5836,6 +5885,8 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 
 				if( (Command == "checkwarn" || Command == "checkwarns" || Command == "cw" )&& Payload.empty( ) )
 				{
+					if ( ( m_GHost->m_BnetNonAdminCommands == 0 || m_GHost->m_BnetNonAdminCommands == 3 ) && !IsRootAdmin(User) && !IsAdmin( User ) )
+						return;
 					uint32_t WarnCount = 0;
 					for( vector<CBNET *> :: iterator i = m_GHost->m_BNETs.begin( ); i != m_GHost->m_BNETs.end( ); i++ )
 						WarnCount += m_GHost->m_DB->BanCount( (*i)->GetServer(), User, 1 );
@@ -5872,6 +5923,8 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 
 				if( Command == "version" || Command == "v" )
 				{
+					if ( ( m_GHost->m_BnetNonAdminCommands == 0 || m_GHost->m_BnetNonAdminCommands == 4 ) && !IsRootAdmin(User) && !IsAdmin( User ) )
+						return;
 					if( IsAdmin( User ) || IsRootAdmin( User ) )
 						QueueChatCommand( m_GHost->m_Language->VersionAdmin( m_GHost->m_Version ), User, Whisper );
 					else
@@ -5881,6 +5934,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 		} 	else if ( !Message.empty( ) && Message[0] != m_CommandTrigger){
 				bool wrongtrigger = false;
 				string str = m_GHost->m_InvalidTriggers;
+				if (!str.empty())
 				for( uint32_t i = 0; i < str.length( ); i++ )
 					if ( Message[0] == str[i]){
 						wrongtrigger = true;
@@ -6820,7 +6874,7 @@ void CBNET :: ChannelJoin( string name )
 	else if (Safe)
 		msg = m_GHost->m_Language->SafeJoinedTheChannel(name);
 	
-	if (msg.size()!=0 && m_OutPackets.size()<3)
+	if (msg.size()!=0 && m_OutPackets.size( )<3)
 		QueueChatCommand("/me " + msg);
 }
 

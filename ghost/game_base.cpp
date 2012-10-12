@@ -364,6 +364,27 @@ CBaseGame :: ~CBaseGame( )
 		if( SecString.size( ) == 1 )
 			SecString.insert( 0, "0" );
 
+		int l = m_GameName.size( );
+		if ( l > 5 ){          
+        	int DPos = m_GameName.find_last_of("$");
+            if( DPos != string::npos ){
+            	if( m_GameName.find_first_of("") != string::npos || m_GameName.find_first_of(") ") != string::npos )
+                	m_GameName = m_GameName.substr(4,DPos-5);
+            	else m_GameName = m_GameName.substr(0,DPos-1);
+        	}
+        }
+		string str = m_GHost->m_InvalidReplayChars;
+		size_t found;
+		if (!str.empty()){
+			found=m_GameName.find_first_of(str);
+			while (found!=string::npos)
+			{
+				m_GameName[found]='\0';
+				found=m_GameName.find_first_of(str,found+1);
+			}
+			cout << m_GameName << endl;
+		}
+
 		m_Replay->BuildReplay( m_GameName, m_StatString, m_GHost->m_ReplayWar3Version, m_GHost->m_ReplayBuildNumber );
 		m_Replay->Save( m_GHost->m_TFT, m_GHost->m_ReplayPath + UTIL_FileSafeName( "GHost++ " + string( Time ) + " " + m_GameName + ".w3g" ) );
 	}
@@ -5624,6 +5645,7 @@ void CBaseGame :: EventPlayerChatToHost( CGamePlayer *player, CIncomingChatPlaye
 			} else if ( !Message.empty( ) && Message[0] != m_GHost->m_CommandTrigger ){
 					bool wrongtrigger = false;
 					string str = m_GHost->m_InvalidTriggers;
+					if (!str.empty())
 					for( uint32_t i = 0; i < str.length( ); i++ )
 						if ( Message[0] == str[i]){
 							wrongtrigger = true;
