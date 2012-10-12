@@ -13,7 +13,7 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
-
+	This modification is released under the GNU GPL v3.
    CODE PORTED FROM THE ORIGINAL GHOST PROJECT: http://ghost.pwner.org/
 
 */
@@ -164,7 +164,7 @@ int main( int argc, char **argv )
 
 	cout << "creating tables" << endl;
 
-	string QCreate1 = "CREATE TABLE IF NOT EXISTS dota_elo_scores ( id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, name VARCHAR(15) NOT NULL, server VARCHAR(100) NOT NULL, score REAL NOT NULL )";
+	string QCreate1 = "CREATE TABLE IF NOT EXISTS dota_elo_scores ( id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, name VARCHAR(15) NOT NULL, server VARCHAR(100) NOT NULL, score REAL NOT NULL, games INT NOT NULL, wins INT NOT NULL, losses INT NOT NULL, kills INT NOT NULL, deaths INT NOT NULL, creepkills INT NOT NULL, creepdenies INT NOT NULL, assists INT NOT NULL, neutralkills INT NOT NULL, towerkills INT NOT NULL, raxkills INT NOT NULL, courierkills INT NOT NULL )";
 	string QCreate2 = "CREATE TABLE IF NOT EXISTS dota_elo_games_scored ( id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, gameid INT NOT NULL )";
 
 	if( mysql_real_query( Connection, QCreate1.c_str( ), QCreate1.size( ) ) != 0 )
@@ -182,7 +182,7 @@ int main( int argc, char **argv )
 	cout << "getting unscored games" << endl;
 	queue<uint32_t> UnscoredGames;
 
-	string QSelectUnscored = "SELECT id FROM games WHERE id NOT IN ( SELECT gameid FROM dota_elo_games_scored ) ORDER BY id";
+	string QSelectUnscored = "SELECT id FROM games WHERE id > ( SELECT IFNULL(MAX(gameid), 0) FROM dota_elo_games_scored ) ORDER BY id LIMIT 1000";
 
 	if( mysql_real_query( Connection, QSelectUnscored.c_str( ), QSelectUnscored.size( ) ) != 0 )
 	{
@@ -219,7 +219,7 @@ int main( int argc, char **argv )
 		uint32_t GameID = UnscoredGames.front( );
 		UnscoredGames.pop( );
 
-		string QSelectPlayers = "SELECT dota_elo_scores.id, gameplayers.name, spoofedrealm, newcolour, winner, score FROM dotaplayers LEFT JOIN dotagames ON dotagames.gameid=dotaplayers.gameid LEFT JOIN gameplayers ON gameplayers.gameid=dotaplayers.gameid AND gameplayers.colour=dotaplayers.colour LEFT JOIN dota_elo_scores ON dota_elo_scores.name=gameplayers.name AND server=spoofedrealm WHERE dotaplayers.gameid=" + UTIL_ToString( GameID );
+		string QSelectPlayers = "SELECT dota_elo_scores.id, gameplayers.name, spoofedrealm, newcolour, winner, score, dotaplayers.kills, dotaplayers.deaths, dotaplayers.creepkills, dotaplayers.creepdenies, dotaplayers.assists, dotaplayers.neutralkills, dotaplayers.towerkills, dotaplayers.raxkills, dotaplayers.courierkills FROM dotaplayers LEFT JOIN dotagames ON dotagames.gameid=dotaplayers.gameid LEFT JOIN gameplayers ON gameplayers.gameid=dotaplayers.gameid AND gameplayers.colour=dotaplayers.colour LEFT JOIN dota_elo_scores ON dota_elo_scores.name=gameplayers.name AND server=spoofedrealm WHERE dotaplayers.gameid=" + UTIL_ToString( GameID );
 
 		if( mysql_real_query( Connection, QSelectPlayers.c_str( ), QSelectPlayers.size( ) ) != 0 )
 		{
@@ -238,6 +238,15 @@ int main( int argc, char **argv )
 				uint32_t rowids[10];
 				string names[10];
 				string servers[10];
+				uint32_t kills[10];
+				uint32_t deaths[10];
+				uint32_t creepkills[10];
+				uint32_t creepdenies[10];
+				uint32_t assists[10];
+				uint32_t neutralkills[10];
+				uint32_t towerkills[10];
+				uint32_t raxkills[10];
+				uint32_t courierkills[10];
 				bool exists[10];
 				int num_players = 0;
 				float player_ratings[10];
@@ -253,7 +262,7 @@ int main( int argc, char **argv )
 
 				vector<string> Row = MySQLFetchRow( Result );
 
-				while( Row.size( ) == 6 )
+				while( Row.size( ) == 15 )
 				{
 					if( num_players >= 10 )
 					{
@@ -288,6 +297,16 @@ int main( int argc, char **argv )
 
 					names[num_players] = Row[1];
 					servers[num_players] = Row[2];
+					
+					kills[num_players] = UTIL_ToUInt32( Row[6] );
+					deaths[num_players] = UTIL_ToUInt32( Row[7] );
+					creepkills[num_players] = UTIL_ToUInt32( Row[8] );
+					creepdenies[num_players] = UTIL_ToUInt32( Row[9] );
+					assists[num_players] = UTIL_ToUInt32( Row[10] );
+					neutralkills[num_players] = UTIL_ToUInt32( Row[11] );
+					towerkills[num_players] = UTIL_ToUInt32( Row[12] );
+					raxkills[num_players] = UTIL_ToUInt32( Row[13] );
+					courierkills[num_players] = UTIL_ToUInt32( Row[14] );
 
 					if( !Row[5].empty( ) )
 					{
@@ -350,9 +369,12 @@ int main( int argc, char **argv )
 						{
 							cout << "player [" << names[i] << "] rating " << UTIL_ToString( (uint32_t)old_player_ratings[i] ) << " -> " << UTIL_ToString( (uint32_t)player_ratings[i] ) << endl;
 
+							uint32_t WinIncrement = (uint32_t) team_winners[player_teams[i]];
+							uint32_t LossIncrement = 1 - WinIncrement;
+
 							if( exists[i] )
 							{
-								string QUpdateScore = "UPDATE dota_elo_scores SET score=" + UTIL_ToString( player_ratings[i], 2 ) + " WHERE id=" + UTIL_ToString( rowids[i] );
+								string QUpdateScore = "UPDATE dota_elo_scores SET score=" + UTIL_ToString( player_ratings[i], 2 ) + ", games=games+1, wins=wins+" + UTIL_ToString( WinIncrement ) + ", losses=losses+" + UTIL_ToString( LossIncrement ) + ", kills=kills+" + UTIL_ToString( kills[i] ) + ", deaths=deaths+" + UTIL_ToString( deaths[i] ) + ", creepkills=creepkills+" + UTIL_ToString( creepkills[i] ) + ", creepdenies=creepdenies+" + UTIL_ToString( creepdenies[i] ) + ", assists=assists+" + UTIL_ToString( assists[i] ) + ", neutralkills=neutralkills+" + UTIL_ToString( neutralkills[i] ) + ", towerkills=towerkills+" + UTIL_ToString( towerkills[i] ) + ", raxkills=raxkills+" + UTIL_ToString( raxkills[i] ) + ", courierkills=courierkills+" + UTIL_ToString( courierkills[i] ) + " WHERE id=" + UTIL_ToString( rowids[i] );
 
 								if( mysql_real_query( Connection, QUpdateScore.c_str( ), QUpdateScore.size( ) ) != 0 )
 								{
@@ -364,7 +386,8 @@ int main( int argc, char **argv )
 							{
 								string EscName = MySQLEscapeString( Connection, names[i] );
 								string EscServer = MySQLEscapeString( Connection, servers[i] );
-								string QInsertScore = "INSERT INTO dota_elo_scores ( name, server, score ) VALUES ( '" + EscName + "', '" + EscServer + "', " + UTIL_ToString( player_ratings[i], 2 ) + " )";
+								
+								string QInsertScore = "INSERT INTO dota_elo_scores ( name, server, score, games, wins, losses, kills, deaths, creepkills, creepdenies, assists, neutralkills, towerkills, raxkills, courierkills ) VALUES ( '" + EscName + "', '" + EscServer + "', " + UTIL_ToString( player_ratings[i], 2 ) + ", 1, " + UTIL_ToString( WinIncrement ) + ", " + UTIL_ToString( LossIncrement ) + ", " + UTIL_ToString( kills[i] ) + ", " + UTIL_ToString( deaths[i] ) + ", " + UTIL_ToString( creepkills[i] ) + ", " + UTIL_ToString( creepdenies[i] ) + ", " + UTIL_ToString( assists[i] ) + ", " + UTIL_ToString( neutralkills[i] ) + ", " + UTIL_ToString( towerkills[i] ) + ", " + UTIL_ToString( raxkills[i] ) + ", " + UTIL_ToString( courierkills[i] ) + " )";
 
 								if( mysql_real_query( Connection, QInsertScore.c_str( ), QInsertScore.size( ) ) != 0 )
 								{
@@ -390,23 +413,6 @@ int main( int argc, char **argv )
 			cout << "error: " << mysql_error( Connection ) << endl;
 			return 1;
 		}
-	}
-
-	cout << "copying dota elo scores to scores table" << endl;
-
-	string QCopyScores1 = "DELETE FROM scores WHERE category='dota_elo'";
-	string QCopyScores2 = "INSERT INTO scores ( category, name, server, score ) SELECT 'dota_elo', name, server, score FROM dota_elo_scores";
-
-	if( mysql_real_query( Connection, QCopyScores1.c_str( ), QCopyScores1.size( ) ) != 0 )
-	{
-		cout << "error: " << mysql_error( Connection ) << endl;
-		return 1;
-	}
-
-	if( mysql_real_query( Connection, QCopyScores2.c_str( ), QCopyScores2.size( ) ) != 0 )
-	{
-		cout << "error: " << mysql_error( Connection ) << endl;
-		return 1;
 	}
 
 	cout << "committing transaction" << endl;

@@ -13,7 +13,7 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
-
+	This modification is released under the GNU GPL v3.
    CODE PORTED FROM THE ORIGINAL GHOST PROJECT: http://ghost.pwner.org/
 
 */
@@ -132,13 +132,6 @@ int main( int argc, char **argv )
 	string User = CFG.GetString( "db_mysql_user", string( ) );
 	string Password = CFG.GetString( "db_mysql_password", string( ) );
 	int Port = CFG.GetInt( "db_mysql_port", 0 );
-	string Category = CFG.GetString( "update_category", string( ) );
-
-	if( Category.empty( ) )
-	{
-		cout << "no update_category specified in config file" << endl;
-		return 1;
-	}
 
 	cout << "connecting to database server" << endl;
 	MYSQL *Connection = NULL;
@@ -171,8 +164,8 @@ int main( int argc, char **argv )
 
 	cout << "creating tables" << endl;
 
-	string QCreate1 = "CREATE TABLE IF NOT EXISTS w3mmd_elo_scores ( id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, category VARCHAR(25) NOT NULL, name VARCHAR(15) NOT NULL, server VARCHAR(100) NOT NULL, score REAL NOT NULL )";
-	string QCreate2 = "CREATE TABLE IF NOT EXISTS w3mmd_elo_games_scored ( id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, category VARCHAR(25), gameid INT NOT NULL )";
+	string QCreate1 = "CREATE TABLE IF NOT EXISTS w3mmd_elo_scores ( id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, name VARCHAR(15) NOT NULL, category VARCHAR(25), server VARCHAR(100) NOT NULL, score REAL NOT NULL, games INT NOT NULL, wins INT NOT NULL, losses INT NOT NULL, intstats0 INT NOT NULL, intstats1 INT NOT NULL, intstats2 INT NOT NULL, intstats3 INT NOT NULL, intstats4 INT NOT NULL, intstats5 INT NOT NULL, intstats6 INT NOT NULL, intstats7 INT NOT NULL, doublestats0 DOUBLE NOT NULL, doublestats1 DOUBLE NOT NULL, doublestats2 DOUBLE NOT NULL, doublestats3 DOUBLE NOT NULL )";
+	string QCreate2 = "CREATE TABLE IF NOT EXISTS w3mmd_elo_games_scored ( id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, gameid INT NOT NULL )";
 
 	if( mysql_real_query( Connection, QCreate1.c_str( ), QCreate1.size( ) ) != 0 )
 	{
@@ -189,7 +182,7 @@ int main( int argc, char **argv )
 	cout << "getting unscored games" << endl;
 	queue<uint32_t> UnscoredGames;
 
-	string QSelectUnscored = "SELECT id FROM games WHERE id NOT IN ( SELECT gameid FROM w3mmd_elo_games_scored WHERE category='" + MySQLEscapeString( Connection, Category ) + "' ) ORDER BY id";
+	string QSelectUnscored = "SELECT id FROM games WHERE id > ( SELECT IFNULL(MAX(gameid), 0) FROM w3mmd_elo_games_scored ) ORDER BY id LIMIT 1000";
 
 	if( mysql_real_query( Connection, QSelectUnscored.c_str( ), QSelectUnscored.size( ) ) != 0 )
 	{
@@ -228,7 +221,7 @@ int main( int argc, char **argv )
 
 		// lowercase the name because there was a bug in GHost++ 13.3 and earlier that didn't automatically lowercase it when using MySQL
 
-		string QSelectPlayers = "SELECT w3mmd_elo_scores.id, LOWER(gameplayers.name), spoofedrealm, flag, practicing, score FROM w3mmdplayers LEFT JOIN gameplayers ON gameplayers.gameid=w3mmdplayers.gameid AND LOWER(gameplayers.name)=LOWER(w3mmdplayers.name) LEFT JOIN w3mmd_elo_scores ON LOWER(w3mmd_elo_scores.name)=LOWER(gameplayers.name) AND server=spoofedrealm WHERE w3mmdplayers.category='" + MySQLEscapeString( Connection, Category ) + "' AND w3mmdplayers.gameid=" + UTIL_ToString( GameID );
+		string QSelectPlayers = "SELECT w3mmd_elo_scores.id, LOWER(gameplayers.name), spoofedrealm, flag, practicing, score, w3mmdplayers.pid, w3mmdplayers.category FROM w3mmdplayers LEFT JOIN gameplayers ON gameplayers.gameid=w3mmdplayers.gameid AND gameplayers.name=w3mmdplayers.name LEFT JOIN w3mmd_elo_scores ON w3mmd_elo_scores.name=w3mmdplayers.name AND server=spoofedrealm AND w3mmd_elo_scores.category=w3mmdplayers.category WHERE w3mmdplayers.gameid=" + UTIL_ToString( GameID );
 
 		if( mysql_real_query( Connection, QSelectPlayers.c_str( ), QSelectPlayers.size( ) ) != 0 )
 		{
@@ -243,6 +236,8 @@ int main( int argc, char **argv )
 			{
 				cout << "gameid " << UTIL_ToString( GameID ) << " found" << endl;
 
+				string category = "";
+
 				bool ignore = false;
 				bool winner = false;
 				uint32_t rowids[12];
@@ -253,19 +248,24 @@ int main( int argc, char **argv )
 				float player_ratings[12];
 				int player_teams[12];
 				int num_teams = 0;
-				float team_ratings[12];
-				float team_winners[12];
-				int team_numplayers[12];
-
-				for( int i = 0; i < 12; i++ )
-				{
-					team_ratings[i] = 0.0;
-					team_numplayers[i] = 0;
-				}
+				float team_ratings[2];
+				float team_winners[2];
+				int team_numplayers[2];
+				
+				team_ratings[0] = 0.0;
+				team_ratings[1] = 0.0;
+				team_numplayers[0] = 0;
+				team_numplayers[1] = 0;
+				team_winners[0] = 1.0;
+				team_winners[1] = 0.0;
+				
+				//statistics
+				uint32_t intstats[12][8];
+				double doublestats[12][4];
 
 				vector<string> Row = MySQLFetchRow( Result );
 
-				while( Row.size( ) == 6 )
+				while( Row.size( ) == 8 )
 				{
 					// Row[0] = rowid
 					// Row[1] = name
@@ -273,6 +273,8 @@ int main( int argc, char **argv )
 					// Row[3] = flag
 					// Row[4] = practicing
 					// Row[5] = score
+					// Row[6] = pid
+					// Row[7] = category
 
 					if( num_players >= 12 )
 					{
@@ -284,31 +286,22 @@ int main( int argc, char **argv )
 					if( Row[3] == "drawer" )
 					{
 						cout << "ignoring player [" << Row[1] << "|" << Row[2] << "] because they drew" << endl;
+						Row = MySQLFetchRow( Result );
 						continue;
 					}
 
 					if( Row[4] == "1" )
 					{
 						cout << "ignoring player [" << Row[1] << "|" << Row[2] << "] because they were practicing" << endl;
+						Row = MySQLFetchRow( Result );
 						continue;
 					}
 
-					if( Row[3] == "winner" )
-					{
-						// keep track of whether at least one player won or not since we shouldn't score the game if nobody won
-
-						winner = true;
-
-						// note: we pretend each player is on a different team (i.e. it was a free for all)
-						// this is because the ELO algorithm requires that each team either all won or all lost as a group
-						// however, the MMD system stores win/loss flags on a per player basis and doesn't constrain the flags based on team
-						// another option is to throw an error when this is detected and ignore the game completely
-						// at this point I'm not sure which option is more correct
-
-						team_winners[num_players] = 1.0;
-					}
-					else
-						team_winners[num_players] = 0.0;
+					category = Row[7];
+					uint32_t pid = UTIL_ToUInt32( Row[6] );
+					
+					for( int x = 0; x < 8; x++ ) intstats[num_players][x] = 0;
+					for( int x = 0; x < 4; x++ ) doublestats[num_players][x] = 0;
 
 					if( !Row[0].empty( ) )
 						rowids[num_players] = UTIL_ToUInt32( Row[0] );
@@ -325,44 +318,107 @@ int main( int argc, char **argv )
 					}
 					else
 					{
-						cout << "new player [" << Row[1] << "|" << Row[2] << "] found" << endl;
+						cout << "new player [" << Row[1] << "|" << Row[2] << "] found, team=" << player_teams[num_players] << endl;
 						exists[num_players] = false;
 						player_ratings[num_players] = 1000.0;
 					}
 
-					player_teams[num_players] = num_players;
-					team_ratings[num_players] = player_ratings[num_players];
-					team_numplayers[num_players]++;
+					if( Row[3] == "winner" )
+					{
+						team_numplayers[0]++;
+						team_ratings[0] += player_ratings[num_players];
+						player_teams[num_players] = 0;
+					}
+					else
+					{
+						team_numplayers[1]++;
+						team_ratings[1] += player_ratings[num_players];
+						player_teams[num_players] = 1;
+					}
+					
+					if( Row[7] == "treetag" || Row[7] == "battleships" || Row[7] == "elitesnipers" )
+					{
+						string QSelectStats = "SELECT varname, value_int FROM w3mmdvars WHERE gameid=" + UTIL_ToString( GameID ) + " AND pid=" + UTIL_ToString( pid );
+						
+						if( mysql_real_query( Connection, QSelectStats.c_str( ), QSelectStats.size( ) ) != 0 )
+						{
+							cout << "error: " << mysql_error( Connection ) << endl;
+							return 1;
+						}
+						else
+						{
+							MYSQL_RES *StatsResult = mysql_store_result( Connection );
+
+							if( Result )
+							{
+								vector<string> StatsRow = MySQLFetchRow( StatsResult );
+								
+								while( StatsRow.size( ) == 2 )
+								{
+									if( Row[7] == "treetag" )
+									{
+										if( StatsRow[0] == "kills" && pid < 9 ) intstats[num_players][0] = UTIL_ToUInt32( StatsRow[1] );
+										else if( StatsRow[0] == "deaths" && pid < 9  ) intstats[num_players][1] = UTIL_ToUInt32( StatsRow[1] );
+										else if( StatsRow[0] == "saves" && pid < 9 ) intstats[num_players][2] = UTIL_ToUInt32( StatsRow[1] );
+										else if( StatsRow[0] == "kills" && pid >= 9 ) intstats[num_players][3] = UTIL_ToUInt32( StatsRow[1] );
+										
+										if( pid < 9 ) intstats[num_players][4] = 1;
+										else intstats[num_players][5] = 1;
+									}
+									
+									else if( Row[7] == "battleships" )
+									{
+										if( StatsRow[0] == "kills" ) intstats[num_players][0] = UTIL_ToUInt32( StatsRow[1] );
+										else if( StatsRow[0] == "deaths"  ) intstats[num_players][1] = UTIL_ToUInt32( StatsRow[1] );
+									}
+									
+									else if( Row[7] == "elitesnipers" )
+									{
+										if( StatsRow[0] == "kills" ) intstats[num_players][0] = UTIL_ToUInt32( StatsRow[1] );
+										else if( StatsRow[0] == "deaths"  ) intstats[num_players][1] = UTIL_ToUInt32( StatsRow[1] );
+									}
+									
+									StatsRow = MySQLFetchRow( StatsResult );
+								}
+							}
+							
+							mysql_free_result( StatsResult );
+						}
+					}
+
 					num_players++;
 					Row = MySQLFetchRow( Result );
 				}
 
-				num_teams = num_players;
+				num_teams = 2;
 				mysql_free_result( Result );
 
 				if( !ignore )
 				{
-					if( num_players == 0 )
-						cout << "gameid " << UTIL_ToString( GameID ) << " has no players or is the wrong category, ignoring" << endl;
-					else if( !winner )
-						cout << "gameid " << UTIL_ToString( GameID ) << " has no winner, ignoring" << endl;
+					if( num_players == 0 || team_numplayers[0] == 0 || team_numplayers[1] == 0 )
+						cout << "gameid " << UTIL_ToString( GameID ) << " has no players or has invalid teams or is the wrong category, ignoring" << endl;
 					else
 					{
 						cout << "gameid " << UTIL_ToString( GameID ) << " is calculating" << endl;
 
 						float old_player_ratings[12];
 						memcpy( old_player_ratings, player_ratings, sizeof( float ) * 12 );
-						// team_ratings[0] /= team_numplayers[0];
-						// team_ratings[1] /= team_numplayers[1];
+						team_ratings[0] /= team_numplayers[0];
+						team_ratings[1] /= team_numplayers[1];
 						elo_recalculate_ratings( num_players, player_ratings, player_teams, num_teams, team_ratings, team_winners );
 
 						for( int i = 0; i < num_players; i++ )
 						{
+							if( names[i].empty( ) ) continue;
+							
 							cout << "player [" << names[i] << "|" << servers[i] << "] rating " << UTIL_ToString( (uint32_t)old_player_ratings[i] ) << " -> " << UTIL_ToString( (uint32_t)player_ratings[i] ) << endl;
+
+							uint32_t WinIncrement = (uint32_t) team_winners[player_teams[i]];
+							uint32_t LossIncrement = 1 - WinIncrement;
 
 							if( exists[i] )
 							{
-								string QUpdateScore = "UPDATE w3mmd_elo_scores SET score=" + UTIL_ToString( player_ratings[i], 2 ) + " WHERE id=" + UTIL_ToString( rowids[i] );
+								string QUpdateScore = "UPDATE w3mmd_elo_scores SET score=" + UTIL_ToString( player_ratings[i], 2 ) + ", games=games+1, wins=wins+" + UTIL_ToString( WinIncrement ) + ", losses=losses+" + UTIL_ToString( LossIncrement ) + ", intstats0=intstats0+" + UTIL_ToString( intstats[i][0] ) + ", intstats1=intstats1+" + UTIL_ToString( intstats[i][1] ) + ", intstats2=intstats2+" + UTIL_ToString( intstats[i][2] ) + ", intstats3=intstats3+" + UTIL_ToString( intstats[i][3] ) + ", intstats4=intstats4+" + UTIL_ToString( intstats[i][4] ) + ", intstats5=intstats5+" + UTIL_ToString( intstats[i][5] ) + ", intstats6=intstats6+" + UTIL_ToString( intstats[i][6] ) + ", intstats7=intstats7+" + UTIL_ToString( intstats[i][7] ) + ", doublestats0=doublestats0+" + UTIL_ToString( doublestats[i][0] ) + ", doublestats1=doublestats1+" + UTIL_ToString( doublestats[i][1] ) + ", doublestats2=doublestats2+" + UTIL_ToString( doublestats[i][2] ) + ", doublestats3=doublestats3+" + UTIL_ToString( doublestats[i][3] ) + " WHERE id=" + UTIL_ToString( rowids[i] );
 
 								if( mysql_real_query( Connection, QUpdateScore.c_str( ), QUpdateScore.size( ) ) != 0 )
 								{
@@ -372,10 +428,10 @@ int main( int argc, char **argv )
 							}
 							else
 							{
-								string EscCategory = MySQLEscapeString( Connection, Category );
+								string EscCategory = MySQLEscapeString( Connection, category );
 								string EscName = MySQLEscapeString( Connection, names[i] );
 								string EscServer = MySQLEscapeString( Connection, servers[i] );
-								string QInsertScore = "INSERT INTO w3mmd_elo_scores ( category, name, server, score ) VALUES ( '" + EscCategory + "', '" + EscName + "', '" + EscServer + "', " + UTIL_ToString( player_ratings[i], 2 ) + " )";
+								string QInsertScore = "INSERT INTO w3mmd_elo_scores ( category, name, server, score, games, wins, losses, intstats0, intstats1, intstats2, intstats3, intstats4, intstats5, intstats6, intstats7, doublestats0, doublestats1, doublestats2, doublestats3 ) VALUES ( '" + EscCategory + "', '" + EscName + "', '" + EscServer + "', " + UTIL_ToString( player_ratings[i], 2 ) + ", 1, " + UTIL_ToString( WinIncrement ) + ", " + UTIL_ToString( LossIncrement ) + ", " + UTIL_ToString( intstats[i][0] ) + ", " + UTIL_ToString( intstats[i][1] ) + ", " + UTIL_ToString( intstats[i][2] ) + ", " + UTIL_ToString( intstats[i][3] ) + ", " + UTIL_ToString( intstats[i][4] ) + ", " + UTIL_ToString( intstats[i][5] ) + ", " + UTIL_ToString( intstats[i][6] ) + ", " + UTIL_ToString( intstats[i][7] ) + ", " + UTIL_ToString( doublestats[i][0] ) + ", " + UTIL_ToString( doublestats[i][1] ) + ", " + UTIL_ToString( doublestats[i][2] ) + ", " + UTIL_ToString( doublestats[i][3] ) + " )";
 
 								if( mysql_real_query( Connection, QInsertScore.c_str( ), QInsertScore.size( ) ) != 0 )
 								{
@@ -394,30 +450,13 @@ int main( int argc, char **argv )
 			}
 		}
 
-		string QInsertScored = "INSERT INTO w3mmd_elo_games_scored ( category, gameid ) VALUES ( '" + MySQLEscapeString( Connection, Category ) + "', " + UTIL_ToString( GameID ) + " )";
+		string QInsertScored = "INSERT INTO w3mmd_elo_games_scored ( gameid ) VALUES ( " + UTIL_ToString( GameID ) + " )";
 
 		if( mysql_real_query( Connection, QInsertScored.c_str( ), QInsertScored.size( ) ) != 0 )
 		{
 			cout << "error: " << mysql_error( Connection ) << endl;
 			return 1;
 		}
-	}
-
-	cout << "copying w3mmd elo scores to scores table" << endl;
-
-	string QCopyScores1 = "DELETE FROM scores WHERE category='" + MySQLEscapeString( Connection, Category ) + "'";
-	string QCopyScores2 = "INSERT INTO scores ( category, name, server, score ) SELECT category, name, server, score FROM w3mmd_elo_scores WHERE category='" + MySQLEscapeString( Connection, Category ) + "'";
-
-	if( mysql_real_query( Connection, QCopyScores1.c_str( ), QCopyScores1.size( ) ) != 0 )
-	{
-		cout << "error: " << mysql_error( Connection ) << endl;
-		return 1;
-	}
-
-	if( mysql_real_query( Connection, QCopyScores2.c_str( ), QCopyScores2.size( ) ) != 0 )
-	{
-		cout << "error: " << mysql_error( Connection ) << endl;
-		return 1;
 	}
 
 	cout << "committing transaction" << endl;
