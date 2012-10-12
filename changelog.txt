@@ -2,6 +2,13 @@
 # Gen's MODDED Version of GhostOne @ http://thegenmaps.tk #
 ###########################################################
 
+BETA VERSION 1.4b4
+	=================
+	v1.44
+	- fix incorrect submit about GameName in r64 (v1.43), GameName should be
+	correctly mapcfg like before
+	- fix the same incorrect find_first_of when naming replay file
+	
 BETA VERSION 1.4b3
 	=================
 	- friend command is added to bnet.cpp, it's useful when you want your bot adds/removes some friend to the friend list
