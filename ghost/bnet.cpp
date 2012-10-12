@@ -5762,13 +5762,16 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					{
 						if( Type == "list" || Type == "l" )
 						{
-							if ( ( m_GHost->m_BnetNonAdminCommands == 0 || m_GHost->m_BnetNonAdminCommands == 5 ) && !IsRootAdmin(User) && !IsAdmin( User ) )
-								return;
-							QueueChatCommand( "/f l");
-							string s = UTIL_ToString(m_Friends.size( )) + " friends: ";
-							for( vector<CIncomingFriendList *> :: iterator i = m_Friends.begin( ); i != m_Friends.end( ); i++ )
-								s += (*i)->GetAccount( ) + ", ";
-							QueueChatCommand( s, User, Whisper );
+							if ( Type == "l" )
+								QueueChatCommand( "/f l");
+							if ( Type == "list" ){
+								if ( ( m_GHost->m_BnetNonAdminCommands == 0 || m_GHost->m_BnetNonAdminCommands == 5 ) && !IsRootAdmin(User) && !IsAdmin( User ) )
+									return;
+								string s = UTIL_ToString(m_Friends.size( )) + " friends: ";
+								for( vector<CIncomingFriendList *> :: iterator i = m_Friends.begin( ); i != m_Friends.end( ); ++i )
+									s += (*i)->GetAccount( ) + ", ";
+								QueueChatCommand( s, User, Whisper );
+							}
 						}
 						else if( SS.eof( ) )
 								CONSOLE_Print( "[BNET: " + m_ServerAlias + "] missing input #2 in friend command" );

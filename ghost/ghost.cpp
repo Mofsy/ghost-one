@@ -1884,11 +1884,11 @@ bool CGHost :: Update( unsigned long usecBlock )
 				int DPos = AutoHostMapStr.find("mapcfgs") ;
 				if (DPos!= string ::npos)				
 				AutoHostMapStr = AutoHostMapStr.substr(DPos+8);
-				DPos = AutoHostMapStr.find_first_of(") ") ;
+				DPos = AutoHostMapStr.find(") ") ;
 				if (DPos!= string ::npos)				
 					AutoHostMapStr = AutoHostMapStr.substr(DPos+2);
 				else {
-					DPos = AutoHostMapStr.find_first_of(")");
+					DPos = AutoHostMapStr.find(")");
 					if (DPos!= string ::npos)				
 						AutoHostMapStr = AutoHostMapStr.substr(DPos+1);
 				}
