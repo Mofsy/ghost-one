@@ -1,5 +1,9 @@
-(\__/)  Welcome to Gen host
-(='.'=)  Join our Group in GarenaPlus-GroupID 56934
+(\__/)  Welcome to New host
+(='.'=)   JOIN our Group in GarenaPlus-GroupID 56934
 ('')_('') for numerous games!, plz speak English
-COMMANDS: !checkme, !f, !p, !wim, !ready, !rmk.
-Only admin can do !startn,!endn to go.
+
+!COMMANDS: !sc,!go(=!ready),!wim,!rmk,!f,!p,!votestart.
+ONLY admin can do !endn, !startn to go.
+
+OWNER COMMANDS:!a,!as,!close,!closeall,!swap,!open,!openall,!holds,!hold,!unhold, !startn
+!fp (!fakeplayer), !dfs (!delfake,!delfakes); !startn (start game now)
