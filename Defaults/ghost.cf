@@ -1,7 +1,154 @@
 [GHOST]
 ###########################################################
-# PLEASE EDIT CONFIG IN GHOST ONE UNDER GHOST OPTIONS TAB #
+# Gen's MODDED Version of GhostOne @ http://thegenmaps.tk #
 ###########################################################
+##  PLS use NOTEPAD++ OR a good TEXTPAD program to EDIT  ##
+###########################################################
+
+lan_war3version = 26
+bot_hostport = 6127
+
+### Gen Custom Name & Text Fix ###
+# Disallow start/n & autostart command typed by a temp owner if less than X players in lobby
+bot_gamenotstartuntilXplayers = 4
+# whether to set the game name as mapcfg name 1=set gamename to mapcfg name, 0=non set & gamename will always be bot_autohostgamename
+bot_cfgname = 1
+# squirrel txt part in lobby
+bot_squirreltxt = 1
+## show realm on name as a prefix, PRECAUTION: turning it on may cause desync in some maps which have code saving/loading system !
+bot_realmprefixname = 0
+# whether to print a Vietnamese text on screen when hosting, 0 = disable, 1 = enable
+bot_viettxt = 0
+# decide x times to delay the rehost message in lobby Rehost as GameName #3
+bot_rehostprintingdelay = 5
+# bot_playerbeforestartprintdelay * 10 seconds is the time between two waiting for x more players Messages
+# remember nobody likes spam bots!
+bot_playerbeforestartprintdelay = 5
+##################################
+
+### Gen OWNER PATCH (!owner or !admin) FOR TEMPOWNER IN LOBBY ###
+# Owner has limited rights to do the following commands: !a, !as, !close, !closeall, !swap, !open, !openall, !holds, !hold, !unhold, !start, !startn
+# set bot_tempownerinlobby=0 to disable, = 1 to initiate !owner command to normal player which means a normal player can set him/herself as an owner of the current hosting game when s/he types !owner. We allow only 1 owner in a game lobby, next player who types !owner will get error.
+# However setting it = 2 for your liking of changeable owner right in lobby
+# Don't set bot_tempownerinlobby = 3, as 0 <= bot_tempownerinlobby <= 2
+bot_tempownerinlobby = 1
+#################################################################
+
+### Gen FPs Patch ###
+# bot fakes players in lobby, 0 = always disable (bot_morefakeplayersinlobby will be ignored), 1 = enable 
+bot_fakeplayersinlobby = 1
+# whether to allow more fakeplayers in lobby, 1= more fps will be created if less than 4 human players in lobby, 2= many more fps without that condition, 3= maximum of 3 fps refilled with that condition, 0= disable fp refilling
+# bot_morefakeplayersinlobby = 3 is (preferred as) default setting in previous releases
+# setting it to 3, you can still have more fps if needed by configuring maptype in mapcfgs for specific maps
+# e.g. map_type = ward morefps2
+bot_morefakeplayersinlobby = 1
+# fakeplayers' NAMES should be less than 14 chars in fpnames.txt, without this file the bot can't work for fakeplayers adding
+#####################
+
+### Gen Patch for BAN working for Garena too ###
+# Setting this to BAN download & leaver in  bot_lobbyleaverbantime seconds, minimum = 30s << bot_lobbyleaverbantime << 120s = maximum
+bot_lobbyleaverbantime = 45
+################################################
+
+### Action parser (detect AFK and prevent resource trading added in Gen modded GhostOne 1.3) ###
+## Available map_type for many variations:
+## "2teams" "morefps1" "morefps2" "nosave" "guard" (guard means notrade, no afk & nosave) "dota" "noafk" "notrade" "nopause" "noteam" "ward" (ward means notrade & nosave but allows afk)
+# take a mapcfg and add guard to map_type to enable this tool
+## "noteam" Ghost bot will allow a lobby owner(known as temporary owner) to start game without having to re-balance the teams
+## "2teams" Ghost bot will insistently ask the temporary owner to re-balance the game when a !startn command is sent & teams are not balanced yet
+# You can have map_type = noteam ward if you want no trade, no save and no team check in lobby command
+################################################################################################
+
+### REFRESH HACK ###
+### the mapgametype overwrite (advance)
+### This controls the mapgametype overwrite. Use with caution as this can result in an ipban from battle.net services or make users unavailable to join your bot with an invalid number
+### Example numbers can be found at (http://www.codelain.com/forum/index.php?topic=11373.msg135301#msg135301)
+### set it to 0 to disable mapgametype overwrite 
+bot_mapgametype = 21569664
+## normal gametime refresh (GetTime( ) - m_CreationTime) will be used if bot_refresh = 180 or bigger
+bot_refresh = 0
+## MapGameType = 4784211
+####################
+
+# maximum number of games to host at once
+bot_maxgames = 2
+
+# bot_shuffleslotsonstart
+######## DENY PATCH #############
+# set bot_denypatchonjoin = 0, won't affect kicking for things like long map downloads, but the deny on join will be disabled 
+# be careful, disable that may allow access from breaker, hacker and bot players
+# bot_denypatchonjoin = 0
+deny_maxdownloadtime = 90000
+deny_maxmapsizetime = 5000 
+deny_maxreqjointime = 5000
+deny_maxipusage = 8
+deny_maxloadtime = 240000
+deny_downloadtimeduration = 20000
+deny_mapsizeduration = 60000 
+deny_reqjoinduration = 60000 
+deny_ipusageduration = 10000 
+deny_loadduration = 180000
+#################################
+
+### BNET Non-Admin-Commands by Gen ###
+# It may not be necessary because 3 commands queued are not accepted we accept only 2 max, just IGNORE this
+# Set bot_bnetnonadmincommands, = 0 to disable most of non-admin commands to prevent malicious users from filling up the bot's chat queue and crippling the bot
+# = 1 (missing/commented/default) to enable all, = 2 to disable !currentgames, = 3 !checkwarn, = 4 !version, = 5 !friend list
+# bot_bnetnonadmincommands = 1
+######################################
+
+################################
+## Added with patch votestart ##
+################################
+
+# Set bot_votestartpercentalvoting to 1 for set the number of player who have to vote in percent
+# or set bot_votestartpercentalvoting to 0 for set an absolute value
+bot_votestartpercentalvoting = 1
+
+# set bot_votestartallowed to 1 to allow votestart otherwise to 0
+bot_votestartallowed = 1
+
+# if you like to have votestart only in autohosted games set bot_votestartautohostonly to 0
+# if you like to have votestart in all games set it to 1
+bot_votestartautohostonly = 1
+
+# This value will be ignored if bot_votestartpercentalvoting is set to 0
+# else it set the percent of users joined the game who has to vote for starting the game
+# set it to a value between 0 and 100
+# example for needed votes joinedplayer/needed_votes
+# for 60%:
+# 1/1 2/2 2/3 3/4
+bot_votestartpercent = 60
+
+# if bot_votestartpercentalvoting is set to 1, bot_votestartminplayers will set the minimal
+# players who has to have joined the game, to make it possible to startvote.
+# othervise it will set the number of needed votes for starting the game!
+
+bot_votestartminplayers = 5
+bot_votestartplayers = 5
+
+################################
+
+### make the ban announcement on one line ( = 0) (if possible) or on two ( = 1)
+bot_twolinesbanannouncement = 1
+
+### custom text to add to version.
+bot_customversiontext = 
+
+### auto ban people who leave during the countdown
+bot_autobancountdown = 0
+
+### auto ban people who leave during the game load
+bot_autobangameloading = 0
+
+bot_autohostdeniedcountries = RU CN
+
+bot_autohostallowedcountries = 
+
+### UDP port on which the bot communicates with GHost One GUI, 5868 default
+udp_guiport = 5868
+
+
 # LIST OF SETTINGS NOT IN GHOST OPTIONS TAB
 #bot_language
 #bot_mapcfgpath
@@ -53,6 +200,7 @@ bot_lanrootadmins = 0
 
 ### if set to 1, blue player is considered the owner
 bot_blueisowner = 0
+bot_bluecanhcl = 1
 
 ### if enabled, any user can !pub/!map/!unhost
 bot_userscanhost = 0
@@ -73,19 +221,19 @@ bot_adminsandsafecandownload = 1
 bot_replacebanwithwarn = 0
 
 # In LAN/GArena show the real number of current/total players in the game, when using !pubg it will be auto activated
-lan_showrealslotcount = 0
+lan_showrealslotcount = 1
 
 ### all the bots messages will only be seen by admins (bot will be practicly hidden)
 bot_detourallmessagestoadmins = 0
 
 ### 0 - ghost countdown, 1 - warcraft countdown
-bot_normalcountdown = 0
+bot_normalcountdown = 1
 
 # when you !unban player, the bot also issues an /unban player
 bot_unbanremoveschannelban = 0
 
 # Time limit for hosting a game
-bot_lobbytimelimitmax = 15
+bot_lobbytimelimit = 45
 
 ### enable dynamic latency, lowers or even increases latency as needed
 bot_usedynamiclatency = 1
@@ -130,7 +278,7 @@ bot_newLatency = 0
 bot_placeadminshigheronlyindota = 0
 
 ### force auto hcl from gamename in dota games (even when bot_defaulthcl is not set)
-bot_forceautohclindota = 1
+bot_forceautohclindota = 0
 
 ### set !autostart 10 automatically in dota games
 bot_autostartdotagames = 0
@@ -151,35 +299,36 @@ bot_fakepings =
 bot_endreq2ndteamaccept = 0
 
 ### normal bans will expire in x days - set to 0 to be permanent
-bot_bantime = 180
+bot_bantime = 40
 
 ### normal banlast/bl will expire in x days - set to 0 to be permanent
-bot_banlasttime = 180
+bot_banlasttime = 80
 
 ### tbanlast/tbl will expire in x days - set to 0 to be permanent
-bot_tbanlasttime = 30
+bot_tbanlasttime = 22
 
 ### how many warns are needed to auto-ban the player. Default: 3.
 bot_banthewarnedplayerquota = 3
 
 ### how many days will the auto-ban from warns last. 0 - permanent ban. Default: 14.
-bot_bantimeofwarnedplayer = 14
+bot_bantimeofwarnedplayer = 20
 
 ### how many days will each warn last. 0 - permanent warn. Default: 14.
-bot_warntimeofwarnedplayer = 14
+bot_warntimeofwarnedplayer = 20
 
 ### how many games should the player play (without taking another warn) to make one of his warns inactive. Default: 7
-bot_gamenumtoforgetawarn = 7
+bot_gamenumtoforgetawarn = 5
 
 ### if 0, autowarning is off. Default: 0.
 bot_autowarnearlyleavers = 0
 
 ### Prints the gameloaded.txt message after X seconds. Default: 10.
-bot_gameloadedprintout = 10
+bot_gameloadedprintout = 7
 
 ### handle ip bans: 0 = do nothing, 1 = kick, 2 = announce only (no kick).
-bot_ipbanning = 2
-
+bot_ipbanning = 1
+bot_banmethod = 3
+bot_banning = 1
 ### handle name bans: 0 = do nothing, 1 = kick, 2 = announce only (no kick).
 bot_banning = 1
 
@@ -187,7 +336,7 @@ bot_banning = 1
 bot_dropifdesync = 1
 
 # the log file
-bot_log =
+bot_log = ghostlog.txt
 
 # Show a message when a safe/admin/rootadmin/chieftain/shaman joins the channel
 bot_channeljoingreets = 1
@@ -195,23 +344,22 @@ bot_channeljoingreets = 1
 bot_adminslimitedunban = 0
 
 # Announce +1 and +2 (players left to join) in lobby (only if not autohosted)
-bot_lobbyannounceunoccupied = 1
+bot_lobbyannounceunoccupied = 0
 
 # Auto set HCL based on game name,ex: -arso EU pros will set HCL to arso (only if map_defaulthcl is defined, for ex: map_defaulthcl = ar), will set hcl to empty if no mode is detected in the gamename
-bot_autohclfromgamename = 1
+bot_autohclfromgamename = 0
 
 # whether players who use censored words are auto muted for x seconds
-bot_censormute = 0
+bot_censormute = 1
 # also auto mute admins
 bot_censormuteadmins = 0
 # mute for x seconds, the first time a player curses
-bot_censormutefirstseconds = 60
+bot_censormutefirstseconds = 25
 # mute for x seconds, the second time a player curses
-bot_censormutesecondseconds = 180
+bot_censormutesecondseconds = 50
 # mute for x seconds, if a player has cursed for 3 or more times
-bot_censormuteexcessiveseconds = 360
+bot_censormuteexcessiveseconds = 120
 
-lan_war3version = 24
 
 # Disable nagle algorithm (TCPIP algorithm that can slow down the network) - may improve latency if you set to 1
 tcp_nodelay = 0
@@ -226,7 +374,7 @@ wtv_playername = Waaagh!TV
 # for ex: RO, only these countries will be allowed to join a game
 bot_allowedcountries = 
 # for ex: BR, these countries will not be allowed to join a game
-bot_deniedcountries = 
+bot_deniedcountries = RU CN
 
 # milliseconds to wait before sending medium sized packets to bnet when using PVPGN
 bot_bnetpacketdelaymediumpvpgn = 2000
@@ -236,7 +384,6 @@ bot_bnetpacketdelaybigpvpgn = 2500
 bot_bnetpacketdelaymedium = 3200
 # milliseconds to wait before sending big sized packets to bnet (official)
 bot_bnetpacketdelaybig = 4000
-
 
 # Allowed variables: totgames, kills, deaths, assists, creepkills, creepdenies, neutralkills, 
 # towerkills, raxkills, courierkills, wins, losses, killstotal, deathstotal, creepkillstotal, 
@@ -271,16 +418,16 @@ bot_autobanall = 0
 bot_autobanfirstxleavers = 0
 
 # the bot will auto rehost the game as gamename + 1 if 60 seconds have passed since last player joined, 0 = disable
-bot_autorehostdelay = 60
+bot_autorehostdelay = 36
 
 # the bot will auto rehost the game as gamename + 1 if game name is taken
 bot_rehostifnametaken = 1
 
 # if host counter goes over this number it will reset to 1, set to 0 to disable the feature
-bot_maxhostcounter = 30
+bot_maxhostcounter = 36
 
 # these words will be edited/censored in game.
-bot_censorwords = fuck idiot retarded dick cunt pussy asshole suck shit penis vagina
+bot_censorwords = fuck idiot retarded dick cunt cum pussy asshole cock bullshit penis vagina bitch vcc vc dcm disme vkl dkm deo d.cm vai~ clgt thon cec kac kec loz vcl dit djt cmm clm
 
 # load in game feature will be enabled for every map (if set to 1)
 bot_forceloadingame = 1
@@ -301,13 +448,74 @@ bot_patch21 = 0
 bot_showscoresonjoin = 0
 
 # setting bot_autohostmaximumgames > 0 will make ghost begin autohosting on startup
-bot_autohostmaximumgames = 0
-bot_autohostautostartplayers = 10
+bot_autohostmaximumgames = 132
+bot_autohostautostartplayers = 8
 bot_autohostallowstart = 0
 bot_autohostlocal = 0
-bot_autohostowner = one
-bot_autohostmapcfg = map.cfg
-bot_autohostgamename = auto -sd EU pros
+bot_autohostowner = Ghost
+# delete the line below (bot_autohostmapcfg) if you got the modded version of GhostOne from Gen allowing you to use autohost_map$$ instead. 
+# bot_autohostmapcfg = Terrania v110 Prot.cfg
+############################################################
+## A set of autohost_map$$ are ONLY working with the modded version of GHostOne from Gen, http://thegenmaps.tk
+############################################################
+autohost_map1 = CastleFight3vs3as.cfg
+autohost_map2 = CastleFight3vs3as.cfg
+autohost_map3 = CastleFight3vs3as.cfg
+autohost_map4 = Terrania v110 Prot.cfg
+autohost_map5 = Terrania v110 Prot.cfg
+autohost_map6 = Terrania v110 Prot.cfg
+autohost_map7 = (8) ChristmasEscape.cfg
+autohost_map8 = (8) ChristmasEscape.cfg
+autohost_map9 = (10) FortressSurvival5.2P.cfg
+autohost_map10 = (10) FortressSurvival5.2P.cfg
+autohost_map11 = (10) Battle Ships 3.74b.cfg
+autohost_map12 = (10) Battle Ships 3.74b.cfg
+autohost_map13 = (10) Battle Tank 874.cfg
+autohost_map14 = (10) Battle Tank 874.cfg
+autohost_map15 = (7) Jurassic Park Survival.cfg
+autohost_map16 = (7) JurassicParkSurvival2.cfg
+autohost_map17 = (6) WhispersInTheDark1.6.cfg
+autohost_map18 = (11) Escape Loyalty.cfg
+autohost_map19 = (11) Escape Loyalty.cfg
+autohost_map20 = Soft_Escape_1.26.cfg
+autohost_map21 = Soft_Escape_1.26.cfg
+autohost_map22 = (10) PyramidEscapeV3.6b.cfg
+autohost_map23 = (10) PyramidEscapeV3.6b.cfg
+autohost_map24 = (10) StickymansEscape 2.5.cfg
+autohost_map25 = (10) Platform Escape 2.5.cfg
+autohost_map26 = (8) Art of Defense 1.18b.cfg
+autohost_map27 = (8) Art of Defense 1.18b.cfg
+autohost_map28 = (8) UtherParty2v0.4d.cfg
+autohost_map29 = (8) UtherParty2v0.4d.cfg
+autohost_map30 = (12) Stronghold 2 teams.cfg
+autohost_map31 = (12) Stronghold 2 teams.cfg
+autohost_map32 = (12) Stronghold 3 teams.cfg
+autohost_map33 = (12) Stronghold 3 teams.cfg
+autohost_map34 = (10) RabbitsVsSheep1.62.cfg
+autohost_map35 = (10) RabbitsVsSheep1.62.cfg
+autohost_map36 = (8) VN HerosDefensive2b.cfg
+autohost_map37 = (8) VN HerosDefensive2b.cfg
+autohost_map38 = (8) GreenCircleTD10.9.cfg
+autohost_map39 = (8) GreenCircleTD10.9.cfg
+autohost_map40 = (9) Monstie TD Juli 2011.cfg
+autohost_map41 = (9) Monstie TD Juli 2011.cfg
+autohost_map42 = (8) Skill Defense v1.15.cfg
+autohost_map43 = (8) Skill Defense v1.15.cfg
+autohost_map44 = (12) Blades'nGore II.cfg
+autohost_map45 = (12) Blades'nGore II.cfg
+autohost_map46 = (8) Binders v3.0 (Final).cfg
+autohost_map47 = (8) Binders v3.0 (Final).cfg
+autohost_map48 = (10) BattleShip Xfire4.67.cfg
+autohost_map49 = (10) BattleShip Xfire4.67.cfg
+autohost_map50 = (8) Blood_TournamentB16.cfg
+autohost_map51 = (8) Blood_TournamentB16.cfg
+autohost_map52 = (6) MassDestruction_106.cfg
+autohost_map53 = (6) MassDestruction_106.cfg
+autohost_map54 = (8) Whosthekiller4.2.cfg
+autohost_map55 = (12) Survival 1.382.cfg
+autohost_map56 = (12) Survival 1.382.cfg
+##############################################################
+bot_autohostgamename =  Gen Multigames !as8
 
 # If you autohost a even playered two team map and want to auto ban leavers that make the game uneven turn this on. Will not ban admins or root admins. An example map would be DotA or Battleships.
 #     0 = off   1 = on
@@ -320,7 +528,6 @@ bot_lanadmins = 0
 bot_localadmins = 0
 
 # the language file
-
 bot_language = language.cfg
 
 # the path to your local Warcraft III directory
@@ -329,25 +536,18 @@ bot_language = language.cfg
 #  if this path contains War3Patch.mpq the bot will attempt to extract "Scripts\common.j" and "Scripts\blizzard.j" on startup and write them to bot_mapcfgpath (which is defined later in this file)
 #  common.j and blizzard.j are only required for automatically calculating map_crc, you do not need them if your map config files already contain map_crc
 
-bot_war3path = C:\Program Files\Warcraft III\
-
-# the port GHost++ will host battle.net games on (this must be different from your admingame_port)
-
-bot_hostport = 6113
-
-# maximum number of games to host at once
-
-bot_maxgames = 5
+bot_war3path = C:\Program Files (x86)\Warcraft III\
 
 # command trigger for ingame only (battle.net command triggers are defined later)
 
 bot_commandtrigger = !
+bot_invalidtriggers = .,_'
 
 # the path to the directory where you keep your map config files (must end in your system's path seperator)
 #  this directory can also contain common.j and blizzard.j (extracted from War3Patch.mpq)
 #  common.j and blizzard.j are only required for automatically calculating map_crc, you do not need them if your map config files already contain map_crc
 
-bot_mapcfgpath = mapcfgs\
+bot_mapcfgpath = D:\modded GhostOne by Gen\mapcfgs\
 
 # the path to the directory where you keep your savegame files (must end in your system's path seperator)
 
@@ -357,24 +557,25 @@ bot_savegamepath = savegames\
 #  GHost++ doesn't require map files but if it has access to them it can send them to players and automatically calculate most map config values
 #  GHost++ will search [bot_mappath + map_localpath] for the map file (map_localpath is set in each map's config file)
 
-bot_mappath = c:\program files\Warcraft III\Maps\Download\
+bot_mappath = C:\Program Files (x86)\Warcraft III\maps\download\
 
 # whether to save replays or not
-
 bot_savereplays = 0
+# ignore the definition of bot_invalidreplaychars if bot_savereplays = 0
+## Only uncomment this if you really can't open any replays bot_invalidreplaychars = ï€$#+-_,;()?={}[]'"!&/\*%:<>|
+## In that case, Ask for support in thegenmaps.tk first
 
 # the path to the directory where you want GHost++ to save replays (must end in your system's path seperator)
-
 bot_replaypath = replays\
 
 ### the Warcraft 3 version to save replays as
-
-replay_war3version = 24
+replay_war3version = 26
 
 ### the Warcraft 3 build number to save replays as (this is specific to each Warcraft 3 version)
 ###  patch 1.23:  war3version 23, buildnumber 6058
 ###  patch 1.24:  war3version 24, buildnumber 6059
 ###  patch 1.24b: war3version 24, buildnumber 6059
+###  patch 1.26:  war3version 26, buildnumber 6059
 
 replay_buildnumber = 6059
 
@@ -384,7 +585,7 @@ replay_buildnumber = 6059
 ###  set to 1 to enable automatic spoof checks on all players
 ###  set to 2 to enable automatic spoof checks on potential admins only
 
-bot_spoofchecks = 2
+bot_spoofchecks = 0
 
 ### whether to require spoof checks or not
 ###  this controls whether the bot will require players to spoof check before starting the game
@@ -408,9 +609,8 @@ bot_autolock = 0
 bot_autosave = 0
 
 # whether to allow map downloads or not
-#  set to 0 to disable map downloads
-#  set to 1 to enable map downloads
-#  set to 2 to enable conditional map downloads (an admin must start each map download with the !download or !dl command)
+#  set to 0 to disable map downloads, =1 to enable map downloads
+# =2 to enable conditional map downloads (an admin must start each map download with the !download or !dl command)
 
 bot_allowdownloads = 1
 
@@ -421,10 +621,10 @@ bot_allowdownloads = 1
 bot_pingduringdownloads = 0
 
 # kicked banned people when they enter the channel
-bot_kickbannedfromchannel = 0
+bot_kickbannedfromchannel = 1
 
 # Ban banned people when they enter the channel
-bot_banbannedfromchannel = 0
+bot_banbannedfromchannel = 1
 
 # use LC style pings (divide actual pings by two)
 
@@ -432,7 +632,7 @@ bot_lcpings = 1
 
 # auto kick players with ping higher than this
 
-bot_autokickping = 200
+bot_autokickping = 650
 
 # the game latency
 #  this can always be changed for a particular game with the !latency command (which enforces a minimum of 50 and a maximum of 500)
@@ -459,7 +659,7 @@ bot_votekickallowed = 1
 #  if you set it to 70 it will require 2/3, 3/4, 3/5, 4/6, 5/7, 5/8, 6/9, 7/10, 7/11, and 8/12 votes to pass
 #  if you set it to 60 it will require 2/3, 2/4, 3/5, 3/6, 4/7, 5/8, 5/9, 6/10, 6/11, and 7/12 votes to pass
 
-bot_votekickpercentage = 100
+bot_votekickpercentage = 60
 
 # Just before a game is hosted the creator is added to the bots friends list and removed soon after 
 bot_addcreatorasfriendonhost = 0
@@ -468,25 +668,28 @@ bot_addcreatorasfriendonhost = 0
 bot_relaychatcommands = 1
 
 # display information on current downloads (speed, ETA)
-bot_showdownloadsinfo = 1
+bot_showdownloadsinfo = 0
 
 # interval in seconds between download info message
-bot_showdownloadsinfotime = 5
+bot_showdownloadsinfotime = 16
 
 # maximum players allowed to download at once, the rest will have almost KB/s until someone finishes downloading
 bot_maxdownloaders = 3
 
 # set total download speed (KB/s) available for all clients at once, if set to 1024, 4 people will get 256 each
-bot_totaldownloadspeed = 1024
+bot_totaldownloadspeed = 1536
 
 # set max download speed (KB/s) available for one client
-bot_clientdownloadspeed = 512
+bot_clientdownloadspeed = 1024
 
 # initiate game over timer when x seconds have passed since world tree/frozen throne has fallen - 0 to disable
-bot_gameoverbasefallen = 20
+bot_gameoverbasefallen = 12
 
 # initiate game over timer if remaining players are less than this number (and at least a player left) - 0 to disable
-bot_gameoverminplayers = 0
+bot_gameoverminplayers = 2
+
+# initiate game over timer if there's only 1 player in game - 0 to disable, 1 or missing is enabled as default
+bot_gameoverwhenoneplayer = 0
 
 # initiate game over timer if remaining player percentage is less than this number (and at least a player left) - 0 to disable
 bot_gameoverminpercent = 0
@@ -504,7 +707,7 @@ bot_holdplayersforrmk = 1
 bot_nonadmincommands = 1
 
 # root admins are required to spoof check if 1, or not if 0
-bot_rootadminsspoofcheck = 0
+bot_rootadminsspoofcheck = 1
 
 # admins are required to spoof check if 1, or not if 0
 bot_adminsspoofcheck = 0
@@ -522,7 +725,7 @@ bot_externalip =
 bot_altfindip = 0
 
 # bot's additional rootadmins separated by space ex: userone usertwo userthree
-bot_rootadmins = 
+bot_rootadmins = Geniuskwe
 
 # bot's UDP password
 bot_udppassword = 
@@ -531,13 +734,13 @@ bot_udppassword =
 bot_verbose = 0
 
 # bot's virtual host name
-bot_virtualhostname = |cFF483D8BOne
+bot_virtualhostname = |cFF0080C0Ghost
 
 # ignore drop request for the first x seconds of lagging.
-bot_dropvotetime = 30
+bot_dropvotetime = 40
 
 # Time limit for hosting a game where no admins enter it
-bot_lobbytimelimit = 10
+bot_lobbytimelimit = 45
 
 # udp ip
 udp_cmdbindip = 0.0.0.0
@@ -580,11 +783,12 @@ db_sqlite3_file = ghost.dbs
 
 # this is only used if your database type is MySQL
 
-db_mysql_server = localhost
-db_mysql_database = ghost
-db_mysql_user = YOUR_USERNAME
-db_mysql_password = YOUR_PASSWORD
-db_mysql_port = 0
+db_mysql_server = 127.0.0.1 
+db_mysql_database = dbname
+db_mysql_user = dbusername
+db_mysql_password = dbpassword
+db_mysql_port = 3306
+db_mysql_botid = 1
 
 ############################
 # BATTLE.NET CONFIGURATION #
@@ -598,57 +802,104 @@ db_mysql_port = 0
 # note that each banned player is tied to the realm it was created on and the realm is case sensitive
 # so if you change your realm from useast.battle.net to USEAST.BATTLE.NET it'll still connect but anyone previously banned will not be counted as banned until you change it back
 
-bnet_server = europe.battle.net
+bnet_server = server.eurobattle.net
+# bnet2_server = battle.lp.ro
+# bnet3_server = uswest.battle.net
+
+# Only use serveralias when needed
+# bnet_serveralias = BoredAussie 
+# bnet5_serveralias = JuDotA
+
+bnet_custom_war3version = 26
+bnet_custom_exeversion = 1 0 26 1
+# bnet2_custom_war3version = 26
+# bnet2_custom_exeversion = 1 0 26 1
+# bnet3_custom_war3version = 26
+# bnet3_custom_exeversion = 1 0 26 1
+
+# bnet_bnlswardencookie = 1
+# bnet2_bnlswardencookie = 1
+#	bnet3_bnlswardencookie = 1
 
 # your Warcraft III: Reign of Chaos CD key
 
 bnet_cdkeyroc = FFFFFFFFFFFFFFFFFFFFFFFFFF
+# bnet2_cdkeyroc = FFFFFFFFFFFFFFFFFFFFFFFFFF
+#	bnet3_cdkeyroc = 
 
 # your Warcraft III: The Frozen Throne CD key
 
 bnet_cdkeytft = FFFFFFFFFFFFFFFFFFFFFFFFFF
+# bnet2_cdkeytft = FFFFFFFFFFFFFFFFFFFFFFFFFF
+#	bnet3_cdkeytft = 
 
 # your battle.net username
 
-bnet_username = 
+bnet_username = sage
+#	bnet2_username = sage
+#	bnet3_username = 
 
 # your battle.net password
 
 bnet_password = 
+#	bnet2_password = 
+#	bnet3_password = 
 
 # the first channel to join upon entering battle.net
 
-bnet_firstchannel = W3-bots
+bnet_firstchannel = Gen
+#	bnet2_firstchannel = Gen
+#	bnet3_firstchannel = Gen
 
 # the root admin on this battle.net server only
 
-bnet_rootadmin = 
+bnet_rootadmin = Geniuskwe
+#	bnet2_rootadmin = Geniuskwe
+#	bnet3_rootadmin = Geniuskwe
 
 # command trigger for this battle.net server only
 
 bnet_commandtrigger = !
+#	bnet2_commandtrigger = !
+#	bnet3_commandtrigger = !
 
 # whether to automatically add your friends list to each game's reserved list
-
-bnet_holdfriends = 1
-
 # whether to automatically add your clan members list to each game's reserved list
 
+bnet_holdfriends = 1
+#	bnet2_holdfriends = 1
+# bnet3_holdfriends = 1
+
 bnet_holdclan = 1
+#	bnet2_holdclan = 1
+#	bnet3_holdclan = 1
+
+###
+# BNLS Settings DISABLED a long time ago
+###
+# bnet_bnlsserver = localhost
+# bnet2_bnlsserver = localhost
+# bnet3_bnlsserver = localhost
+# bnet4_bnlsserver = localhost
+# bnet5_bnlsserver = 80.86.83.93
+# bnet6_bnlsserver = 80.86.83.93
+# bnet_bnlsport = 9367
+# bnet2_bnlsport = 9367
+# bnet3_bnlsport = 9367
+# bnet4_bnlsport = 9367
+# bnet5_bnlsport = 9367
+# bnet6_bnlsport = 9367
 
 # you will need to edit this section of the config file if you're connecting to a PVPGN server
 #  your PVPGN server operator will tell you what to put here
 
-bnet_custom_war3version = 24
-bnet_custom_exeversion = 
-bnet_custom_exeversionhash = 
-bnet_custom_passwordhashtype = 
+# ONLY FOR PVPGN SERVERS, DON'T MAKE THESE SETTINGS FOR OFFICIAL BNET SERVERS
 
-###
-# BNLS Settings
-###
-bnet_bnlsserver = 80.86.83.93
-bnet_bnlsport = 9367
+bnet_custom_exeversionhash = 194 206 231 242
+bnet_custom_passwordhashtype = pvpgn
+
+#	bnet2_custom_exeversionhash = 194 206 231 242
+#	bnet2_custom_passwordhashtype = pvpgn
 
 ###
 # example configuration for connecting to a official battle.net server (second server)
@@ -683,3 +934,10 @@ bnet_bnlsport = 9367
 # bnet3_custom_exeversion = 184 0 22 1
 # bnet3_custom_exeversionhash = 219 152 153 144
 # bnet3_custom_passwordhashtype = pvpgn
+
+## Desync Reduction
+#Theoretically you need to set the latency at the maximum latency (!p shows) of the players in games, but, the medium value will work too. So if the players in the game have !p - 60ms 80ms 120ms - you could try setting it at about 90 or 100.
+# bot_appleicon = 0
+#The synclimit it's just a value for when to show the lag screen. You should increase it a bit only if some players lag, but not too much cause either way if they are behind and have lag they will drop, regardless of the lag screen showing or not. So the latency is the most important. 
+
+
