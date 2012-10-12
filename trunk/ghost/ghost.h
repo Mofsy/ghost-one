@@ -240,6 +240,7 @@ public:
 	uint32_t m_StartGameWhenAtLeastXPlayers;
 	uint32_t m_RefreshDuration;
 	uint32_t m_MoreFPsLobby;
+	uint32_t m_BnetNonAdminCommands;
 	bool m_UDPConsole;						// config value: console output redirected to UDP
 	bool m_Verbose;							// config value: show all info or just some
 	bool m_RelayChatCommands;				// config value: show/hide issued commands
@@ -252,6 +253,7 @@ public:
 	bool m_PrefixName;
 	bool m_SquirrelTxt;
 	string m_InvalidTriggers;
+	string m_InvalidReplayChars;
 	bool m_QueueGameRefresh;
 	bool m_VietTxt;
 	bool m_ReplaceBanWithWarn;
