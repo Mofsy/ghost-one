@@ -1,0 +1,213 @@
+###########################################################
+# Gen's MODDED Version of GhostOne @ http://thegenmaps.tk #
+###########################################################
+
+BETA VERSION 1.4b3
+	=================
+	- friend command is added to bnet.cpp, it's useful when you want your bot adds/removes some friend to the friend list
+	Payload for friend command should be [add|remove|list] or [a|r|l]
+		/w urbotname .friend a NAME
+		/w urbotname !friend r NAME
+		/w urbotname ,friend list
+		(.,! is upon your bot_commandtrigger)
+	- as replay issue was fixed in previous version, this release commits to name the replay files correctly, so that they can be opened
+	- replay files should NOT have special chars: ï,€,$,etc.
+	- bot_bnetnonadmincommands added to ghost.cfg to define what non-admin commands can be allowed.
+	- bot_invalidreplaychars added to ghost.cfg to define what chars are invalid and should be removed when naming the replay file
+	- USE NEW GHOST.CFG because old variables in ghostcfg are changed as following:
+		+ bot_tempownerinlobby for - bot_newownerinagame
+		+ bot_gamenotstartuntilXplayers for - bot_startgamewhenatleastXplayers
+		+ bot_refresh for - bot_refreshduration
+		+ typos in ghost.cfg are corrected
+	
+BETA VERSION 1.4b2
+	=================
+
+	- potentially fix replay issue
+	- command !help, !helps added
+	- added m_Stats to command !ff
+	- bot_denypatchonjoin added to ghostcfg
+	# set bot_denypatchonjoin = 0, won't affect kicking for things like long map downloads, but the deny on join will be disabled
+	- map_type having dota will no longer trigger anti-parser tool(anti-save, anti-trade,etc.)
+	To have the tool on, e.g. set map_type = dota guard
+	
+VERSION 1.4
+  =================
+
+  Adds:
+    - bot_invalidtriggers to define the invalid chars for announcement: wrong command trigger.
+	- bot_lobbyleaverbantime is added to ghostcfg to set timer for the BAN of leavers in lobby
+	- bot_viettxt variable added to whether print a Vietnamese text in BAN announcement
+  Nailed:
+	- fakeplayers patch is once again nailed
+	- bot_morefakeplayersinlobby variable is added to ghost.cfg to give the option for your choice of more fps in lobby
+	- you can also add "morefps1" or "morefps2" to map_type for that purpose for specific maps
+	- e.g. map_type = ward morefps2
+	- fakeplayers' NAMES should be less than 14 chars in fpnames.txt, without this file the bot can't work for fakeplayers adding
+  Fixes:
+  Hopefully fix the issue about "startadvex3 failed", 
+  configuring ghostcfg correctly the bot will have no more disconnection from official bnet servers
+	- RefreshHack in ghostcfg:
+		For the bot that host on official bnet servers:
+		bot_mapgametype = 0; bot_refreshduration = 180 is the normal GhostOne refresh
+			Try to change only 1 of them at a time for testing as if you wish to improve the refresh.
+			OR just set it to normal GhostOne refresh for that bot.
+		For a bot of yours that doesn't host on official bnet servers, 
+			bot_mapgametype = 21569664 and bot_refreshduration = 0 is the best option
+	- GameName in refresh will no longer exceed 31 chars, with apple icon, you should name the mapcfg within 24 chars max.
+	without apple icon, 28 chars max. (11) is not counted, no worry.
+	- bot refreshes GameName with $ instead of #
+	- IF GameName has more than 28 chars, bot shall not add +3,+2,+1 for the vacant slots when refreshing
+	- currentgames(cgames/!cg) command is fixed, no more spamming on eurobattle.net server 
+	which caused the bot to be kicked by the server's anti-spam control
+  Changes:
+    - Filter SEND_W3GS_PLAYERINFO packet in gameprotocol.cpp for tracking possible error.
+	- To prevent error with SEND_W3GS_PLAYERINFO packet, fakeplayers' names will be nailed automatically if exceed 14 chars,
+	they should be 14 chars max.
+	- PREVIOUS CHANGES ARE APPLIED in this v1.4
+
+BETA VERSION 1.3b5
+  =================
+
+  Added:
+	- !currentgames/!cgames/!cg command to display the games being hosted by the bot, just whisper /w botname !cg
+	- !realm (for admins only) to check what realm ppls are on in the lobby (probably works in game too).
+	- add refreshdelay variable to be able to disable the refreshduration, 
+	bot_refreshduration = 180 or bigger number in ghost.cfg will disable the refreshhack, 
+	normal gametime refresh (GetTime( ) - m_CreationTime) applied
+  Changes:
+	- fix version in language.cfg
+	- add 1 ip (79.141.174.186|DE=from Germany) to the ipbanlist as his attempts to attack the bot with multiple names but failed & detected by deny patch
+	- filter SEND_SID_STARTADVEX3 errors (startadvex3 failed) for future debugging
+
+BETA VERSION 1.3b4
+  =================
+
+  Changes:
+    - Revert MapGameType in bnet.cpp & game_base.cpp
+    - Fix tempban on 127.0.0.1 in deny patch
+    - minor changes
+    - bot_refreshduration is added (in ghost.cfg) for defining the time for next refresh of the bot. (bot_refreshduration = 0 as default)
+	
+BETA VERSION 1.3b3
+  =================
+    
+  - bot no longer spams 30000 milisecond, connection close texts heavily
+  - allow multiple modes in map_type, for examples: map_type = 2teams guard, map_type = ward 2teams, map_type = noteam ward, map_type = noteam guard
+  - fix: command autostart by temporary owner is working in accordance with bot_startgamewhenatleastXplayers
+  - fix: text printed to 1 player instead of all players in lobby when requesting to start game but the lobby has less than bot_startgamewhenatleastXplayers value.
+  - bot_startgamewhenatleastXplayers = 4. Temp owner will be disallowed to start game when <4 ppls in lobby. You can set it to other number for your liking.
+  go command will still work to start game in most cases.
+  - df command is fixed.
+  
+
+Version 1.3 released on 08/20/2012:
+    =================
+
+    TheGenMaps Forum, "The Gen Maps", http://thegenmaps.tk
+
+    Version 1.3, stable version
+
+    News:
+    - bot_squirreltxt added to whether Ghost prints the squirrel part or not in the welcome message in lobby
+    - functions added for !startn & !start in game.cpp as to require actions (!swap)
+    from players to re-balance the game before starting.
+    - new string keys for map_type, see available map_type in ghost.cfg
+
+    Patches:
+    - gamelist.patch to fetch the infos about your game from mySQL database to a forum/website
+    - anti-parser tool to detect afk, anti-trade, anti-save & ofc anti-hack
+    - refresh hack to show up your host in bnet often
+    - Previous patches
+
+    Fixes:
+    -!open & !close bugs, anti-abuse, a temporary owner is no longer able to open & close the fp slot, just use !df or !dfs instead
+    -!owner/!admin temporary owner
+    - Ban working on realms + Garena fix
+    - safelisted players will no longer be kicked by anti-spam patch
+    - Correct the number of Players for AutoStart for 1st game created by Ghost
+    (it was only wrong in 1st game earlier, $AutoStarT$ once >= is always correct
+    for 2nd-3rd,..games)
+    - unlimited realms (about 19 realms) each bot for hosting
+    - add more server alias
+    - modify spoofcheck command to easily catch the text from players for a
+    spoofcheck
+    - fix !getgames bug, no more spamming on bnet realms which caused Ghost to be
+    kicked out of the realm and sometimes crashed. NO MORE CRASHING.
+    - Issue about + player to start game for X ppls is fixed.
+	
+
+Version 1.2 (stale):
+    (Update July 27th)
+    Patches:
+    -!ff
+    -!wim
+    -!go (!ready)
+    -!votestart
+    -!owner (TEMPORARY OWNER COMMANDS:!a,!as,!close,!closeall,!swap,!open,!openall,!holds,!hold,!unhold, !startn
+    !fp (!fakeplayer), !dfs (!delfake,!delfakes); !startn (start game now))
+
+    -GCB patch fully works for broadcasting/hosting to multiple Garena Rooms & bnet Realms.
+    -Lobby spam control with announcement & auto-kick
+    -Gen Patch: Display GarenaRoom (known as GaRoomDetection system) when new player joined the lobby
+    -Gen Patch: Garena ban, autoban leaver in lobby: Leaver in 30 secs after downloaded gets banned for 2 days
+    -Gen Patch: FakePlayers in Lobby
+    -Autohost N Maps fully feature Patch (known as map cycling system): GameName & bot_autohostautostartplayer value changed automatically according to the new hosting map
+
+    Fixes:
+    -+$PLAYER$ to start game spamming reduced (bot_playerbeforestartprintdelay)
+    -m_GameOverTime >= 12s (Gameover in 12 sec instead of 60 by default)
+    -m_LastAutoHostTime >= 15 (Rehost in 15s after the game is over)
+    -GCBI patch fully works
+    -Specific admins from LAN
+    -Garena auto-hooking setup
+    -bnet !dbstatus fix for max_allowed_packet
+    - some minor fixes
+
+
+    Version 1.2 (N/A)
+    !go=!ready, typing !go is easier and abit faster
+    !go, 4 votes,
+    Weird number in !votestart is fixed
+    Info displays whether players have joined from bnet or LAN
+    Warning from spam control
+    ghost.cfg is updated.
+    and some minor fixes.
+
+    Works perfectly with Map Collection #1 
+	
+	
+Version 1.1 (stale):
+
+    Patches:
+    !ff
+    !wim
+    !ready
+    !votestart
+    Lobby spam control
+    Map cycling
+    autoban leaver in lobby: Leaver in 30 secs after downloaded gets banned for 2 days
+
+    Fixes:
+    -+$PLAYER$ to start game spamming (bot_playerbeforestartprintdelay)
+    -m_GameOverTime >= 12s (Gameover in 12 sec instead of 60 by default)
+    -m_LastAutoHostTime >= 15 (Rehost in 15s after the game is over)
+    -Specific admins from LAN
+    -Garena auto-hooking setup
+
+    #r1 notes:
+    for this initial version
+    ghost.exe works but isn't public for downloading
+    GCBI works though there're some delays abt 30s-1min that ppls in Garena room couldn't see the host immediately.
+    mrotate doesn't seem to work well and results in autorehostdelay bug (people can't see the host after rehosting #2 #3) when testing.
+
+    # notes for latest revision
+    bnet.cpp code is rolled-back to original.
+    ghost.exe works
+    mrotate works
+    GhostOne hooking works fine.
+    GCBI seems to stop working due to the changes in bnet.cpp (update 06/29/12)
+
+###########################################################
+# Gen's MODDED Version of GhostOne @ http://thegenmaps.tk #
+###########################################################
