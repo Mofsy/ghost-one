@@ -1,0 +1,26 @@
+###########################################################
+# Gen's MODDED Version of GhostOne @ http://thegenmaps.tk #
+###########################################################
+			mySQL database REQUIRED for this guide
+	###################################################
+	
+gamelist.php is simple & plain version to display the games being hosted.
+listofgame.php is currently used by thegenmaps.tk for the same purpose.
+
+To use them: make sure you set up mySQL server successfully (e.g. you can use WampServer for Window, LampServer for linux)
+	Correct these below to your settings. You have database name, username & password of your own, make your inputs in " " 
+	
+	$db_name = "ghostdbname";
+	$db_host = "127.0.0.1:3306";
+	$db_username = "root";
+	$db_password = "password";
+	
+	If the php file doesn't have them, look for mysql_connect, mysql_select_db and correct them in there
+		mysql_connect("127.0.0.1:3306", "root", "password");
+		mysql_select_db("ghostdbname");
+	
+gametrack,logcron,newdota,status php files are from uakf.b, codelain.com. QUESTION there for more use.
+- gametrack: records information for each player based on the last games in the database; specifically, maintains data for each player (name-realm pair) on the last ten bots (based on botid) played on, last ten games (based on games.id) played, average stay percentage (much more efficient than AVG), total number of games, time first played, and time most recently played.
+- logcron: probably not useful for anyone, but I'm too lazy to setup logrotate so I made a simple alternative; just renames .log to .log_ every day
+- newdota: notifies you when there's a new DotA version; you can also subscribe to this mailing list
+- status: generates various status updates on your bots / websites and can email them somewhere
