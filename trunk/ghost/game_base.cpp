@@ -386,7 +386,10 @@ CBaseGame :: ~CBaseGame( )
 		}
 
 		m_Replay->BuildReplay( m_GameName, m_StatString, m_GHost->m_ReplayWar3Version, m_GHost->m_ReplayBuildNumber );
-		m_Replay->Save( m_GHost->m_TFT, m_GHost->m_ReplayPath + UTIL_FileSafeName( "GHost++ " + string( Time ) + " " + m_GameName + ".w3g" ) );
+		if (m_GHost->m_ReplaysByName)
+			m_Replay->Save( m_GHost->m_TFT, m_GHost->m_ReplayPath + UTIL_FileSafeName( m_GameName + " dated " + string( Time ) + ".w3g" ) );
+		else
+			m_Replay->Save( m_GHost->m_TFT, m_GHost->m_ReplayPath + UTIL_FileSafeName( "GHost++ " + string( Time ) + " " + m_GameName + ".w3g" ) );
 	}
 
 	delete m_Socket;

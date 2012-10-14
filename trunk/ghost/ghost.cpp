@@ -2274,6 +2274,7 @@ void CGHost :: SetConfigs( CConfig *CFG )
 	m_SquirrelTxt = CFG->GetInt( "bot_squirreltxt", 0 ) == 0 ? false : true; //Gen
 	m_InvalidTriggers = CFG->GetString( "bot_invalidtriggers", string( ) ); //Gen
 	m_InvalidReplayChars = CFG->GetString( "bot_invalidreplaychars", string( ) ); //Gen
+	m_ReplaysByName = CFG->GetInt( "bot_replayssavedbyname", 0 ) == 1 ? true : false; //Gen
 	m_StartGameWhenAtLeastXPlayers = CFG->GetInt( "bot_gamenotstartuntilXplayers", 4 ); //Gen
 	m_BnetNonAdminCommands = CFG->GetInt( "bot_bnetnonadmincommands", 1 ); //Gen
 	m_RefreshDuration = CFG->GetInt( "bot_refresh", 0 ); //Gen
@@ -4023,6 +4024,7 @@ void CGHost :: ReloadConfig ()
 	m_SquirrelTxt = CFG->GetInt( "bot_squirreltxt", 0 ) == 0 ? false : true; //Gen
 	m_InvalidTriggers = CFG->GetString( "bot_invalidtriggers", string( ) ); //Gen
 	m_InvalidReplayChars = CFG->GetString( "bot_invalidreplaychars", string( ) ); //Gen
+	m_ReplaysByName = CFG->GetInt( "bot_replayssavedbyname", 0 ) == 1 ? true : false; //Gen
 	m_StartGameWhenAtLeastXPlayers = CFG->GetInt( "bot_gamenotstartuntilXplayers", 4 ); //Gen
 	m_BnetNonAdminCommands = CFG->GetInt( "bot_bnetnonadmincommands", 1 ); //Gen
 	m_RefreshDuration = CFG->GetInt( "bot_refresh", 0 ); //Gen
