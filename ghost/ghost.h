@@ -252,6 +252,7 @@ public:
 	bool m_DenyPatchEnable;
 	bool m_PrefixName;
 	bool m_SquirrelTxt;
+	bool m_ReplaysByName;
 	string m_InvalidTriggers;
 	string m_InvalidReplayChars;
 	bool m_QueueGameRefresh;
