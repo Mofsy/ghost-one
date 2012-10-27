@@ -2,12 +2,34 @@
 # Gen's MODDED Version of GhostOne @ http://thegenmaps.tk #
 ###########################################################
 
+v 1.46
+	=================
+	Repository for decent maps storing, sharing & downloading https://decentmaps.googlecode.com/svn/trunk/
+	=================
+	- TempOwner patch is once again nailed, an unlimited number of TempOwners is possible with bot_tempownerinlobby = 2
+	
+	GHOSTCFG add-ons:
+	- bot_disableunhost & bot_adminscanunhost are to restrictedly allow only listed admins to be able to unhost
+	- bot_adminsonlan, whether to enable(default) admin players to do admin commands on LAN
+	- bot_disallowdelmapbyroot & bot_disallowdlmapbyroot whether to allow rootadmins to use !delmap & !dlmap (always allow by default or =0), forbid those commands if (=1)
+	- bot_neverdlmapfromepicwar & bot_onlydlmapfromhive, whether to allow map download from a source like epicwar or only Hive & https://decentmaps.googlecode.com/svn/trunk/, = 1 to enable, = 0 to disable (default)
+	
+	- IMPORTANT FIX: BAN CHECK is corrected for LAN & LAN ppls won't be kicked by mistake
+	- some security fixes & other fixes	
+
+v 1.45
+	=================
+	- add bot_replayssavedbyname to ghostcfg (see changes in ghostcfg & add bot_replayssavedbyname = 1 to ghostcfg)
+	- it's possible to enable bot should name replays file by GameName first instead
+	of Ghost++ as prefix by setting bot_replayssavedbyname = 1
+	
 BETA VERSION 1.4b4
 	=================
 	v1.44
 	- fix incorrect submit about GameName in r64 (v1.43), GameName should be
 	correctly mapcfg like before
 	- fix the same incorrect find_first_of when naming replay file
+	- new ELO system (uakf.b's system) for DotA games supported
 	
 BETA VERSION 1.4b3
 	=================
