@@ -2,6 +2,13 @@
 # Gen's MODDED Version of GhostOne @ http://thegenmaps.tk #
 ###########################################################
 
+v1.47
+    =================
+	Repository for decent maps storing, sharing & downloading https://decentmaps.googlecode.com/svn/trunk/
+	=================
+    - bot_rehostchar = $ is added to ghost.cfg as for your choice on which char ($,#,or others), bot will be using to print when rehosting, e.g. GameName $32
+    - Replay files are now named with version, as you may wish to run a bot for 1.24e. So you'll recognize which replays were made on 1.26 and 1.24
+
 v 1.46
 	=================
 	Repository for decent maps storing, sharing & downloading https://decentmaps.googlecode.com/svn/trunk/
