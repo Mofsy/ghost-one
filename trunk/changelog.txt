@@ -2,12 +2,27 @@
 # Gen's MODDED Version of GhostOne @ http://thegenmaps.tk #
 ###########################################################
 
+v1.48
+	=================
+	Repository for decent maps storing, sharing & downloading https://decentmaps.googlecode.com/svn/trunk/
+	=================
+	- language.cfg suits you better if you want to localize the bot with your own language
+	- new TOOL: Gen TEST on BroadCast Port with bot_broadcastport & bot_useportotherthan6112 added into
+	Remark: new TOOL is only for users who are really used to the hosting program
+			It's not recommended for newbie users
+	- set bot_logreduction = 1 in ghost.cfg if you want to reduce the length of your ghostlog
+	- With ghost.cfg setting, now you can make the bot to kick if player has download rate is smaller than X kb/s, set it = 0 to disable
+		bot_kickifdownloadrate = 15 (15kb/s, this is to discard ppls with slow internet connection)
+	Kicked player will be banned for 1 day.
+			
 v1.47
     =================
 	Repository for decent maps storing, sharing & downloading https://decentmaps.googlecode.com/svn/trunk/
 	=================
     - bot_rehostchar = $ is added to ghost.cfg as for your choice on which char ($,#,or others), bot will be using to print when rehosting, e.g. GameName $32
     - Replay files are now named with version, as you may wish to run a bot for 1.24e. So you'll recognize which replays were made on 1.26 and 1.24
+	# bot kick if player has download rate is smaller than 15 kb/s, set it = 0 to disable
+		bot_kickifdownloadrate = 15
 
 v 1.46
 	=================
