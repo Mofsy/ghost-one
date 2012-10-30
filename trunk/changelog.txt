@@ -2,6 +2,16 @@
 # Gen's MODDED Version of GhostOne @ http://thegenmaps.tk #
 ###########################################################
 
+v1.49
+	=================
+	Repository for decent maps storing, sharing & downloading https://decentmaps.googlecode.com/svn/trunk/
+	=================
+	- deny_extension = 600000 (it's default value in case of missing in ghost.cfg) is added into ghost.cfg
+	high deny count will now count up to 25 instead of 20
+	deny_extension can take any value >=120000 miliseconds(2 mins), if you put it < 120000, the system will make it to 900000 (=15 mins).
+	Deny extension is always needed to deny on join the malicious players / bot players (= who are attempting to wreck your bot). Yet if you have any problem with deny extension, just set bot_denypatchonjoin = 0, then deny on join will be disabled
+	- Msg will be printed in ghostlog clearly to state what IP is under effect and for how the deny extension is in effect.
+	- Russian.cfg is added, feel free to check and give feedback with new file to correct mistakes in current release of Russian.cfg
 v1.48
 	=================
 	Repository for decent maps storing, sharing & downloading https://decentmaps.googlecode.com/svn/trunk/
