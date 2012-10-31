@@ -171,6 +171,7 @@ public:
 	bool m_TFT;								// config value: TFT enabled or not
 	string m_BindAddress;					// config value: the address to host games on
 	uint16_t m_HostPort;					// config value: the port to host games on
+	uint16_t m_BroadCastPort;					// config value: the port to host games on
 	bool m_Reconnect;						// config value: GProxy++ reliable reconnects enabled or not
 	uint16_t m_ReconnectPort;				// config value: the port to listen for GProxy++ reliable reconnects on
 	uint32_t m_ReconnectWaitTime;			// config value: the maximum number of minutes to wait for a GProxy++ reliable reconnect
@@ -232,6 +233,7 @@ public:
 	uint32_t m_DenyReqjoinDuration;			// config value: time to deny due to no reqjoin received
 	uint32_t m_DenyIPUsageDuration;			// config value: time to deny due to high multiple IP usage
 	uint32_t m_DenyLoadDuration;			// config value: time to deny due to no load received
+	uint32_t m_ExtendDeny;					// config value: time for the denial to be extended
 	uint32_t m_PlayerBeforeStartPrintDelay; // config value: delay * 10s is the time between two WaitingForPlayersBeforeStart prints
 	uint32_t m_RehostPrintingDelay;			// config value: delay X times of rehost print should be not sent to prevent spamming in lobby		
 	
@@ -253,10 +255,18 @@ public:
 	bool m_PrefixName;
 	bool m_SquirrelTxt;
 	bool m_ReplaysByName;
+	bool m_NoDelMap;
+	bool m_NoDLMap;
+	bool m_NoMapDLfromEpicwar;
+	bool m_OnlyMapDLfromHive;
+	bool m_OtherPort;
 	string m_InvalidTriggers;
 	string m_InvalidReplayChars;
+	string m_RehostChar;
+	string m_OwnerNameAlias;
 	bool m_QueueGameRefresh;
 	bool m_VietTxt;
+	bool m_EnableUnhost;
 	bool m_ReplaceBanWithWarn;
 	bool m_forceautohclindota;
 	bool m_PlaceAdminsHigherOnlyInDota;
@@ -309,6 +319,7 @@ public:
 	uint32_t m_InformAboutWarnsPrintout; // config value: how many secs should ghost wait to printout the warn count to each player.
 
 	bool m_LanAdmins;						// config value: LAN people who join the game are considered admins
+	bool m_AdminsOnLan;						// config value: admin players who join through LAN can command
 	bool m_LanRootAdmins;					// config value: LAN people who join the game are considered rootadmins
 	bool m_LocalAdmins;						// config value: Local(localhost or GArena) people who join the game are considered admins
 	bool m_KickUnknownFromChannel;			// config value: kick unknown people from channel
@@ -381,6 +392,7 @@ public:
 	uint32_t m_ShowDownloadsInfoTime;
 	vector<string> m_Commands;
 	string m_RootAdmins;
+	string m_AdminsWithUnhost;
 	string m_FakePings;
 	string m_UDPPassword;
 	bool m_onlyownerscanswapadmins;
@@ -400,7 +412,9 @@ public:
 	unsigned char newGameGameState;
 	string newGameName;
 	bool newGameGArena;
+	bool m_LogReduction;
 	uint32_t m_LobbyDLLeaverBanTime;
+	uint32_t m_DLRateLimit;
 	uint32_t m_LobbyTimeLimit;
 	uint32_t m_LobbyTimeLimitMax;
 //	bool m_dbopen;
@@ -424,6 +438,7 @@ public:
 	string GetMars();
 	void ReadFP();	
 	string GetFPName();
+	string GetRehostChar();
 	void ReadRoomData();
 	string GetRoomName(string RoomID);
 	void SetTimerResolution();
@@ -432,6 +447,7 @@ public:
 	void UDPCommands(string Message);
 	bool ShouldFakePing(string name);
 	bool IsRootAdmin(string name);
+	bool IsAdminWithUnhost(string name);
 	void AddRootAdmin(string name);
 	void DelRootAdmin(string name);
 	void ReloadConfig();

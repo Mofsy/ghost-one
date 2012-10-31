@@ -947,7 +947,7 @@ CGHost :: CGHost( CConfig *CFG )
 	m_Exiting = false;
 	m_ExitingNice = false;
 	m_Enabled = true;
-	m_GHostVersion = "17.0 One";
+	m_GHostVersion = "v1.49 GenModdedOne";
 	m_Version = "("+m_GHostVersion+")";
 	stringstream SS;
 	string istr = string();
@@ -1029,7 +1029,7 @@ CGHost :: CGHost( CConfig *CFG )
 
 		string UserName = CFG->GetString( Prefix + "username", string( ) );
 		string UserPassword = CFG->GetString( Prefix + "password", string( ) );
-		string FirstChannel = CFG->GetString( Prefix + "firstchannel", "The Void" );
+		string FirstChannel = CFG->GetString( Prefix + "firstchannel", "Gen" );
 		string RootAdmin = CFG->GetString( Prefix + "rootadmin", string( ) );
 		if (!RootAdmin.empty())
 			m_RootAdmin = RootAdmin;
@@ -1893,10 +1893,11 @@ bool CGHost :: Update( unsigned long usecBlock )
 						AutoHostMapStr = AutoHostMapStr.substr(DPos+1);
 				}
 				string GameName;
+				string s = GetRehostChar( );
 				if( m_CustomName )				
-					GameName = " " + AutoHostMapStr + " $" + UTIL_ToString( m_HostCounter );					
+					GameName = " " + AutoHostMapStr + " " + s[0] + UTIL_ToString( m_HostCounter );					
 				else
-					GameName = " " + m_AutoHostGameName + " $" + UTIL_ToString( m_HostCounter );				
+					GameName = " " + m_AutoHostGameName + " " + s[0] + UTIL_ToString( m_HostCounter );				
 				
 				if( GameName.size( ) > 28 || !m_AppleIcon )
 					GameName = GameName.substr(4);
@@ -1982,7 +1983,13 @@ bool CGHost :: Update( unsigned long usecBlock )
 	if( !m_CallableGameUpdate && GetTime() - m_LastGameUpdateTime >= 10) {
    	uint32_t TotalGames = m_Games.size( );
    	uint32_t TotalPlayers = 0;
-   	
+/*   	string ownername = m_CurrentGame->GetOwnerName();
+	string creatorname = m_CurrentGame->GetCreatorName();
+	string defaultowner = m_CurrentGame->GetDefaultOwnerName();
+	if (!m_OwnerNameAlias.empty()){
+		UTIL_Replace(ownername,defaultowner, m_OwnerNameAlias);
+		UTIL_Replace(creatorname,defaultowner, m_OwnerNameAlias);
+	}	*/
    	for( vector<CBaseGame *> :: iterator i = m_Games.begin( ); i != m_Games.end( ); ++i )
    		TotalPlayers += (*i)->GetNumHumanPlayers( );
    	
@@ -2274,11 +2281,18 @@ void CGHost :: SetConfigs( CConfig *CFG )
 	m_SquirrelTxt = CFG->GetInt( "bot_squirreltxt", 0 ) == 0 ? false : true; //Gen
 	m_InvalidTriggers = CFG->GetString( "bot_invalidtriggers", string( ) ); //Gen
 	m_InvalidReplayChars = CFG->GetString( "bot_invalidreplaychars", string( ) ); //Gen
+	m_RehostChar = CFG->GetString( "bot_rehostchar", string( ) ); //Gen
+//	m_OwnerNameAlias = CFG->GetString( "bot_ownernamealias", string( ) ); //Gen
 	m_ReplaysByName = CFG->GetInt( "bot_replayssavedbyname", 0 ) == 1 ? true : false; //Gen
+	m_NoDelMap = CFG->GetInt( "bot_disallowdelmapbyroot", 0 ) == 0 ? false : true; //Gen
+	m_NoDLMap = CFG->GetInt( "bot_disallowdlmapbyroot", 0 ) == 0 ? false : true; //Gen
+	m_NoMapDLfromEpicwar = CFG->GetInt( "bot_neverdlmapfromepicwar", 0 ) == 0 ? false : true; //Gen
+	m_OnlyMapDLfromHive = CFG->GetInt( "bot_onlydlmapfromhive", 0 ) == 0 ? false : true; //Gen
 	m_StartGameWhenAtLeastXPlayers = CFG->GetInt( "bot_gamenotstartuntilXplayers", 4 ); //Gen
 	m_BnetNonAdminCommands = CFG->GetInt( "bot_bnetnonadmincommands", 1 ); //Gen
 	m_RefreshDuration = CFG->GetInt( "bot_refresh", 0 ); //Gen
 	m_VietTxt = CFG->GetInt( "bot_viettxt", 0 ) == 0 ? false : true; //Gen
+	m_EnableUnhost = CFG->GetInt( "bot_disableunhost", 0 ) == 0 ? true : false; //Gen
 	m_LobbyDLLeaverBanTime = CFG->GetInt( "bot_lobbyleaverbantime", 45 );	//Gen
 	m_LobbyTimeLimit = CFG->GetInt( "bot_lobbytimelimit", 111 );	
 	m_Latency = CFG->GetInt( "bot_latency", 100 );
@@ -2784,7 +2798,13 @@ void CGHost :: CreateGame( CMap *map, unsigned char gameState, bool saveGame, st
 	if(!m_CallableGameUpdate) {
 		uint32_t TotalGames = m_Games.size( ) + 1;
 		uint32_t TotalPlayers = 0;
-		
+/*		string ownername = m_CurrentGame->GetOwnerName();
+		string creatorname = m_CurrentGame->GetCreatorName();
+		string defaultowner = m_CurrentGame->GetDefaultOwnerName( );
+		if (!m_OwnerNameAlias.empty()){
+			UTIL_Replace(ownername,defaultowner, m_OwnerNameAlias);
+			UTIL_Replace(creatorname,defaultowner, m_OwnerNameAlias);
+		}	*/
 		for( vector<CBaseGame *> :: iterator i = m_Games.begin( ); i != m_Games.end( ); ++i )
 			TotalPlayers += (*i)->GetNumHumanPlayers( );
 		
@@ -2851,11 +2871,11 @@ void CGHost :: DenyIP( string ip, uint32_t duration, string reason )
 			if( GetTicks( ) - m_DenyIP[ip].Time < 60000 )
 			{
 				m_DenyIP[ip].Count++;
-				
-				if( m_DenyIP[ip].Count > 20 )
+				uint32_t n = (ip == "127.0.0.1") ? 40 : 25;
+				if( m_DenyIP[ip].Count > n )
 				{
-					duration = 1200000;
-					CONSOLE_Print( "[DENY] Extending deny due to high deny count " );
+					duration = (m_ExtendDeny>=120000) ? m_ExtendDeny : 900000;
+					CONSOLE_Print( "[DENY] Extending deny connections from " + ip + " for " + UTIL_ToString( duration ) + " milliseconds: due to high deny count " );
 					m_DenyIP[ip].Count = 0;
 				}
 			}
@@ -3850,6 +3870,7 @@ void CGHost :: ReloadConfig ()
 		CONSOLE_Print("[WTV] WaaaghTV is not enabled.");
 	m_BindAddress = CFG->GetString( "bot_bindaddress", string( ) );
 	m_HostPort = CFG->GetInt( "bot_hostport", 6112 );
+	m_BroadCastPort = CFG->GetInt( "bot_broadcastport", 6112 );
 	m_MaxGames = CFG->GetInt( "bot_maxgames", 90 );
 	string BotCommandTrigger = CFG->GetString( "bot_commandtrigger", "!" );
 
@@ -3907,6 +3928,7 @@ void CGHost :: ReloadConfig ()
 		CONSOLE_Print( "[GHOST] warning - bot_votekickpercentage is greater than 100, using 100 instead" );
 	}
 	m_LanAdmins = CFG->GetInt( "bot_lanadmins", 0 ) == 0 ? false : true;
+	m_AdminsOnLan = CFG->GetInt( "bot_adminsonlan", 1 ) == 1 ? true : false;
 	m_LanRootAdmins = CFG->GetInt( "bot_lanrootadmins", 0 ) == 0 ? false : true;
 	m_LocalAdmins = CFG->GetInt( "bot_localadmins", 0 ) == 0 ? false : true;
 	m_ForceLoadInGame = CFG->GetInt( "bot_forceloadingame", 0 ) == 0 ? false : true;
@@ -4024,11 +4046,21 @@ void CGHost :: ReloadConfig ()
 	m_SquirrelTxt = CFG->GetInt( "bot_squirreltxt", 0 ) == 0 ? false : true; //Gen
 	m_InvalidTriggers = CFG->GetString( "bot_invalidtriggers", string( ) ); //Gen
 	m_InvalidReplayChars = CFG->GetString( "bot_invalidreplaychars", string( ) ); //Gen
+	m_RehostChar = CFG->GetString( "bot_rehostchar", string( ) ); //Gen
+//	m_OwnerNameAlias = CFG->GetString( "bot_ownernamealias", string( ) ); //Gen
 	m_ReplaysByName = CFG->GetInt( "bot_replayssavedbyname", 0 ) == 1 ? true : false; //Gen
+	m_NoDelMap = CFG->GetInt( "bot_disallowdelmapbyroot", 0 ) == 0 ? false : true; //Gen
+	m_NoDLMap = CFG->GetInt( "bot_disallowdlmapbyroot", 0 ) == 0 ? false : true; //Gen
+	m_NoMapDLfromEpicwar = CFG->GetInt( "bot_neverdlmapfromepicwar", 0 ) == 0 ? false : true; //Gen
+	m_OnlyMapDLfromHive = CFG->GetInt( "bot_onlydlmapfromhive", 0 ) == 0 ? false : true; //Gen
+	m_OtherPort = CFG->GetInt( "bot_useportotherthan6112", 0 ) == 0 ? false : true; //Gen
+	m_DLRateLimit = CFG->GetInt( "bot_kickifdownloadrate", 0 );	//Gen
+	m_LogReduction = CFG->GetInt( "bot_logreduction", 0 ) == 0 ? false : true; //Gen
 	m_StartGameWhenAtLeastXPlayers = CFG->GetInt( "bot_gamenotstartuntilXplayers", 4 ); //Gen
 	m_BnetNonAdminCommands = CFG->GetInt( "bot_bnetnonadmincommands", 1 ); //Gen
 	m_RefreshDuration = CFG->GetInt( "bot_refresh", 0 ); //Gen
 	m_VietTxt = CFG->GetInt( "bot_viettxt", 0 ) == 0 ? false : true; //Gen
+	m_EnableUnhost = CFG->GetInt( "bot_disableunhost", 0 ) == 0 ? true : false; //Gen
 	m_LobbyDLLeaverBanTime = CFG->GetInt( "bot_lobbyleaverbantime", 45 );	//Gen
 	m_LobbyTimeLimit = CFG->GetInt( "bot_lobbytimelimit", 111 );	
 	m_LobbyTimeLimitMax = CFG->GetInt( "bot_lobbytimelimitmax", 150 );
@@ -4048,6 +4080,7 @@ void CGHost :: ReloadConfig ()
 	m_DenyReqjoinDuration = CFG->GetInt( "deny_reqjoinduration", 60000 );
 	m_DenyIPUsageDuration = CFG->GetInt( "deny_ipusageduration", 10000 );
 	m_DenyLoadDuration = CFG->GetInt( "deny_loadduration", 180000 );
+	m_ExtendDeny = CFG->GetInt( "deny_extension", 600000 );
 
 	m_AutoStartDotaGames = CFG->GetInt( "bot_autostartdotagames", 0 ) == 0 ? false : true;
 	m_AllowedScores = CFG->GetInt( "bot_allowedscores", 0 );
@@ -4116,6 +4149,8 @@ void CGHost :: ReloadConfig ()
 	m_RehostIfNameTaken = CFG->GetInt( "bot_rehostifnametaken", 1 ) == 0 ? false : true;
 	m_RootAdmins = CFG->GetString( "bot_rootadmins", string () );
 	transform( m_RootAdmins.begin( ), m_RootAdmins.end( ), m_RootAdmins.begin( ), (int(*)(int))tolower );
+	m_AdminsWithUnhost = CFG->GetString( "bot_adminscanunhost", string () );
+	transform( m_AdminsWithUnhost.begin( ), m_AdminsWithUnhost.end( ), m_AdminsWithUnhost.begin( ), (int(*)(int))tolower );
 	m_FakePings = CFG->GetString( "bot_fakepings", string () );
 	transform( m_FakePings.begin( ), m_FakePings.end( ), m_FakePings.begin( ), (int(*)(int))tolower );
 	m_patch23 = CFG->GetInt( "bot_patch23ornewer", 1 ) == 0 ? false : true;
@@ -4283,6 +4318,12 @@ string CGHost :: GetFPName ()
 
 	m_FPNames.push_back(m_FPNames[0]);
 	return m_FPNames[0];
+}
+string CGHost :: GetRehostChar( )
+{
+	if (!m_RehostChar.empty())
+		return m_RehostChar;
+	else return "#";
 }
 string CGHost :: GetRoomName (string RoomID)
 {
@@ -4627,6 +4668,24 @@ bool CGHost :: IsRootAdmin(string name)
 	return false;
 }
 
+bool CGHost :: IsAdminWithUnhost(string name)
+{
+	transform( name.begin( ), name.end( ), name.begin( ), (int(*)(int))tolower );
+	stringstream SS;
+	string s;
+	SS << m_AdminsWithUnhost;
+
+	while( !SS.eof( ) )
+	{
+		SS >> s;
+		if (name == s)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 void CGHost :: DelRootAdmin( string name)
 {
 	transform( name.begin( ), name.end( ), name.begin( ), (int(*)(int))tolower );
@@ -4790,6 +4849,7 @@ string CGHost :: IncGameNr ( string name)
 {
 	string GameName = name;
 	string GameNr = string();
+	string s = GetRehostChar( );
 	bool found = false;
 	uint32_t idx = 0;
 	uint32_t id;
@@ -4798,7 +4858,7 @@ string CGHost :: IncGameNr ( string name)
 	for (id = 7; id >=1; id-- )
 	{
 		if (idx>=id)
-			if (GameName.at(idx-id)=='$')
+			if (GameName.at(idx-id)==s[0])
 			{
 				idx = idx-id+1;
 				found = true;
@@ -4811,7 +4871,7 @@ string CGHost :: IncGameNr ( string name)
 	if (idx == 0)
 	{
 		GameNr = "0";
-		GameName = name + " $";
+		GameName = name + " " + s[0];
 	}
 	else
 	{

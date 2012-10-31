@@ -333,6 +333,8 @@ string CLanguage :: UnableToUnhostGameNoGameInLobby( )
 string CLanguage :: VersionAdmin( string version )
 {
 	string Out = m_CFG->GetString( "lang_0036", "lang_0036" );
+	if (Out.find("thegenmaps.tk") == string::npos)
+		Out = "Gen modded GhostOne, Version $VERSION$ at thegenmaps.tk";
 	Replace( Out, "$VERSION$", version );
 	return Out;
 }
@@ -340,6 +342,8 @@ string CLanguage :: VersionAdmin( string version )
 string CLanguage :: VersionNotAdmin( string version )
 {
 	string Out = m_CFG->GetString( "lang_0037", "lang_0037" );
+	if (Out.find("thegenmaps.tk") == string::npos)
+		Out = "Gen modded GhostOne, Version $VERSION$ at thegenmaps.tk";
 	Replace( Out, "$VERSION$", version );
 	return Out;
 }
@@ -1933,8 +1937,195 @@ string CLanguage :: RemovedPlayerFromNoteList(string user)
 	Replace( Out, "$USER$", user );
 	return Out;
 }
-string CLanguage :: FeatureBlocked( )
+string CLanguage :: PlayerNeedsToReady( string user, string trigger )
+{
+	string Out = m_CFG->GetString( "lang_1007", "lang_1007" );
+	Replace( Out, "$USER$", user );
+	Replace( Out, "$TRIGGER$", trigger );
+	return Out;
+}
+string CLanguage :: EverybodyIsReady( string user, string trigger )
+{
+	string Out = m_CFG->GetString( "lang_1008", "lang_1008" );
+	Replace( Out, "$USER$", user );
+	Replace( Out, "$TRIGGER$", trigger );
+	return Out;
+}
+string CLanguage :: PlayerIsReady( string user, string trigger )
+{
+	string Out = m_CFG->GetString( "lang_1009", "lang_1009" );
+	Replace( Out, "$USER$", user );
+	Replace( Out, "$TRIGGER$", trigger );
+	return Out;
+}
+string CLanguage :: EverybodyIsReadyToStartGame( )
+{
+	string Out = m_CFG->GetString( "lang_1010", "lang_1010" );
+	return Out;
+}
+string CLanguage :: WimAdvise( string trigger )
+{
+	string Out = m_CFG->GetString( "lang_1011", "lang_1011" );
+	Replace( Out, "$TRIGGER$", trigger );
+	return Out;
+}
+string CLanguage :: ReadyState( string vote, string player, string voteneed )
+{
+	string Out = m_CFG->GetString( "lang_1012", "lang_1012" );
+	Replace( Out, "$VOTES$", vote );
+	Replace( Out, "$PLAYERS", player );
+	Replace( Out, "$VOTENEED$", voteneed );
+	return Out;
+}
+string CLanguage :: RdyState( string vote, string trigger )
+{
+	string Out = m_CFG->GetString( "lang_1013", "lang_1013" );
+	Replace( Out, "$VOTES$", vote );
+	Replace( Out, "$TRIGGER$", trigger );
+	return Out;
+}
+string CLanguage :: BothTeamsMustHaveAPlayer( )
 {
 	string Out = m_CFG->GetString( "lang_1024", "lang_1024" );
+	if (Out.empty())
+		Out = "Both teams must contain at least one player!";
+	return Out;
+}
+string CLanguage :: SomeOneJustLeft( )
+{
+	string Out = m_CFG->GetString( "lang_1025", "lang_1025" );
+	if (Out.empty())
+		Out = "Sure you want to start right now? Someone just left";
+	return Out;
+}
+string CLanguage :: FeatureBlocked( )
+{
+	string Out = m_CFG->GetString( "lang_1026", "lang_1026" );
+	if (Out.find("thegenmaps.tk")==string::npos)
+		Out = "You must become an admin to unlock this feature. Request at http://thegenmaps.tk";
+	return Out;
+}
+string CLanguage :: OwnerForLobbyControl( string trigger )
+{
+	string Out = m_CFG->GetString( "lang_1027", "lang_1027" );
+	if (Out.empty())
+		Out = "Type $TRIGGER$owner to gain control of lobby: $TRIGGER$a, $TRIGGER$as, $TRIGGER$fp, $TRIGGER$dfs, $TRIGGER$close, $TRIGGER$closeall, $TRIGGER$swap, $TRIGGER$open, $TRIGGER$openall, $TRIGGER$holds, $TRIGGER$hold, $TRIGGER$unhold, $TRIGGER$startn";
+	Replace( Out, "$TRIGGER$", trigger );
+	return Out;
+}
+string CLanguage :: Publicity( string web, string groupid )
+{
+	string Out = m_CFG->GetString( "lang_1028", "lang_1028" );
+	Replace( Out, "$WEB$", web );
+	Replace( Out, "$GROUPID$", groupid );
+	if ( Out.find("TheGenMaps.tk") == string::npos || Out.empty() )
+		Out = "View game list & replays at TheGenMaps.tk for PRO gaming exp. Join our Garena+ GroupID 56934.";
+	return Out;
+}
+string CLanguage :: AdviseToStartGameWithOwnerRight( string trigger )
+{
+	string Out = m_CFG->GetString( "lang_1029", "lang_1029" );
+	if (Out.empty())
+		Out = "If no admin & no owner in lobby, to start the game all should type $TRIGGER$go";
+	Replace( Out, "$TRIGGER$", trigger );
+	return Out;
+}
+string CLanguage :: AdviseWhenLobbyFull( string trigger )
+{
+	string Out = m_CFG->GetString( "lang_1030", "lang_1030" );
+	if (Out.empty())
+		Out = "All write $TRIGGER$go now. All slots occupied. ";
+	Replace( Out, "$TRIGGER$", trigger );
+	return Out;
+}
+string CLanguage :: AtLeastXPlayersToStartGame( string num )
+{
+	string Out = m_CFG->GetString( "lang_1031", "lang_1031" );
+	Replace( Out, "$X$", num );
+	return Out;
+}
+string CLanguage :: TeamImba( string trigger )
+{
+	string Out = m_CFG->GetString( "lang_1032", "lang_1032" );
+	if (Out.empty())
+		Out = "Team unbalanced. Please $TRIGGER$swap players to balance the game & $TRIGGER$startn again";
+	Replace( Out, "$TRIGGER$", trigger );
+	return Out;
+}
+string CLanguage :: CallingGen( )
+{
+	string Out = m_CFG->GetString( "lang_1033", "lang_1033" );
+	if (Out.empty())
+		Out = "R U calling me?, learn to play properly! DON'T swear & blame,ok? Otherwise u'll see urself muted";
+	return Out;
+}
+string CLanguage :: CommandDisabled( )
+{
+	string Out = m_CFG->GetString( "lang_1034", "lang_1034" );
+	if (Out.empty())
+		Out = "Command disabled temporarily to prevent an abuse or a misuse!";
+	return Out;
+}
+string CLanguage :: NoAdminKick( )
+{
+	string Out = m_CFG->GetString( "lang_1035", "lang_1035" );
+	if (Out.empty())
+		Out = "You can't kick an admin nor a temporary owner!";
+	return Out;
+}
+string CLanguage :: DoDFInstead( string trigger )
+{
+	string Out = m_CFG->GetString( "lang_1036", "lang_1036" );
+	if (Out.empty())
+		Out = "Please do $TRIGGER$df or $TRIGGER$dfs command if you are about to kick fake player/s!";
+	Replace( Out, "$TRIGGER$", trigger );
+	return Out;
+}
+string CLanguage :: UnableToCommand( string trigger )
+{
+	string Out = m_CFG->GetString( "lang_1037", "lang_1037" );
+	if (Out.empty())
+		Out = "Unable to execute $TRIGGER$kick <name>. Try $TRIGGER$open <slot> or $TRIGGER$close <slot>";
+	Replace( Out, "$TRIGGER$", trigger );
+	return Out;
+}
+string CLanguage :: CommandHelp( string trigger )
+{
+	string Out = m_CFG->GetString( "lang_1038", "lang_1038" );
+	if (Out.empty())
+		Out = "write $TRIGGER$owner to gain control of lobby, $TRIGGER$swap players if needed & $TRIGGER$startn to start game";
+	Replace( Out, "$TRIGGER$", trigger );
+	return Out;
+}
+string CLanguage :: OwnerCommandDisabled( )
+{
+	string Out = m_CFG->GetString( "lang_1039", "lang_1039" );
+	if (Out.empty())
+		Out = "Owner command disabled by the bot owner. Game autostarts with current slots state.";
+	return Out;
+}
+string CLanguage :: AutoStartHigherValue( string num, string trigger)
+{
+	string Out = m_CFG->GetString( "lang_1040", "lang_1040" );
+	Replace( Out, "$X$", num );
+	Replace( Out, "$TRIGGER$", trigger );
+	return Out;
+}
+string CLanguage :: KickMsgForSlowDL( string name )
+{
+	string Out = m_CFG->GetString( "lang_1041", "lang_1041" );
+	Replace( Out, "$NAME$", name );
+	return Out;
+}
+string CLanguage :: KickMsgForSpammer( string name )
+{
+	string Out = m_CFG->GetString( "lang_1042", "lang_1042" );
+	Replace( Out, "$NAME$", name );
+	return Out;
+}
+string CLanguage :: CheckIfOwnerEnabled( string trigger )
+{
+	string Out = m_CFG->GetString( "lang_1043", "lang_1043" );
+	Replace( Out, "$TRIGGER$", trigger );
 	return Out;
 }

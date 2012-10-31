@@ -815,9 +815,9 @@ bool CBNET :: Update( void *fd, void *send_fd )
 	{
 		// the socket has an error
 
-		uint32_t timetowait = 90;
+		uint32_t timetowait = 270;
 		if (m_PasswordHashType == "pvpgn")
-			timetowait = 30;
+			timetowait = 45;
 
 		CONSOLE_Print( "[BNET: " + m_ServerAlias + "] disconnected from battle.net due to socket error" );
 
@@ -825,7 +825,6 @@ bool CBNET :: Update( void *fd, void *send_fd )
 			CONSOLE_Print( "[BNET: " + m_ServerAlias + "] warning - you are probably temporarily IP banned from battle.net" );
 
 		CONSOLE_Print( "[BNET: " + m_ServerAlias + "] waiting "+UTIL_ToString(timetowait)+" seconds to reconnect" );
-		m_GHost->EventBNETDisconnected( this );
 		delete m_BNLSClient;
 		m_BNLSClient = NULL;
 		m_BNCSUtil->Reset( m_UserName, m_UserPassword );
@@ -841,13 +840,12 @@ bool CBNET :: Update( void *fd, void *send_fd )
 	{
 		// the socket was disconnected
 
-		uint32_t timetowait = 90;
+		uint32_t timetowait = 270;
 		if (m_PasswordHashType == "pvpgn")
-			timetowait = 30;
+			timetowait = 45;
 
 		CONSOLE_Print( "[BNET: " + m_ServerAlias + "] disconnected from battle.net" );
 		CONSOLE_Print( "[BNET: " + m_ServerAlias + "] waiting "+UTIL_ToString(timetowait)+" seconds to reconnect" );
-		m_GHost->EventBNETDisconnected( this );
 		delete m_BNLSClient;
 		m_BNLSClient = NULL;
 		m_BNCSUtil->Reset( m_UserName, m_UserPassword );
@@ -944,9 +942,9 @@ bool CBNET :: Update( void *fd, void *send_fd )
 		return m_Exiting;
 	}
 
-	uint32_t timetowait = 90;
+	uint32_t timetowait = 270;
 	if (m_PasswordHashType == "pvpgn")
-		timetowait = 30;
+		timetowait = 45;
 
 	if( m_Socket->GetConnecting( ) )
 	{
@@ -976,7 +974,6 @@ bool CBNET :: Update( void *fd, void *send_fd )
 
 			CONSOLE_Print( "[BNET: " + m_ServerAlias + "] connect timed out" );
 			CONSOLE_Print( "[BNET: " + m_ServerAlias + "] waiting "+UTIL_ToString(timetowait)+" seconds to reconnect" );
-			m_GHost->EventBNETConnectTimedOut( this );
 			m_Socket->Reset( );
 			m_LastDisconnectedTime = GetTime( );
 			m_WaitingToConnect = true;
@@ -987,17 +984,16 @@ bool CBNET :: Update( void *fd, void *send_fd )
 	if( !m_Socket->GetConnecting( ) && !m_Socket->GetConnected( ) && ( m_FirstConnect || GetTime( ) - m_LastDisconnectedTime >= timetowait ) )
 	{
 		// attempt to connect to battle.net
-
+		uint16_t port = (m_GHost->m_OtherPort) ? m_GHost->m_BroadCastPort : 6112;
 		m_FirstConnect = false;
-		CONSOLE_Print( "[BNET: " + m_ServerAlias + "] connecting to server [" + m_Server + "] on port 6112" );
-		m_GHost->EventBNETConnecting( this );
+		CONSOLE_Print( "[BNET: " + m_ServerAlias + "] connecting to server [" + m_Server + "] on port "+ UTIL_ToString(port) );
 
 		if( !m_GHost->m_BindAddress.empty( ) )
 			CONSOLE_Print( "[BNET: " + m_ServerAlias + "] attempting to bind to address [" + m_GHost->m_BindAddress + "]" );
 
 		if( m_ServerIP.empty( ) )
 		{
-			m_Socket->Connect( m_GHost->m_BindAddress, m_Server, 6112 );
+			m_Socket->Connect( m_GHost->m_BindAddress, m_Server, port );
 
 			if( !m_Socket->HasError( ) )
 			{
@@ -1010,7 +1006,7 @@ bool CBNET :: Update( void *fd, void *send_fd )
 			// use cached server IP address since resolving takes time and is blocking
 
 			CONSOLE_Print( "[BNET: " + m_ServerAlias + "] using cached server IP address " + m_ServerIP );
-			m_Socket->Connect( m_GHost->m_BindAddress, m_ServerIP, 6112 );
+			m_Socket->Connect( m_GHost->m_BindAddress, m_ServerIP, port );
 		}
 
 		m_WaitingToConnect = false;
@@ -1115,7 +1111,8 @@ void CBNET :: ProcessPackets( )
 			case CBNETProtocol :: SID_ENTERCHAT:
 				if( m_Protocol->RECEIVE_SID_ENTERCHAT( Packet->GetData( ) ) )
 				{
-					CONSOLE_Print( "[BNET: " + m_ServerAlias + "] joining channel [" + m_FirstChannel + "]" );
+					if (!m_GHost->m_LogReduction)
+						CONSOLE_Print( "[BNET: " + m_ServerAlias + "] joining channel [" + m_FirstChannel + "]" );
 					m_InChat = true;
 					m_Socket->PutBytes( m_Protocol->SEND_SID_JOINCHANNEL( m_FirstChannel ) );
 				}
@@ -1521,15 +1518,24 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 
 				if(Command == "dl" && !Payload.empty()) 
 				{
-					if (!RootAdminCheck)
+					if (!RootAdminCheck || m_GHost->m_NoDLMap)
 					{
 						QueueChatCommand(m_GHost->m_Language->YouDontHaveAccessToThatCommand( ), User, Whisper);
 						return;
 					}
-
 					if (m_GHost->m_CallableDownloadFile)
 					{
 						QueueChatCommand("Another download is already in progress, try again later!", User, Whisper);
+						return;
+					}
+					if (m_GHost->m_NoMapDLfromEpicwar)
+					if (Payload.find("epicwar.com") != string::npos || Payload.find("nibbits.com") != string::npos || Payload.find("w3xmap.com") != string::npos || Payload.find("warcmaps.com") != string::npos || Payload.find("wc3edit") != string::npos ){
+						QueueChatCommand("Map download from a source like epicwar is not allowed. You'd better pick a link for a map from http://www.decentmaps.tk or http://bit.ly/decentmaps (decentmaps trunk on googleSVN)", User, Whisper);
+						return;
+					}
+					if (m_GHost->m_OnlyMapDLfromHive)
+					if ( Payload.find("hiveworkshop.com/") == string::npos && Payload.find("//decentmaps.googlecode.com/") == string::npos && Payload.find("//code.google.com/p/decentmaps/") == string::npos ){
+						QueueChatCommand("Only map download from HiveWorkShop & http://www.decentmaps.tk is allowed", User, Whisper);
 						return;
 					}
 					stringstream SS;
@@ -1560,18 +1566,26 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 
 				if(Command == "dlmap" && !Payload.empty()) 
 				{
-					if (!RootAdminCheck)
+					if (!RootAdminCheck || m_GHost->m_NoDLMap)
 					{
 						QueueChatCommand(m_GHost->m_Language->YouDontHaveAccessToThatCommand( ), User, Whisper);
 						return;
 					}
-
 					if (m_GHost->m_CallableDownloadFile)
 					{
 						QueueChatCommand("Another download is already in progress, try again later!", User, Whisper);
 						return;
 					}
-
+					if (m_GHost->m_NoMapDLfromEpicwar)
+					if (Payload.find("epicwar.com") != string::npos || Payload.find("nibbits.com") != string::npos || Payload.find("w3xmap.com") != string::npos || Payload.find("warcmaps.com") != string::npos || Payload.find("wc3edit") != string::npos ){
+						QueueChatCommand("Map download from a source like epicwar is not allowed. You'd better pick a link for a map from http://www.decentmaps.tk or http://bit.ly/decentmaps (decentmaps trunk on googleSVN)", User, Whisper);
+						return;
+					}
+					if (m_GHost->m_OnlyMapDLfromHive)
+					if ( Payload.find("hiveworkshop.com/") == string::npos && Payload.find("//decentmaps.googlecode.com/") == string::npos && Payload.find("//code.google.com/p/decentmaps/") == string::npos ){
+						QueueChatCommand("Only map download from HiveWorkShop & http://www.decentmaps.tk is allowed", User, Whisper);
+						return;
+					}
 					m_GHost->m_CallableDownloadFile = m_GHost->ThreadedDownloadFile(Payload, m_GHost->m_MapPath);
 					m_DownloadFileUser = User;					
 					QueueChatCommand("Downloading map ...", User, Whisper);
@@ -1583,7 +1597,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 
 				if(Command == "dlmapcfg" && !Payload.empty() ) 
 				{
-					if (!RootAdminCheck)
+					if (!RootAdminCheck || m_GHost->m_NoDLMap)
 					{
 						QueueChatCommand(m_GHost->m_Language->YouDontHaveAccessToThatCommand( ), User, Whisper);
 						return;
@@ -1611,14 +1625,16 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 						nam = pnam;
 					if( RootAdminCheck )
 					{
-						string Usr;
-						Usr = Whisper ? User : string( );
-						if (m_GHost->m_WhisperAllMessages)
-							Usr = User;
-						if( IsAdmin( nam ) )
-							QueueChatCommand( m_GHost->m_Language->UserIsAlreadyAnAdmin( m_Server, nam ), User, Whisper );
-						else
-							m_PairedAdminAdds.push_back( PairedAdminAdd( Usr, m_GHost->m_DB->ThreadedAdminAdd( m_Server, nam ) ) );
+						if( m_GHost->m_AdminsWithUnhost.empty() || ( !m_GHost->m_AdminsWithUnhost.empty() && m_GHost->IsAdminWithUnhost(User) ) ) {
+							string Usr;
+							Usr = Whisper ? User : string( );
+							if (m_GHost->m_WhisperAllMessages)
+								Usr = User;
+							if( IsAdmin( nam ) )
+								QueueChatCommand( m_GHost->m_Language->UserIsAlreadyAnAdmin( m_Server, nam ), User, Whisper );
+							else
+								m_PairedAdminAdds.push_back( PairedAdminAdd( Usr, m_GHost->m_DB->ThreadedAdminAdd( m_Server, nam ) ) );
+						}
 					}
 					else
 						QueueChatCommand( m_GHost->m_Language->YouDontHaveAccessToThatCommand( ), User, Whisper );
@@ -2879,7 +2895,6 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 						else
 							QueueChatCommand( "Dynamic latency enabled", User, Whisper );
 						m_GHost->m_UseDynamicLatency = !m_GHost->m_UseDynamicLatency;
-
 						return;
 					}
 					if( Payload == "on" )
@@ -2901,6 +2916,10 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 
 				if( Command == "disable" || Command == "d" )
 				{
+					if( !(m_GHost->m_EnableUnhost || m_GHost->IsAdminWithUnhost(User)) ){
+						QueueChatCommand( m_GHost->m_Language->YouDontHaveAccessToThatCommand( ), User, Whisper );
+						return;
+					}	
 					if( IsRootAdmin( User ) )
 					{
 						QueueChatCommand( m_GHost->m_Language->BotDisabled( ), User, Whisper );
@@ -2980,6 +2999,10 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 						QueueChatCommand(m_GHost->m_Language->YouDontHaveAccessToThatCommand( ), User, Whisper);
 						return;
 					}
+					if( !(m_GHost->m_EnableUnhost || m_GHost->IsAdminWithUnhost(User)) ){
+						QueueChatCommand(m_GHost->m_Language->YouDontHaveAccessToThatCommand( ), User, Whisper);
+						return;
+					}	
 						if( Payload == "nice" )
 							m_GHost->m_ExitingNice = true;
 						else if( Payload == "force" )
@@ -3048,7 +3071,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 						}
 						if( m_GHost->m_CurrentGame )
 							s = s + "; " + m_GHost->m_Language->GameIsInTheLobby( m_GHost->m_CurrentGame->GetDescription( ), UTIL_ToString( m_GHost->m_Games.size( ) ), UTIL_ToString( m_GHost->m_MaxGames ) );
-						ImmediateChatCommand( "/w "+user+" ("+UTIL_ToString(m_TodayGamesCount) +" today)"+ s );
+						QueueChatCommand("("+UTIL_ToString(m_TodayGamesCount) +" today)"+ s, User, Whisper );
 						return;
 					}
 					if( m_GHost->m_CurrentGame )
@@ -3283,7 +3306,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 
 				if( Command == "delmapcfg" )
 				{
-					if (!RootAdminCheck)
+					if (!RootAdminCheck || m_GHost->m_NoDelMap)
 					{
 						QueueChatCommand( m_GHost->m_Language->YouDontHaveAccessToThatCommand( ), User, Whisper );
 						return;
@@ -3547,7 +3570,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				if( Command == "delmap" )
 				{
 
-					if (!RootAdminCheck)
+					if (!RootAdminCheck || m_GHost->m_NoDelMap)
 					{
 						QueueChatCommand( m_GHost->m_Language->YouDontHaveAccessToThatCommand( ), User, Whisper );
 						return;
@@ -3783,9 +3806,10 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 						return;
 					}
 
-					string GameName = Payload;
-					if (GameName.empty())
-						GameName = m_GHost->m_LastGameName;					
+					string GameName;
+					if (m_GHost->m_AppleIcon && Payload.size( ) < 24)
+						GameName = (Payload.empty()) ? (" " + m_GHost->m_LastGameName) : (" " + Payload);
+					else GameName = (Payload.empty()) ? m_GHost->m_LastGameName : Payload;				
 					string GameNr = string();
 					uint32_t idx = 0;
 					uint32_t Nr = 0;
@@ -3799,12 +3823,13 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 */
 					if (Payload.empty())
 					{
+						string s = m_GHost->GetRehostChar( );
 						idx = GameName.length()-1;
 						if (idx>=2)
-						if (GameName.at(idx-2)=='$')
+						if (GameName.at(idx-2)==s[0])
 							idx = idx-1;
 						else
-							if (GameName.at(idx-1)=='$')
+							if (GameName.at(idx-1)==s[0])
 								idx = idx;
 							else
 								idx = 0;
@@ -3813,7 +3838,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 						if (idx == 0)
 						{
 							GameNr = "0";
-							GameName = GameName + " $";
+							GameName = GameName + " " + s[0];
 						}
 						else
 						{
@@ -3887,9 +3912,10 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 						return;
 					}
 
-					string GameName = Payload;
-					if (GameName.empty())
-						GameName = m_GHost->m_LastGameName;					
+					string GameName;
+					if (m_GHost->m_AppleIcon && Payload.size( ) < 24)
+						GameName = (Payload.empty()) ? (" " + m_GHost->m_LastGameName) : (" " + Payload);
+					else GameName = (Payload.empty()) ? m_GHost->m_LastGameName : Payload;
 					string GameNr = string();
 					uint32_t idx = 0;
 					uint32_t Nr = 0;
@@ -3902,12 +3928,13 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 */
 					if (Payload.empty())
 					{
+						string s = m_GHost->GetRehostChar( );
 						idx = GameName.length()-1;
 						if (idx>=2)
-						if (GameName.at(idx-2)=='$')
+						if (GameName.at(idx-2)==s[0])
 							idx = idx-1;
 						else
-							if (GameName.at(idx-1)=='$')
+							if (GameName.at(idx-1)==s[0])
 								idx = idx;
 							else
 								idx = 0;
@@ -3916,7 +3943,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 						if (idx == 0)
 						{
 							GameNr = "0";
-							GameName = GameName + " $";
+							GameName = GameName + " " + s[0];
 						}
 						else
 						{
@@ -3992,9 +4019,10 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 						return;
 					}
 
-					string GameName = Payload;
-					if (GameName.empty())
-						GameName = m_GHost->m_LastGameName;					
+					string GameName;
+					if (m_GHost->m_AppleIcon && Payload.size( ) < 24)
+						GameName = (Payload.empty()) ? (" " + m_GHost->m_LastGameName) : (" " + Payload);
+					else GameName = (Payload.empty()) ? m_GHost->m_LastGameName : Payload;		
 					string GameNr = string();
 					uint32_t idx = 0;
 					uint32_t Nr = 0;
@@ -4007,12 +4035,13 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 */
 					if (Payload.empty())
 					{
+						string s = m_GHost->GetRehostChar( );
 						idx = GameName.length()-1;
 						if (idx>=2)
-						if (GameName.at(idx-2)=='$')
+						if (GameName.at(idx-2)==s[0])
 							idx = idx-1;
 						else
-							if (GameName.at(idx-1)=='$')
+							if (GameName.at(idx-1)==s[0])
 								idx = idx;
 							else
 								idx = 0;
@@ -4021,7 +4050,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 						if (idx == 0)
 						{
 							GameNr = "0";
-							GameName = GameName + " $";
+							GameName = GameName + " " + s[0];
 						}
 						else
 						{
@@ -4072,9 +4101,10 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 						return;
 					}
 
-					string GameName = Payload;
-					if (GameName.empty())
-						GameName = m_GHost->m_LastGameName;					
+					string GameName;
+					if (m_GHost->m_AppleIcon && Payload.size( ) < 24)
+						GameName = (Payload.empty()) ? (" " + m_GHost->m_LastGameName) : (" " + Payload);
+					else GameName = (Payload.empty()) ? m_GHost->m_LastGameName : Payload;				
 					string GameNr = string();
 					uint32_t idx = 0;
 					uint32_t Nr = 0;
@@ -4087,12 +4117,13 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					*/
 					if (Payload.empty())
 					{
+						string s = m_GHost->GetRehostChar( );
 						idx = GameName.length()-1;
 						if (idx>=2)
-						if (GameName.at(idx-2)=='$')
+						if (GameName.at(idx-2)==s[0])
 							idx = idx-1;
 						else
-							if (GameName.at(idx-1)=='$')
+							if (GameName.at(idx-1)==s[0])
 								idx = idx;
 							else
 								idx = 0;
@@ -4101,7 +4132,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 						if (idx == 0)
 						{
 							GameNr = "0";
-							GameName = GameName + " $";
+							GameName = GameName + " " + s[0];
 						}
 						else
 						{
@@ -4155,7 +4186,9 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					if( GameNameStart != string :: npos )
 					{
 						Owner = Payload.substr( 0, GameNameStart );
-						GameName = Payload.substr( GameNameStart + 1 );
+						if (m_GHost->m_AppleIcon && Payload.size( ) < 24)
+							GameName = " " + Payload.substr( GameNameStart + 1 );
+						else GameName = Payload.substr( GameNameStart + 1 );
 						if (GameName.length()<1 || GameName == " ")
 							return;
 						m_GHost->CreateGame( m_GHost->m_Map, GAME_PUBLIC, false, GameName, Owner, User, m_Server, Whisper );
@@ -5479,8 +5512,10 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 								QueueChatCommand( m_GHost->m_Language->CantUnhostGameOwnerIsPresent( m_GHost->m_CurrentGame->GetOwnerName( ) ), User, Whisper );
 							else
 							{
-								QueueChatCommand( m_GHost->m_Language->UnhostingGame( m_GHost->m_CurrentGame->GetDescription( ) ), User, Whisper );
-								m_GHost->m_CurrentGame->SetExiting( true );
+								if( m_GHost->m_EnableUnhost || m_GHost->IsAdminWithUnhost(User) ){
+									QueueChatCommand( m_GHost->m_Language->UnhostingGame( m_GHost->m_CurrentGame->GetDescription( ) ), User, Whisper );
+									m_GHost->m_CurrentGame->SetExiting( true );
+								}
 							}
 						}
 					}
@@ -5767,9 +5802,17 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 							if ( Type == "list" ){
 								if ( ( m_GHost->m_BnetNonAdminCommands == 0 || m_GHost->m_BnetNonAdminCommands == 5 ) && !IsRootAdmin(User) && !IsAdmin( User ) )
 									return;
+								bool initial = true;
 								string s = UTIL_ToString(m_Friends.size( )) + " friends: ";
-								for( vector<CIncomingFriendList *> :: iterator i = m_Friends.begin( ); i != m_Friends.end( ); ++i )
-									s += (*i)->GetAccount( ) + ", ";
+								for( vector<CIncomingFriendList *> :: iterator i = m_Friends.begin( ); i != m_Friends.end( ); ++i ){
+									if( !initial ) 
+										s += ", " + (*i)->GetAccount( );
+									else
+									{
+										initial = false;
+										s += (*i)->GetAccount( );
+									}
+								}
 								QueueChatCommand( s, User, Whisper );
 							}
 						}
@@ -5950,8 +5993,8 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 	else if( Event == CBNETProtocol :: EID_CHANNEL )
 	{
 		// keep track of current channel so we can rejoin it after hosting a game
-
-		CONSOLE_Print( "[BNET: " + m_ServerAlias + "] joined channel [" + Message + "]" );
+		if (!m_GHost->m_LogReduction)
+			CONSOLE_Print( "[BNET: " + m_ServerAlias + "] joined channel [" + Message + "]" );
 		m_CurrentChannel = Message;
 
 		Channel_Clear(Message);
@@ -5963,18 +6006,21 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 	}
 	else if( Event == CBNETProtocol :: EID_JOIN )
 	{
-		CONSOLE_Print( "[BNET: " + m_ServerAlias + "] user [" + User + "] joined channel "+m_CurrentChannel );
+		if (!m_GHost->m_LogReduction)
+			CONSOLE_Print( "[BNET: " + m_ServerAlias + "] user [" + User + "] joined channel "+m_CurrentChannel );
 		ChannelJoin(User);
 		Channel_Join(m_Server, User);
 	}
 	else if( Event == CBNETProtocol :: EID_LEAVE )
 	{
-		CONSOLE_Print( "[BNET: " + m_ServerAlias + "] user [" + User + "] leaves channel "+m_CurrentChannel );
+		if (!m_GHost->m_LogReduction)
+			CONSOLE_Print( "[BNET: " + m_ServerAlias + "] user [" + User + "] leaves channel "+m_CurrentChannel );
 		Channel_Del(User);
 	}
 	else if( Event == CBNETProtocol :: EID_INFO )
 	{
-		CONSOLE_Print( "[INFO: " + m_ServerAlias + "] " + Message );
+		if (!m_GHost->m_LogReduction)
+			CONSOLE_Print( "[INFO: " + m_ServerAlias + "] " + Message );
 		m_GHost->UDPChatSend("|Chate "+UTIL_ToString(4)+" " +"INFO"+" "+Message);
 
 		// extract the first word which we hope is the username
