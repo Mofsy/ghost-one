@@ -768,11 +768,15 @@ Flags:
 							else
 								CONSOLE_Print( "[DEBUG] SEND_SID_STARTADVEX3 - mapPath" );
 						}
-						else
+						else {
 							CONSOLE_Print( "[DEBUG] SEND_SID_STARTADVEX3 - hostName" );
+							hostName = "TheGen";
+						}
 					}
-					else
+					else {
 						CONSOLE_Print( "[DEBUG] SEND_SID_STARTADVEX3 - gameName" );
+						gameName = "Gen Multigames";
+					}
 				}
 				else
 					CONSOLE_Print( "[DEBUG] SEND_SID_STARTADVEX3 - mapHeight" );

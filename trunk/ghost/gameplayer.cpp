@@ -333,7 +333,10 @@ void CGamePlayer :: PushMessage( string message )
 		m_LastMessages.pop_front( );	
 	m_LastMessages.push_back(message);
 	if( m_LastMessages.size( ) == 6 )
-		m_Game->SendAllChat("Spam control detects a spammer [" + GetName( ) +"] will be KICKED for flooding");
+		if(!(m_Game->IsSafe(GetName()) || m_Game->IsAdmin(GetName()) || m_Game->IsRootAdmin(GetName()) || m_Game->IsOwner(GetName()) )){
+			m_Game->SendAllChat( m_Game->m_GHost->m_Language->KickMsgForSpammer( GetName( ) ) );
+			CONSOLE_Print("Spam control detects a spammer "+GetName()+" will be KICKED for flooding");
+		}
 }
 
 void CPotentialPlayer :: Send( BYTEARRAY data )
@@ -612,12 +615,12 @@ bool CGamePlayer :: Update( void *fd )
 		
 		if( downloadingTime > m_Game->m_GHost->m_DenyMaxDownloadTime )
 		{
-			CONSOLE_Print( "[DENY] Kicking player: download time too long" );
+			m_Game->SendAllChat( m_Game->m_GHost->m_Language->KickMsgForSlowDL( GetName( ) ) );
 			m_DeleteMe = true;
-			SetLeftReason( "download time too long" );
+			SetLeftReason( "download time is too long" );
 			SetLeftCode( PLAYERLEAVE_LOBBY );
 			m_Game->OpenSlot( m_Game->GetSIDFromPID( GetPID( ) ), false );
-			m_Game->m_GHost->DenyIP( GetExternalIPString( ), m_Game->m_GHost->m_DenyDownloadDuration, "download time too long" );
+			m_Game->m_GHost->DenyIP( GetExternalIPString( ), m_Game->m_GHost->m_DenyDownloadDuration, "("+ GetName( ) +") rejected because download time is too long" );
 		}
 	}
 

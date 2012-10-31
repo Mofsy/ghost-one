@@ -293,6 +293,7 @@ public:
 	virtual string GetVirtualHostName( )			{ return m_VirtualHostName; }
 	virtual string GetWTVPlayerName( )				{ return m_GHost->m_wtvPlayerName; }
 	virtual string GetOwnerName( )					{ return m_OwnerName; }
+	virtual string GetDefaultOwnerName( )			{ return m_DefaultOwner; }
 	virtual string GetCreatorName( )				{ return m_CreatorName; }
 	virtual string GetHCL( )						{ return m_HCLCommandString; }
 	virtual uint32_t GetCreationTime( )				{ return m_CreationTime; }
@@ -440,6 +441,7 @@ public:
 	virtual void AddToSpoofed( string server, string name, bool sendMessage );
 	virtual void AddToReserved( string name, unsigned char nr );
 	virtual void DelFromReserved( string name );
+	virtual void DelTempOwner( string name );
 	virtual void AddGameName( string name);
 	virtual void AutoSetHCL ( );
 	virtual bool IsGameName( string name );
@@ -495,6 +497,7 @@ public:
 	virtual string CustomReason( string reason, string name );
 	virtual string CustomReason( uint32_t ctime, string reason, string name);
 	virtual string GetGameInfo( );
+	virtual string GetCurrentTime( );
 	virtual void SetDynamicLatency( );
 
 };
