@@ -183,6 +183,7 @@ public:
 	bool m_SaveReplays;						// config value: save replays
 	string m_ReplayPath;					// config value: replay path
 	string m_VirtualHostName;				// config value: virtual host name
+	string m_BlacklistedNames;				// config value: blacklisted names
 	bool m_HideIPAddresses;					// config value: hide IP addresses from players
 	bool m_CheckMultipleIPUsage;			// config value: check for multiple IP address usage
 	uint32_t m_SpoofChecks;					// config value: do automatic spoof checks or not
@@ -267,6 +268,10 @@ public:
 	bool m_QueueGameRefresh;
 	bool m_VietTxt;
 	bool m_EnableUnhost;
+	bool m_BlacklistSlowDLder;
+	bool m_RejectColoredName;
+	bool m_GarenaOnly;
+	bool m_BanListLoaded;
 	bool m_ReplaceBanWithWarn;
 	bool m_forceautohclindota;
 	bool m_PlaceAdminsHigherOnlyInDota;

@@ -855,9 +855,8 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 	uint32_t AdminAccess = 0;
 	bool AdminCheck = false;
 	bool BluePlayer = false;
-	bool isDefaultOwner = player->GetName( ) == m_DefaultOwner ;
-	if( !(m_GHost->m_EnableUnhost || m_GHost->IsAdminWithUnhost(User)) )
-		isDefaultOwner = false; 
+	bool TempOwnerCheck = false;
+	bool isDefaultOwner = player->GetName( ) == m_DefaultOwner ; 
 	CGamePlayer *p = NULL;
 	unsigned char Nrt;
 	unsigned char Nr = 255;
@@ -882,28 +881,16 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 		AdminAccess = m_GHost->CMDAccessAddOwner(0);
 	}
 
-	if (IsOwner(User))
-	{		
-		AdminCheck = true;
-		AdminAccess = m_GHost->CMDAccessAddOwner(0);
-	}
+	if (IsOwner(User))	
+		TempOwnerCheck = true;
 
 	for( vector<CBNET *> :: iterator i = m_GHost->m_BNETs.begin( ); i != m_GHost->m_BNETs.end( ); i++ )
 	{
-		if( ( (*i)->GetServer( ) == player->GetSpoofedRealm( ) || player->GetJoinedRealm( ).empty( ) ) && (*i)->IsAdmin( User ) )
+		if( ( (*i)->GetServer( ) == player->GetSpoofedRealm( ) || ( player->GetJoinedRealm( ).empty( ) && m_GHost->m_AdminsOnLan ) ) && (*i)->IsAdmin( User ) )
 		{
-			if( !player->GetJoinedRealm( ).empty( ) ){
-				AdminCheck = true;
-				AdminAccess = (*i)->LastAccess();
-				if (IsOwner(User))
-					AdminAccess = m_GHost->CMDAccessAddOwner(AdminAccess);
-				break;
-			}
-			if(m_GHost->m_AdminsOnLan)
-			if( player->GetJoinedRealm( ).empty( ) )
-			{
-				AdminCheck = true;
-			}
+			AdminCheck = true;
+			AdminAccess = (*i)->LastAccess();
+			break;
 		}
 	}
 
@@ -919,13 +906,12 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 
 	// upgrade LAN players to rootadmins in case bot_lanrootadmins = 1
 	if ((m_GHost->m_LanRootAdmins && player->IsLAN()) )
-	{
 		RootAdminCheck = true;
-	}
 
+	bool RootOwner = (m_GHost->m_EnableUnhost || m_GHost->IsAdminWithUnhost(User));
 	for( vector<CBNET *> :: iterator i = m_GHost->m_BNETs.begin( ); i != m_GHost->m_BNETs.end( ); i++ )
 	{
-		if( (*i)->GetServer( ) == player->GetSpoofedRealm( ) && ((*i)->IsRootAdmin( User ) || (IsOwner(User) && isDefaultOwner) ) )
+		if( (*i)->GetServer( ) == player->GetSpoofedRealm( ) && ((*i)->IsRootAdmin( User ) || (IsOwner(User) && isDefaultOwner && RootOwner) ) )
 		{
 			RootAdminCheck = true;
 			break;
@@ -938,7 +924,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 		AdminAccess = CMDAccessAll();
 	}
 
-	if( AdminCheck || RootAdminCheck )
+	if( AdminCheck || RootAdminCheck || TempOwnerCheck )
 	{
 		CONSOLE_Print( "[GAME: " + m_GameName + "] admin [" + User + "] sent command [" + Command + "] with payload [" + Payload + "]" );
 				
@@ -947,7 +933,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 			/*****************
 			* ADMIN COMMANDS *
 			******************/
-			if( !IsOwner(User) )
+			if( !TempOwnerCheck )
 			{			
 				//
 				// !AUTOBAN
@@ -1459,6 +1445,54 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 						if (Matches == 1)
 						LastMatch->SetReserved(false);
 					}
+				}
+				
+				// Clear Blacklisted Name
+				
+				if( Command == "clearblname" || Command == "clearblacklistedname" || Command == "clearblacklistname" )
+				{
+					if (!CMDCheck(CMD_delban, AdminAccess))
+					{
+						SendChat(player->GetPID(),(m_GHost->m_Language->YouDontHaveAccessToThatCommand( )));
+						return HideCommand;
+					}
+					m_GHost->m_BlacklistedNames.clear();
+				}				
+				
+				// DEL Blacklisted Name
+				
+				if( ( Command == "delblname" || Command == "delblacklistedname" || Command == "delblacklistname" ) && !Payload.empty( ) )
+				{
+					if (!CMDCheck(CMD_delban, AdminAccess))
+					{
+						SendChat(player->GetPID(),(m_GHost->m_Language->YouDontHaveAccessToThatCommand( )));
+						return HideCommand;
+					}
+
+					string PlayerName;
+					CGamePlayer *LastMatch = NULL;
+					uint32_t Matches = GetPlayerFromNamePartial( Payload, &LastMatch );
+					
+					if (Matches == 0)
+						PlayerName = Payload;
+					else
+						PlayerName = LastMatch->GetName();
+						
+					if (!IsBlacklisted( PlayerName ))
+					{
+						SendChat(player->GetPID(), m_GHost->m_Language->UserIsNotBanned(m_Server, User));
+						return HideCommand;
+					}
+					if( Matches == 0 )
+					{
+						DelBlacklistedName( PlayerName );
+					}
+					else if( Matches == 1 )
+					{
+							DelBlacklistedName( LastMatch->GetName( ) );
+					}
+					else
+						SendChat( player->GetPID(), "Can't del blacklisted name. More than one match found");
 				}
 
 				//
@@ -2248,7 +2282,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 				if( ( Command == "autostart" || Command == "as" ) && !m_CountDownStarted )
 				{
 					if (m_GHost->m_onlyownerscanstart)
-						if ((!IsOwner( User) && GetPlayerFromName(m_OwnerName, false)) && !RootAdminCheck )
+						if ( !RootAdminCheck )
 						{
 							SendChat( player->GetPID(), "Only the owner can start the game.");
 							return HideCommand;
@@ -4283,7 +4317,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 				// !LOCK
 				//
 
-				if( Command == "lock" && ( RootAdminCheck || IsOwner( User ) ) )
+				if( Command == "lock" && ( RootAdminCheck || isDefaultOwner ) )
 				{
 					SendAllChat( m_GHost->m_Language->GameLocked( ) );
 					m_Locked = true;
@@ -4688,7 +4722,6 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 				//
 				// !PUB (rehost as public game)
 				//
-				if(isDefaultOwner || (!isDefaultOwner && !IsOwner(User)))
 				if( Command == "pub" && !m_CountDownStarted && !m_SaveGame )
 				{
 					if (!CMDCheck(CMD_host, AdminAccess))
@@ -4698,7 +4731,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 					}
 
 					if (m_GHost->m_onlyownerscanstart && !Payload.empty())
-						if ( !RootAdminCheck && !isDefaultOwner )
+						if ( !RootAdminCheck )
 						{
 							SendChat( player->GetPID(), "Only the owner can change the gamename.");
 							return HideCommand;
@@ -4842,7 +4875,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 					// e.g. "1.2.3.4 6112" -> ip: "1.2.3.4", port: "6112"
 
 					string IP;
-					uint32_t Port = 6112;
+					uint32_t Port = m_GHost->m_BroadCastPort;
 					stringstream SS;
 					SS << Payload;
 					SS >> IP;
@@ -5087,7 +5120,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 				if( ( Command == "startn" || Command == "startf" || Command == "forcestart" ) && !m_CountDownStarted )
 				{
 					if (m_GHost->m_onlyownerscanstart)
-					if ((!IsOwner( User) && GetPlayerFromName(m_OwnerName, false)) && !RootAdminCheck )
+					if ( !RootAdminCheck )
 					{
 						SendChat( player->GetPID(), "Only the owner can start the game.");
 						return HideCommand;
@@ -5118,7 +5151,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 				if( Command == "start" && !m_CountDownStarted )
 				{					
 					if (m_GHost->m_onlyownerscanstart)
-					if ((!IsOwner( User) && GetPlayerFromName(m_OwnerName, false)) && !RootAdminCheck )
+					if ( !RootAdminCheck )
 					{
 						SendChat( player->GetPID(), "Only the owner can start the game.");
 						return HideCommand;
@@ -5211,7 +5244,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 									return HideCommand;
 								}
 
-								if (isAdmin && !((IsOwner(User) && isDefaultOwner) || RootAdminCheck))
+								if (isAdmin && !(isDefaultOwner || RootAdminCheck))
 								{
 									SendChat( player->GetPID(), "You can't swap an admin!");
 									return HideCommand;
@@ -5260,14 +5293,14 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 				}	*/
 				
 				if( Command == "unhost" && !m_CountDownStarted )
-					if( m_GHost->m_EnableUnhost || m_GHost->IsAdminWithUnhost(User) )
+					if( RootOwner )
 						m_Exiting = true;
 
 				//
 				// !UNLOCK
 				//
 
-				if( Command == "unlock" && ( RootAdminCheck || IsOwner( User ) ) )
+				if( Command == "unlock" && (RootAdminCheck || isDefaultOwner) )
 				{
 					SendAllChat( m_GHost->m_Language->GameUnlocked( ) );
 					m_Locked = false;
@@ -5545,7 +5578,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 			* TEMP OWNER COMMANDS *
 			**********************/
 			// !a, !as, !close, !closeall, !fp, !df, !dfs, !swap, !open, !openall, !holds, !hold, !unhold, !start, !startn. It's helpful for lobby control, we don't allow a sudden ending of the game by !end, no such command and no ingame command in here.
-			if( !RootAdminCheck && !isDefaultOwner && IsOwner( User ) )
+			if( !RootAdminCheck && !isDefaultOwner && TempOwnerCheck )
 			{				
 				//
 				// !ABORT (abort countdown)
@@ -5566,7 +5599,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 				if( ( Command == "autostart" || Command == "as" ) && !m_CountDownStarted )
 				{
 					if (m_GHost->m_onlyownerscanstart)
-						if ((!IsOwner( User) && GetPlayerFromName(m_OwnerName, false)) && !RootAdminCheck )
+						if (!RootAdminCheck)
 						{
 							SendChat( player->GetPID(), "Only the owner can start the game.");
 							return HideCommand;
@@ -5593,15 +5626,9 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 				//
 				// !CLOSE (close slot)
 				//
-				if(!isDefaultOwner && IsOwner(User))
 
 				if( Command == "close" && !Payload.empty( ) && !m_GameLoading && !m_GameLoaded )
 				{
-					if (!CMDCheck(CMD_close, AdminAccess))
-					{
-						SendChat(player->GetPID(), m_GHost->m_Language->YouDontHaveAccessToThatCommand( ));
-						return HideCommand;
-					}
 					// close as many slots as specified, e.g. "5 10" closes slots 5 and 10
 
 					stringstream SS;
@@ -5658,11 +5685,6 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 
 				if( Command == "closeall" && !m_GameLoading && !m_GameLoaded )
 				{
-					if (!CMDCheck(CMD_close, AdminAccess))
-					{
-						SendChat(player->GetPID(), m_GHost->m_Language->YouDontHaveAccessToThatCommand( ));
-						return HideCommand;
-					}
 					if ( GetNumHumanPlayers( ) < 4 || GetSlotsClosed( ) > 6 ){
 						SendChat( player->GetPID(), m_GHost->m_Language->CommandDisabled( ));
 						return HideCommand;
@@ -5830,15 +5852,9 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 				//
 				// !OPEN (open slot)
 				//
-				if(!isDefaultOwner && IsOwner(User))
 
 				if( Command == "open" && !Payload.empty( ) && !m_GameLoading && !m_GameLoaded )
 				{
-					if (!CMDCheck(CMD_open, AdminAccess))
-					{
-						SendChat(player->GetPID(), m_GHost->m_Language->YouDontHaveAccessToThatCommand( ));
-						return HideCommand;
-					}
 
 					// open as many slots as specified, e.g. "5 10" opens slots 5 and 10
 
@@ -5904,11 +5920,6 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 
 				if( Command == "openall" && !m_GameLoading && !m_GameLoaded )
 				{
-					if (!CMDCheck(CMD_open, AdminAccess))
-					{
-						SendChat(player->GetPID(), m_GHost->m_Language->YouDontHaveAccessToThatCommand( ));
-						return HideCommand;
-					}
 					if ( GetNumHumanPlayers( ) < 4 || GetSlotsOpen( ) > 6 ){
 						SendChat( player->GetPID(), m_GHost->m_Language->CommandDisabled( ));
 						return HideCommand;
@@ -5942,7 +5953,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 						}
 					}
 					if (m_GHost->m_onlyownerscanstart)
-					if ((!IsOwner( User) && GetPlayerFromName(m_OwnerName, false)) && !RootAdminCheck )
+					if (!RootAdminCheck)
 					{
 						SendChat( player->GetPID(), "Only the owner can start the game.");
 						return HideCommand;
@@ -5991,7 +6002,7 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 						}
 					}
 					if (m_GHost->m_onlyownerscanstart)
-					if ((!IsOwner( User) && GetPlayerFromName(m_OwnerName, false)) && !RootAdminCheck )
+					if (!RootAdminCheck)
 					{
 						SendChat( player->GetPID(), "Only the owner can start the game.");
 						return HideCommand;
@@ -6017,7 +6028,6 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 				//
 				// !PUB (rehost as public game)
 				//
-				if(!isDefaultOwner && IsOwner(User))
 				if(Command == "pub" && !m_CountDownStarted && !m_SaveGame )
 				{
 					SendChat(player->GetPID(), m_GHost->m_Language->YouDontHaveAccessToThatCommand( ));
@@ -6027,7 +6037,6 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 				//
 				// !KICK
 				//
-				if(!isDefaultOwner && IsOwner(User))
 				if(Command == "kick" && !m_CountDownStarted && !m_SaveGame )
 				{
 					SendChat( player->GetPID(), m_GHost->m_Language->UnableToCommand(string(1, m_GHost->m_CommandTrigger)) );
@@ -6040,11 +6049,6 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 
 				if( Command == "swap" && !Payload.empty( ) && !m_GameLoading && !m_GameLoaded )
 				{
-					if (!CMDCheck(CMD_swap, AdminAccess))
-					{
-						SendChat(player->GetPID(), m_GHost->m_Language->YouDontHaveAccessToThatCommand( ));
-						return HideCommand;
-					}
 					uint32_t SID1;
 					uint32_t SID2;
 					stringstream SS;
@@ -6152,7 +6156,13 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 	//
 		if( Command == "owner" || Command =="admin" )
 		{						
-			if( RootAdminCheck || IsOwner( User ) || (!GetPlayerFromName( m_OwnerName, false ) && m_OwnerJoined))
+			if(IsBlacklisted(User)){
+				player->SetSocket( NULL );
+				player->SetDeleteMe( true );
+				player->SetLeftReason( "Kicked due to blacklisted names" );
+				return HideCommand;
+			}
+			if( RootAdminCheck || AdminCheck || TempOwnerCheck || (isDefaultOwner && m_OwnerJoined))
 			{					
 				if( !Payload.empty( ) )
 				{	
