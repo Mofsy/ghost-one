@@ -947,7 +947,7 @@ CGHost :: CGHost( CConfig *CFG )
 	m_Exiting = false;
 	m_ExitingNice = false;
 	m_Enabled = true;
-	m_GHostVersion = "v1.49 GenModdedOne";
+	m_GHostVersion = "v1.50 GenModdedOne";
 	m_Version = "("+m_GHostVersion+")";
 	stringstream SS;
 	string istr = string();
@@ -1355,7 +1355,23 @@ bool CGHost :: Update( unsigned long usecBlock )
 			}
 		}
 	}
+	// update banlist
+	/* if( !m_GBCallableBanList && GetTime( ) >= m_LastBanRefreshTime + 600 )
+		m_GBCallableBanList = m_DB->ThreadedBanList( m_Server );
+	if( m_GBCallableBanList && m_GBCallableBanList->GetReady( ) && !m_BanListLoaded )
+	{
+		CONSOLE_Print( "[INFO] refreshed ban list (" + UTIL_ToString( m_BanList.size( ) ) + " -> " + UTIL_ToString( m_GBCallableBanList->GetResult( ).size( ) ) + " bans)" );
 
+		for( vector<CDBBan *> :: iterator i = m_BanList.begin( ); i != m_BanList.end( ); i++ )
+			delete *i;
+
+		m_BanList = m_GBCallableBanList->GetResult( );
+		m_DB->RecoverCallable( m_GBCallableBanList );
+		delete m_GBCallableBanList;
+		m_GBCallableBanList = NULL;
+		m_LastBanRefreshTime = GetTime( );
+		m_BanListLoaded = true;
+	}	*/
 	// update callables
 
 	for( vector<CBaseCallable *> :: iterator i = m_Callables.begin( ); i != m_Callables.end( ); )
@@ -2249,6 +2265,7 @@ void CGHost :: SetConfigs( CConfig *CFG )
 	m_SaveReplays = CFG->GetInt( "bot_savereplays", 0 ) == 0 ? false : true;
 	m_ReplayPath = UTIL_AddPathSeperator( CFG->GetString( "bot_replaypath", string( ) ) );
 	m_VirtualHostName = CFG->GetString( "bot_virtualhostname", "|cFF0080C0GHost" );
+	m_BlacklistedNames = CFG->GetString( "bot_blacklistednames", "|cFF0080C0Gen" );
 	m_HideIPAddresses = CFG->GetInt( "bot_hideipaddresses", 0 ) == 0 ? false : true;
 	m_CheckMultipleIPUsage = CFG->GetInt( "bot_checkmultipleipusage", 1 ) == 0 ? false : true;
 
@@ -2293,6 +2310,9 @@ void CGHost :: SetConfigs( CConfig *CFG )
 	m_RefreshDuration = CFG->GetInt( "bot_refresh", 0 ); //Gen
 	m_VietTxt = CFG->GetInt( "bot_viettxt", 0 ) == 0 ? false : true; //Gen
 	m_EnableUnhost = CFG->GetInt( "bot_disableunhost", 0 ) == 0 ? true : false; //Gen
+	m_BlacklistSlowDLder = CFG->GetInt( "bot_blacklistslowdownloader", 0 ) == 0 ? false : true; //Gen
+	m_RejectColoredName = CFG->GetInt( "bot_rejectcolorname", 0 ) == 0 ? false : true; //Gen
+	m_GarenaOnly = CFG->GetInt( "bot_garenaonly", 0 ) == 0 ? false : true; //Gen
 	m_LobbyDLLeaverBanTime = CFG->GetInt( "bot_lobbyleaverbantime", 45 );	//Gen
 	m_LobbyTimeLimit = CFG->GetInt( "bot_lobbytimelimit", 111 );	
 	m_Latency = CFG->GetInt( "bot_latency", 100 );
@@ -4061,6 +4081,9 @@ void CGHost :: ReloadConfig ()
 	m_RefreshDuration = CFG->GetInt( "bot_refresh", 0 ); //Gen
 	m_VietTxt = CFG->GetInt( "bot_viettxt", 0 ) == 0 ? false : true; //Gen
 	m_EnableUnhost = CFG->GetInt( "bot_disableunhost", 0 ) == 0 ? true : false; //Gen
+	m_BlacklistSlowDLder = CFG->GetInt( "bot_blacklistslowdownloader", 0 ) == 0 ? false : true; //Gen
+	m_RejectColoredName = CFG->GetInt( "bot_rejectcolorname", 0 ) == 0 ? false : true; //Gen
+	m_GarenaOnly = CFG->GetInt( "bot_garenaonly", 0 ) == 0 ? false : true; //Gen
 	m_LobbyDLLeaverBanTime = CFG->GetInt( "bot_lobbyleaverbantime", 45 );	//Gen
 	m_LobbyTimeLimit = CFG->GetInt( "bot_lobbytimelimit", 111 );	
 	m_LobbyTimeLimitMax = CFG->GetInt( "bot_lobbytimelimitmax", 150 );
@@ -4160,9 +4183,10 @@ void CGHost :: ReloadConfig ()
 	m_PlayersfromRMK = string();
 	m_dropifdesync = CFG->GetInt( "bot_dropifdesync", 1 ) == 0 ? false : true; //Metal_Koola
 	m_UDPPassword = CFG->GetString( "bot_udppassword", string () );
-	m_VirtualHostName = CFG->GetString( "bot_virtualhostname", "|cFF483D8BOne" );
+	m_VirtualHostName = CFG->GetString( "bot_virtualhostname", "|cFF0080C0GHost" );
 	if (m_VirtualHostName.length()>15)
 		m_VirtualHostName=m_VirtualHostName.substr(0,15);
+	m_BlacklistedNames = CFG->GetString( "bot_blacklistednames", "|cFF0080C0Gen" );
 	m_DropVoteTime = CFG->GetInt( "bot_dropvotetime", 30 );
 	m_IPBanning = CFG->GetInt( "bot_ipbanning", 2 );
 	m_Banning = CFG->GetInt( "bot_banning", 1 );

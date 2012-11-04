@@ -179,6 +179,8 @@ protected:
 	uint32_t m_LastInfoShow;
 	uint32_t m_LastGenInfoShow;
 	uint32_t m_LastOwnerInfoShow;
+	uint32_t m_LastBanRefreshTime;					// GetTime when the ban list was last refreshed from the database
+	CCallableBanList *m_GBCallableBanList;			// threaded database ban list in progress
 	uint32_t m_LastProcessedTicks;
 	bool m_DoAutoWarns;								// enable automated warns for early leavers
 
@@ -186,6 +188,7 @@ public:
 	vector<CGamePlayer *> m_Players;			// vector of players
 	vector<CDBGamePlayer *> m_DBGamePlayers;	// vector of potential gameplayer data for the database
 	vector<CDBBan *> m_DBBans;					// vector of potential ban data for the database (see the Update function for more info, it's not as straightforward as you might think)
+	vector<CDBBan *> m_BanList;					// vector of cached bans
 	CDBBan * m_DBBanLast;						// last ban for the !banlast command - this is a pointer to one of the items in m_DBBans
 	vector<CGameSlot> m_Slots;					// vector of slots
 	vector<string> m_AutoBanTemp;
@@ -442,11 +445,14 @@ public:
 	virtual void AddToReserved( string name, unsigned char nr );
 	virtual void DelFromReserved( string name );
 	virtual void DelTempOwner( string name );
+	virtual void DelBlacklistedName( string name );
 	virtual void AddGameName( string name);
 	virtual void AutoSetHCL ( );
 	virtual bool IsGameName( string name );
 //	virtual void AddToReserved( string name );
 	virtual bool IsOwner( string name );
+	virtual bool IsBlacklisted( string name );
+	virtual bool IsBannedname( string name );
 	virtual bool IsReserved( string name );
 	virtual bool IsDownloading( );
 	virtual bool IsGameDataSaved( );
