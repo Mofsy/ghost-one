@@ -2,6 +2,56 @@
 # Gen's MODDED Version of GhostOne @ http://thegenmaps.tk #
 ###########################################################
 
+v1.51
+	=================
+	Repository for decent maps storing, sharing & downloading https://decentmaps.googlecode.com/svn/trunk/
+	=================
+	More SECURED - more OPTIMIZED - more STURDY
+	Nobody can ruin your bots.
+	
+	- !FF patch fixed & tested
+	- Update language.cfg, fix typos
+	- some parts of the code are optimized
+	- Database now refreshes every 5 mins instead of every hour. So, either SQLite or MySQL db, as long as you have your bot connected to at least a bnet server, the database will work just fine.
+	- Players' banned names are kept in memory for about 310s before the next usual refresh of the database. 
+	THEORETICALLY, IF garena ppls can still somehow bypass the usual check on database for banned names or ips, they'll be stopped at blacklisted names which are temporarily recorded in memory for 310s. After the db refreshes, as they can't bypass by any chance, our bot clean temp memory by clearing those names to spare rooms for new blacklisted names.
+	
+	Changes in ghost.cfg	
+	- bot_obsspecificmaps = 1, if it's commented or missing the value is returned to 1 as default, observer player just joins specific maps with maptype containing nopause. If it's = 0, observer player joins all maps, BEWARE!. OBS player is used to resume the game if being paused
+	- bot_obsplayername = NameYourOBSPlayer here.
+	- same concept with bot_autobangameendmins, now you have bot_autowarngameendmins to autowarn if needed, players leaving before x mins of the gameover time gets warn, it's up to you to define how many warns are worth a ban.
+	
+	More commands in lobby: 
+	- !obsplayer to add/remove observer player
+	- !clearblname/!clearblacklistedname/!clearblacklistname
+	- !delblacklistname <name, partial name>
+	- !delblname/!delblacklistesname are alias to !delblacklistname
+
+v1.50
+	=================
+	Repository for decent maps storing, sharing & downloading https://decentmaps.googlecode.com/svn/trunk/
+	=================
+	
+	- fix !pubg, now hosting on garena only works fine
+	- fix previous commit about AdminCheck, now working very well
+	
+	Changes in ghost.cfg:
+	- as !pubg is fixed, bot_garenaonly is a new added key variable
+	bot_garenaonly = 0 (disable as default & recommended for your bot to host games
+	on both Lan + bnet servers), set it = 1 if you wish your bot to host only via
+	Lan, but the ban system still relies on a bnet connection to work fine. There
+	must be some other way around to check ban list without having to connect to
+	bnet but Gen hasn't succeeded in coding it.
+	- auto spoofcheck + admin spoofcheck are now on, admin must be joining on a correct
+	server to have access to admin commands. This is managed in database.
+	- blacklist specific names + blacklist slow downloader are now possible with
+	bot_blacklistednames & bot_blacklistslowdownloader, they can't join if
+	blacklisted. bot_blacklistslowdownloader works with bot_kickifdownloadrate.
+	Slow downloaders are added into bot_blacklistednames in current instance of
+	running bot.
+	Slow downloaders will be able to rejoin after 1-day ban if
+	(bot_blacklistslowdownloader = 0 or bot is reset/restarted).
+
 v1.49
 	=================
 	Repository for decent maps storing, sharing & downloading https://decentmaps.googlecode.com/svn/trunk/
