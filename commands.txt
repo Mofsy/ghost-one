@@ -166,6 +166,7 @@ In game lobby:
 !abort                  abort countdown
 !acc [name] [cmd] [acc] access commands available to admins, !acc lists available cmds, !acc name 1/0 - access all/none cmds
 !admin					alias to !owner command, to gain the lobby control temporarily
+!adminlock				for admins to disable !owner/!admin and temp owner rights 
 !announce <sec> <msg>   set the announce message (the bot will print <msg> every <sec> seconds), leave blank or "off" to disable the announce message, use | as newline
 !autostart <players>    auto start the game when the specified number of players have joined, leave blank or "off" to disable auto start
 !bans off|on            enables/disables auto kicking banned people from lobby
@@ -278,7 +279,9 @@ In game lobby:
 !virtualhost <name>     change the virtual host name
 !votecancel             cancel a votekick
 !votekick <name>        start a votekick (it tries to do a partial match, can be used by non admins)
+!vk <name>        		alias to votekick above
 !votestart				a poll to start game, it normally requires about 90% of players voted to agree about starting game
+!vs						alias to votestart above
 !verbose                toggle info showing on player trying to join and getting kicked
 !vb                     toggle info showing on player trying to join and getting kicked
 !w <name> <message>     send a whisper on every connected battle.net realm from the bot's account to the player called <name> (this command is HIDDEN from other players)
@@ -293,7 +296,7 @@ In game:
 !checkban <name>        check if a user is banned on any realm
 !drop                   drop all lagging players
 !end                    end the game (disconnect everyone)
-!ff						an alias to forfeit only used in dota games
+!ff						an alias to forfeit (below) only used in dota games
 !forfeit				only used in dota games to forfeit a game without losing points but gaining scores instead for both winning and losing teams. It's a good end for a game and for two teams
 !gn                     display current game name
 !getnames               get names of current games
@@ -338,6 +341,7 @@ In game:
 !warnlast/wlast/wl      warn last
 !wlast                  warn last
 !wl                     warn last
+!y                    	alias to !yes below
 !yes                    register a vote in the votekick (can be used by non admins)
 !w <name> <message>     send a whisper on every connected battle.net realm from the bot's account to the player called <name> (this command is HIDDEN from other players)
 
