@@ -1,9 +1,16 @@
-(\__/)  Welcome to New host
-(='.'=)   JOIN our Group in GarenaPlus-GroupID 56934
-('')_('') for numerous games!, plz speak English
-
-!COMMANDS: !sc,!go(=!ready),!wim,!rmk,!f,!p,!votestart.
-ONLY admin can do !endn, !startn to go.
-
-OWNER COMMANDS:!a,!as,!close,!closeall,!swap,!open,!openall,!holds,!hold,!unhold, !startn
-!fp (!fakeplayer), !dfs (!delfake,!delfakes); !startn (start game now)
+(\__/)    Welcome to Gen host
+(='.'=)    Professional Hosting 
+('')_('')    & Gaming Experience
+                At TheGenMaps.Tk
+                
+    COMMANDS: 
+        .go(=.ready),.wim,.votestart,.votekick
+        .sc,.c,.f,.p,.help,.rule,.rmk
+                
+    .OWNER COMMANDS:
+        .a (=.abort),.as (autostart), .startn
+        .swap,.open, .close
+        .closeall, .openall,
+        .holds,.hold,.unhold,
+        FakePlayer: .fp , .df, .dfs
+        Observer: .obsplayer

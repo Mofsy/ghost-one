@@ -2,6 +2,36 @@
 # Gen's MODDED Version of GhostOne @ http://thegenmaps.tk #
 ###########################################################
 
+v1.53 (Feb 26th 2013)
+	- fix !autohost (!ah) command, however bot will create an infinite number of games (even we set autohost only some games). This should be fixed but it's good like this.
+	- fix !cg bnet command
+	- bots now remore fakeplayers when !autohost is enabled
+	- add Slots State in lobby
+	- fewer checks for map download when autohost, so less spaming of Players downloading map in lobby.	
+	- Update ip-to-country.csv and ips.dbs (http://software77.net updated Feb 22nd)
+	- add !vk as an alias to !votekick
+	- add !vs for !votestart
+	- add !y for !yes
+	- Command !obsplayer is disabled for TempOwner. We don't want TempOwners to mess up with the mapcfg settings by removing obsplayer, then they could pause/save game/hacks in game.
+	
+v1.52 (Feb 18th)
+	- slot counter fix (from Neolo) is added.
+	- due to the raised issues which are not clearly caused by deny patch, 127.0.0.1 & 127.0.1.1 become an exception in deny function of deny patch. This is to allow multiple LAN players to rush into your bot. Beware that you should increase max connection to your database if you are using MySQL db otherwise db can be out of order.
+	- kick & ban (1 day) slow downloaders nicely at early state of their downloading progress not halfway. Blacklist is possible if bot_blacklistslowdownloader = 1, they will not be able to rejoin before the database gets refreshed for the ban to be in effect.
+	- Disable TempOwners' rights to !start/n when map download is in progress.
+	- Optimize TempOwner code and condition.
+	- safelisted players are now ONLY immune to !votekick when in lobby, not in game (need tests!). B'cuz an unanimous decision made by votekick should work to kick even rootadmin, so safelisted players are not an exception.
+	- TempOwner should not be immune to !kick commanded by admins/rootadmins.
+	- Kick and Ban (2 days) to players who abuse close/open commands with their TempOwner rights. Playing with commands for your fun is restrictively not allowed.
+	- !autohost (!ah) in bnet.cpp is partly fixed. Manual autohost now depends on bot_maxgames to make bot auto-create some games.
+	- !unlock works to unlock game while being locked if owner joins (bot_lockgamewhenownerjoin), owner can do some commands if the lobby is locked
+	- !adminlock is different, it can be used by root/admins to lock/unlock the lobby against TempOwner.
+	- !from is changed to !country (!c) for the display of country solely
+	- !help (!helps/!idk) command is added to help newbies players joining bots
+	- !faq, !guide, !rule, !about ( bot_yourowncommand ) added for various uses to display some texts ( 15 lines max) to players.
+	- add alias to !statsdota commands, alias are !dotastats, !ds
+	- some minor fixes
+
 v1.51
 	=================
 	Repository for decent maps storing, sharing & downloading https://decentmaps.googlecode.com/svn/trunk/
