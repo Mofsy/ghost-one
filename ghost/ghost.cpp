@@ -947,7 +947,7 @@ CGHost :: CGHost( CConfig *CFG )
 	m_Exiting = false;
 	m_ExitingNice = false;
 	m_Enabled = true;
-	m_GHostVersion = "v1.50 GenModdedOne";
+	m_GHostVersion = "v1.50 GenModdedOne last moded Mega.Animeshnik";
 	m_Version = "("+m_GHostVersion+")";
 	stringstream SS;
 	string istr = string();
@@ -1152,13 +1152,15 @@ CGHost :: CGHost( CConfig *CFG )
 		m_AdminMap = new CMap( this );
 	}
 
-	for( int i = 0; i < 100; i++)
+	for( int i = 1; i < 100; i++)
 	{
 		string AutoHostMapCFGString = CFG->GetString( "autohost_map" + UTIL_ToString( i ) , string( ) );
 		
 		if( AutoHostMapCFGString.empty( ) )
 		{
-			continue;
+			//continue;
+			//выходим из цикла если autohost_mapНОМЕР отсутвует
+			break;
 		}
 		
     	if( AutoHostMapCFGString.size( ) < 4 || AutoHostMapCFGString.substr( AutoHostMapCFGString.size( ) - 4 ) != ".cfg" )
@@ -1240,6 +1242,7 @@ CGHost :: CGHost( CConfig *CFG )
 #else
 	CONSOLE_Print( "[GHOST] GHost++ Version " + m_Version + " (without MySQL support)" );
 #endif
+	CONSOLE_Print( "[GHOST] Последняя модификация Mega.Animeshnik" );
 }
 
 CGHost :: ~CGHost( )
@@ -1895,8 +1898,12 @@ bool CGHost :: Update( unsigned long usecBlock )
 			
 			if( AutoHostMap->GetValid( ) )
 			{				
+
 				string AutoHostMapCFGStr = AutoHostMap->GetCFGFile( );
-				string AutoHostMapStr = AutoHostMapCFGStr.substr(AutoHostMapCFGStr.size( ) - 35,31);
+				// тут происходит краш.
+			//	string AutoHostMapStr = AutoHostMapCFGStr.substr(AutoHostMapCFGStr.size( ) - 35,31);
+				// незнаю что имел ввиду автор, поэтому название игры прнимаем за имя конфига без ".cfg"
+				string AutoHostMapStr = AutoHostMapCFGStr.substr(0, AutoHostMapCFGStr.size( ) - 4);
 				int DPos = AutoHostMapStr.find("mapcfgs") ;
 				if (DPos!= string ::npos)				
 				AutoHostMapStr = AutoHostMapStr.substr(DPos+8);
@@ -1910,14 +1917,15 @@ bool CGHost :: Update( unsigned long usecBlock )
 				}
 				string GameName;
 				string s = GetRehostChar( );
+
 				if( m_CustomName )				
-					GameName = " " + AutoHostMapStr + " " + s[0] + UTIL_ToString( m_HostCounter );					
+					GameName = "пЂЂ " + AutoHostMapStr + " " + s[0] + UTIL_ToString( m_HostCounter );					
 				else
-					GameName = " " + m_AutoHostGameName + " " + s[0] + UTIL_ToString( m_HostCounter );				
+					GameName = "пЂЂ " + m_AutoHostGameName + " " + s[0] + UTIL_ToString( m_HostCounter );				
 				
 				if( GameName.size( ) > 28 || !m_AppleIcon )
 					GameName = GameName.substr(4);
-				if( GameName.size( ) <= 31 ) //don't name it  too long, only 28 characters + " $11" (4 plus caract�res)
+				if( GameName.size( ) <= 31 ) //don't name it  too long, only 28 characters + " $11" (4 plus caractиres)
 				{					
 					m_AutoHosted = true;
 					if ( m_NewOwner > 2 )

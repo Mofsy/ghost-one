@@ -24,13 +24,14 @@
 #include <string.h> // Needed for strcat and strcpy
 
 // standard integer sizes for 64 bit compatibility
-
+/*
 #ifdef WIN32
  #include "ms_stdint.h"
 #else
  #include <stdint.h>
 #endif
-
+ */
+ #include <stdint.h>
 #define MAX_FILE_READ_BUFFER 8000
 
 class CSHA1

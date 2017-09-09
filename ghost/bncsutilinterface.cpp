@@ -72,9 +72,10 @@ bool CBNCSUtilInterface :: HELP_SID_AUTH_CHECK( bool TFT, string war3Path, strin
 		getExeInfo( FileWar3EXE.c_str( ), (char *)&buf, 1024, (uint32_t *)&EXEVersion, BNCSUTIL_PLATFORM_X86 );
 		m_EXEInfo = buf;
 		m_EXEVersion = UTIL_CreateByteArray( EXEVersion, false );
-		uint32_t EXEVersionHash;
+	//	uint32_t EXEVersionHash;
+		unsigned long EXEVersionHash;
 		checkRevisionFlat( valueStringFormula.c_str( ), FileWar3EXE.c_str( ), FileStormDLL.c_str( ), FileGameDLL.c_str( ), extractMPQNumber( mpqFileName.c_str( ) ), (unsigned long *)&EXEVersionHash );
-		m_EXEVersionHash = UTIL_CreateByteArray( EXEVersionHash, false );
+		m_EXEVersionHash = UTIL_CreateByteArray( (uint32_t) EXEVersionHash, false );
 		m_KeyInfoROC = CreateKeyInfo( keyROC, UTIL_ByteArrayToUInt32( clientToken, false ), UTIL_ByteArrayToUInt32( serverToken, false ) );
 
 		if( TFT )
@@ -140,12 +141,13 @@ bool CBNCSUtilInterface :: HELP_PvPGNPasswordHash( string userPassword )
 
 BYTEARRAY CBNCSUtilInterface :: CreateKeyInfo( string key, uint32_t clientToken, uint32_t serverToken )
 {
-	unsigned char Zeros[] = { 0, 0, 0, 0 };
+	//unsigned char Zeros[] = { 0, 0, 0, 0 };
 	BYTEARRAY KeyInfo;
 	CDKeyDecoder Decoder( key.c_str( ), key.size( ) );
 
 	if( Decoder.isKeyValid( ) )
 	{
+		unsigned char Zeros[] = { 0, 0, 0, 0 };
 		UTIL_AppendByteArray( KeyInfo, UTIL_CreateByteArray( (uint32_t)key.size( ), false ) );
 		UTIL_AppendByteArray( KeyInfo, UTIL_CreateByteArray( Decoder.getProduct( ), false ) );
 		UTIL_AppendByteArray( KeyInfo, UTIL_CreateByteArray( Decoder.getVal1( ), false ) );

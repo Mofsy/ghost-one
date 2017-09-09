@@ -242,94 +242,92 @@ void CTCPSocket :: PutBytes( BYTEARRAY bytes )
 
 void CTCPSocket :: DoRecv( fd_set *fd )
 {
-	if( m_Socket == INVALID_SOCKET || m_HasError || !m_Connected )
-		return;
+    if( m_Socket == INVALID_SOCKET || m_HasError || !m_Connected )
+        return;
 
-	if( FD_ISSET( m_Socket, fd ) )
-	{
-		// data is waiting, receive it
+    if( FD_ISSET( m_Socket, fd ) )
+    {
+        // data is waiting, receive it
 
-		char buffer[1024];
-		int c = recv( m_Socket, buffer, 1024, 0 );
+        char buffer[1024];
+        int c = recv( m_Socket, buffer, 1024, 0 );
 
-		if( c == SOCKET_ERROR && GetLastError( ) != EWOULDBLOCK )
-		{
-			// receive error
+        if( c > 0 )
+        {
+            // success! add the received data to the buffer
 
-			m_HasError = true;
-			m_Error = GetLastError( );
-			CONSOLE_Print( "[TCPSOCKET] error (recv) - " + GetErrorString( ) );
-			return;
-		}
-		else if( c == 0 )
-		{
-			// the other end closed the connection
+            if( !m_LogFile.empty( ) )
+            {
+                ofstream Log;
+                Log.open( m_LogFile.c_str( ), ios :: app );
 
-			CONSOLE_Print( "[TCPSOCKET] closed by remote host" );
-			m_Connected = false;
-		}
-		else if( c > 0 )
-		{
-			// success! add the received data to the buffer
+                if( !Log.fail( ) )
+                {
+                    Log << "					RECEIVE <<< " << UTIL_ByteArrayToHexString( UTIL_CreateByteArray( (unsigned char *)buffer, c ) ) << endl;
+                    Log.close( );
+                }
+            }
+            m_RecvBuffer += string( buffer, c );
+            m_LastRecv = GetTime( );
+        }
+        else if( c == SOCKET_ERROR && GetLastError( ) != EWOULDBLOCK )
+        {
+            // receive error
 
-			if( !m_LogFile.empty( ) )
-			{
-				ofstream Log;
-				Log.open( m_LogFile.c_str( ), ios :: app );
+            m_HasError = true;
+            m_Error = GetLastError( );
+            //CONSOLE_Print( "[TCPSOCKET] error (recv) - " + GetErrorString( ) );
+            return;
+        }
+        else if( c == 0 )
+        {
+            // the other end closed the connection
 
-				if( !Log.fail( ) )
-				{
-					Log << "					RECEIVE <<< " << UTIL_ByteArrayToHexString( UTIL_CreateByteArray( (unsigned char *)buffer, c ) ) << endl;
-					Log.close( );
-				}
-			}
-
-			m_RecvBuffer += string( buffer, c );
-			m_LastRecv = GetTime( );
-		}
-	}
+            CONSOLE_Print( "[TCPSOCKET] closed by remote host" );
+            m_Connected = false;
+        }
+    }
 }
 
 void CTCPSocket :: DoSend( fd_set *send_fd )
 {
-	if( m_Socket == INVALID_SOCKET || m_HasError || !m_Connected || m_SendBuffer.empty( ) )
-		return;
+	 if( m_Socket == INVALID_SOCKET || m_HasError || !m_Connected || m_SendBuffer.empty( ) )
+        return;
 
-	if( FD_ISSET( m_Socket, send_fd ) )
-	{
-		// socket is ready, send it
+    if( FD_ISSET( m_Socket, send_fd ) )
+    {
+        // socket is ready, send it
 
-		int s = send( m_Socket, m_SendBuffer.c_str( ), (int)m_SendBuffer.size( ), MSG_NOSIGNAL );
+        int s = send( m_Socket, m_SendBuffer.c_str( ), (int)m_SendBuffer.size( ), MSG_NOSIGNAL );
 
-		if( s == SOCKET_ERROR && GetLastError( ) != EWOULDBLOCK )
-		{
-			// send error
+        if( s > 0 )
+        {
+            // success! only some of the data may have been sent, remove it from the buffer
 
-			m_HasError = true;
-			m_Error = GetLastError( );
-			CONSOLE_Print( "[TCPSOCKET] error (send) - " + GetErrorString( ) );
-			return;
-		}
-		else if( s > 0 )
-		{
-			// success! only some of the data may have been sent, remove it from the buffer
+            if( !m_LogFile.empty( ) )
+            {
+                ofstream Log;
+                Log.open( m_LogFile.c_str( ), ios :: app );
 
-			if( !m_LogFile.empty( ) )
-			{
-				ofstream Log;
-				Log.open( m_LogFile.c_str( ), ios :: app );
+                if( !Log.fail( ) )
+                {
+                    Log << "SEND >>> " << UTIL_ByteArrayToHexString( BYTEARRAY( m_SendBuffer.begin( ), m_SendBuffer.begin( ) + s ) ) << endl;
+                    Log.close( );
+                }
+            }
+            m_SendBuffer = m_SendBuffer.substr( s );
+            m_LastSend = GetTime( );
+        }
+        else if( s == SOCKET_ERROR && GetLastError( ) != EWOULDBLOCK )
+        {
+            // send error
 
-				if( !Log.fail( ) )
-				{
-					Log << "SEND >>> " << UTIL_ByteArrayToHexString( BYTEARRAY( m_SendBuffer.begin( ), m_SendBuffer.begin( ) + s ) ) << endl;
-					Log.close( );
-				}
-			}
-
-			m_SendBuffer = m_SendBuffer.substr( s );
-			m_LastSend = GetTime( );
-		}
-	}
+            m_HasError = true;
+            m_Error = GetLastError( );
+            CONSOLE_Print( "[TCPSOCKET] error (send) - " + GetErrorString( ) );
+            return;
+        }
+    }
 }
 
 void CTCPSocket :: Disconnect( )
@@ -392,7 +390,7 @@ void CTCPClient :: Connect( string localaddress, string address, uint16_t port )
 
 		LocalSIN.sin_port = htons( 0 );
 
-		if( bind( m_Socket, (struct sockaddr *)&LocalSIN, sizeof( LocalSIN ) ) == SOCKET_ERROR )
+		if( ::bind( m_Socket, (struct sockaddr *)&LocalSIN, sizeof( LocalSIN ) ) == SOCKET_ERROR )
 		{
 			m_HasError = true;
 			m_Error = GetLastError( );
@@ -514,7 +512,7 @@ bool CTCPServer :: Listen( string address, uint16_t port )
 
 	m_SIN.sin_port = htons( port );
 
-	if( bind( m_Socket, (struct sockaddr *)&m_SIN, sizeof( m_SIN ) ) == SOCKET_ERROR )
+	if( ::bind( m_Socket, (struct sockaddr *)&m_SIN, sizeof( m_SIN ) ) == SOCKET_ERROR )
 	{
 		m_HasError = true;
 		m_Error = GetLastError( );
@@ -728,7 +726,7 @@ bool CUDPServer :: Bind( struct sockaddr_in sin )
 
 	m_SIN = sin;
 
-	if( bind( m_Socket, (struct sockaddr *)&m_SIN, sizeof( m_SIN ) ) == SOCKET_ERROR )
+	if( ::bind( m_Socket, (struct sockaddr *)&m_SIN, sizeof( m_SIN ) ) == SOCKET_ERROR )
 	{
 		m_HasError = true;
 		m_Error = GetLastError( );

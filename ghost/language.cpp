@@ -333,8 +333,7 @@ string CLanguage :: UnableToUnhostGameNoGameInLobby( )
 string CLanguage :: VersionAdmin( string version )
 {
 	string Out = m_CFG->GetString( "lang_0036", "lang_0036" );
-	if (Out.find("thegenmaps.tk") == string::npos)
-		Out = "Gen modded GhostOne, Version $VERSION$ at thegenmaps.tk";
+
 	Replace( Out, "$VERSION$", version );
 	return Out;
 }
@@ -342,8 +341,6 @@ string CLanguage :: VersionAdmin( string version )
 string CLanguage :: VersionNotAdmin( string version )
 {
 	string Out = m_CFG->GetString( "lang_0037", "lang_0037" );
-	if (Out.find("thegenmaps.tk") == string::npos)
-		Out = "Gen modded GhostOne, Version $VERSION$ at thegenmaps.tk";
 	Replace( Out, "$VERSION$", version );
 	return Out;
 }
@@ -2001,8 +1998,6 @@ string CLanguage :: SomeOneJustLeft( )
 string CLanguage :: FeatureBlocked( )
 {
 	string Out = m_CFG->GetString( "lang_1026", "lang_1026" );
-	if (Out.find("thegenmaps.tk")==string::npos)
-		Out = "You must become an admin to unlock this feature. Request at http://thegenmaps.tk";
 	return Out;
 }
 string CLanguage :: OwnerForLobbyControl( string trigger )
@@ -2018,8 +2013,6 @@ string CLanguage :: Publicity( string web, string groupid )
 	string Out = m_CFG->GetString( "lang_1028", "lang_1028" );
 	Replace( Out, "$WEB$", web );
 	Replace( Out, "$GROUPID$", groupid );
-	if ( Out.find("TheGenMaps.tk") == string::npos || Out.empty() )
-		Out = "View game list & replays at TheGenMaps.tk for PRO gaming exp. Join our Garena+ GroupID 56934.";
 	return Out;
 }
 string CLanguage :: AdviseToStartGameWithOwnerRight( string trigger )

@@ -1078,13 +1078,14 @@ bool CBaseGame :: Update( void *fd, void *send_fd )
 		SendAllChat(m_GHost->m_Language->AdviseToStartGameWithOwnerRight(string( 1, m_GHost->m_CommandTrigger )));
 		m_LastInfoShow = GetTime( );
 	}
+	/* не будем выводить рекламу
 	// display thegenmaps.tk forum every 271 seconds
 	
 	if ( !m_CountDownStarted && GetTime( ) - m_LastGenInfoShow >= 271 )
 	{
 		SendAllChat(m_GHost->m_Language->Publicity("TheGenMaps.tk","Garena+ GroupID 56934"));	
 		m_LastGenInfoShow = GetTime( );
-	}
+	}*/
 	// display !owner every 317 seconds
 	
 	if ( !m_CountDownStarted && GetTime( ) - m_LastOwnerInfoShow >= 317 )
