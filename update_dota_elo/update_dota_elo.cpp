@@ -27,13 +27,14 @@
 #include <vector>
 
 using namespace std;
-
+/*
 #ifdef WIN32
  #include "ms_stdint.h"
 #else
  #include <stdint.h>
 #endif
-
+ */
+#include <stdint.h>
 #include "config.h"
 #include "elo.h"
 

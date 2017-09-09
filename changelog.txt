@@ -1,4 +1,15 @@
 ###########################################################
+# Модификацию подготовил Mega.Animeshnik                  #
+###########################################################
+08.09.2017
+  - Теперь бот без проблем компилируется в VisualStudio 2010
+  - Бот более не спамит рекламой thegenmaps.tk
+
+09.09.2017
+  - Работает на последний бустах (1.65)
+  - Подправленна мульти-автохост система
+
+###########################################################
 # Gen's MODDED Version of GhostOne @ http://thegenmaps.tk #
 ###########################################################
 
@@ -152,7 +163,7 @@ BETA VERSION 1.4b3
 		/w urbotname ,friend list
 		(.,! is upon your bot_commandtrigger)
 	- as replay issue was fixed in previous version, this release commits to name the replay files correctly, so that they can be opened
-	- replay files should NOT have special chars: �,�,$,etc.
+	- replay files should NOT have special chars: п,Ђ,$,etc.
 	- bot_bnetnonadmincommands added to ghost.cfg to define what non-admin commands can be allowed.
 	- bot_invalidreplaychars added to ghost.cfg to define what chars are invalid and should be removed when naming the replay file
 	- USE NEW GHOST.CFG because old variables in ghostcfg are changed as following:
